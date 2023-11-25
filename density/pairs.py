@@ -4,6 +4,7 @@ from numpy.typing import NDArray
 import os
 import sys
 import pandas as pd
+from pathlib import Path
 
 from stats import Stats as st
 
@@ -22,15 +23,15 @@ class Pairs(object):
 	# SETTERS #
 
 	def insert(self, x: int, y: int):
-		x = abs(x)
-		y = abs(y)
+		x = int(abs(x))
+		y = int(abs(y))
 		if x <= y:
 			self.pairs.append((x, y))
 		else:
 			self.pairs.append((y, x))
 
 
-	def from_pkl(self, filename: str):
+	def from_pkl(self, filename: Path):
 		with open(filename,'rb') as f:
 			data = pickle.load(f)
 			
@@ -77,30 +78,16 @@ class Pairs(object):
 		return max(max_x, max_y)
 	
 
-	def singular_dataframe(self) -> pd.DataFrame:
-		data = {"x" : [el[0] for el in self.pairs], "y" : [el[1] for el in self.pairs]}
-		df = pd.DataFrame(data=data)
+	def singular_dataframe(self, step=None) -> pd.DataFrame:
+		if step is not None:
+			data = sorted(self.pairs, key=lambda el: el[0]*el[1])
+			data = self.pairs[::step]
+		else:
+			data = self.pairs
+		#data = {"x" : [el[0] for el in self.pairs], "y" : [el[1] for el in self.pairs]}
+		df = pd.DataFrame(data=data, columns=['x', 'y'])
 		
 		return df
-
-
-	def heatmap_dataframe(self) -> pd.DataFrame:
-		pairs = self.get_pairs()
-		
-		dens = st.density(pairs)
-		
-		max_val = self.get_max_val()
-		
-		axis_range = np.arange(max_val+1)
-		
-		percentages = np.zeros((max_val+1, max_val+1))
-		for key, value in dens.items():
-			x, y = key
-			percentages[x, y] = value
-
-		df = pd.DataFrame(data={"x" : axis_range, "y" : axis_range})
-		df.pivot_table(index='x', columns='y', values=percentages)
-		#print(df)
 
 
 	# OUTPUT #

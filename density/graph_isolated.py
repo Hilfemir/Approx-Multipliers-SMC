@@ -8,7 +8,7 @@ from pathlib import Path
 
 from pairs import Pairs
 from stats import Stats as st
-from utils import find_data_file, axis_setup
+from utils import find_data_file, axis_setup, get_save_path
 
 
 # parse args #
@@ -50,12 +50,51 @@ parser.add_argument(
 	help="Maximal value on the Y axis."
 	)
 
+parser.add_argument(
+	'--savepath',
+	default=None,
+	type=str,
+	help='Where should the plot be saved.'
+	)
+
+parser.add_argument(
+	'--nosave',
+	action='store_true',
+	help="Don't save the plot."
+	)
+
+parser.add_argument(
+	'--noshow',
+	action='store_true',
+	help="Don't show the plot."
+	)
+
+parser.add_argument(
+	'--title',
+	'-t',
+	default=None,
+	type=str,
+	help="Title of the plot."
+	)
+
+parser.add_argument(
+	'--step',
+	default=None,
+	type=int,
+	help="Step when loading the data. (In case there is too much data)"
+	)
+
 args = parser.parse_args()
 dirname = args.dirname
 xmin = args.xmin
 xmax = args.xmax
 ymin = args.ymin
 ymax = args.ymax
+savepath = args.savepath
+nosave = args.nosave
+noshow = args.noshow
+title = args.title
+step = args.step
 
 try:
 	filename = find_data_file(dirname)
@@ -63,14 +102,28 @@ except Exception as e:
 	print("Error: directory not found.")
 	exit(1)
 
+#obtain path where the plot shall be saved
+try:
+	savepath = get_save_path(savepath, filename, 'singular')
+except Exception as e:
+	print(e)
+	print("Error: invalid savefig path.")
+	exit(2)
+
 #load data from the pickle file
 data = Pairs()
 data.from_pkl(filename)
 
 xmin, xmax = axis_setup(data, xmin, xmax)
 
-df = data.singular_dataframe()
+df = data.singular_dataframe(step=step)
 
-df.plot(kind='density', xlim=(xmin, xmax))
+print(df)
 
-plt.show()
+df.plot(kind='density', xlim=(xmin, xmax), title=title)
+
+if not nosave:
+	plt.savefig(savepath)
+
+if not noshow:
+	plt.show()

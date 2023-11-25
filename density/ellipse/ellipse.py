@@ -88,7 +88,7 @@ def ellipse(A: int, B: int):
 			y -= 1
 
 
-for i in range(100):
+for i in range(1000):
 	x = randrange(1, 10)
 	y = x + randrange(1, 10)
 	ellipse(x, y)

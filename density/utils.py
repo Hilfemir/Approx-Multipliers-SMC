@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 from pairs import Pairs
 
 
-def find_data_file(dirname: str, filename: str | None = None) -> str:
+def find_data_file(dirname: str, filename: str | None = None) -> Path:
 	if filename is None:
 		filename = '*.pkl'
 	try:
@@ -13,6 +13,33 @@ def find_data_file(dirname: str, filename: str | None = None) -> str:
 		raise e
 
 	return file_path
+
+
+def get_save_path(path: str | None, data_path: Path, graph_type: str) -> Path:
+	"""graph_type: either 'singular' or 'heatmap'
+	"""
+	if graph_type not in ['singular', 'heatmap']:
+		raise ValueError("Error: graph_type has to be either 'singular' or 'heatmap'.")
+	
+	if graph_type == 'singular':
+		dir = 'singulars'
+		suffix = '_singular.png'
+	else:
+		dir = 'heatmaps'
+		suffix = '_heatmap.png'
+
+	if path is not None:
+		if not path.endswith(suffix):
+			path += suffix
+
+		filename = path
+	else:
+		filename = data_path.name[:-4]
+		filename += suffix
+
+	dest = Path(f'./{dir}', filename)
+	return dest
+
 
 def axis_setup(
 		data: Pairs,
@@ -26,6 +53,7 @@ def axis_setup(
 		xmax = data.get_max_val()
 	
 	return xmin, xmax
+
 
 def get_range(x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int) -> tuple[int, int, int, int]:
 	if xmin is None:
@@ -42,7 +70,8 @@ def get_range(x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int
 
 	return xmin, xmax, ymin, ymax
 
-def fig_setup(ax, x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int):
+
+def fig_setup(ax, x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int, title: str):
 	#labels
 	ax.set_xlabel(r"x")
 	ax.set_ylabel(r"y")
@@ -51,7 +80,11 @@ def fig_setup(ax, x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax:
 	ax.set_xlim(xmin, xmax)
 	ax.set_ylim(ymin, ymax)
 
-def bins_setup(bins: int, binsx: int | None, binsy: int | None) -> list[int, int]:
+	if title is not None:
+		ax.set_title(title)
+
+
+def bins_setup(bins: int, binsx: int | None, binsy: int | None) -> list[int]:
 	ret = [bins, bins]
 	if binsx is not None:
 		ret[0] = binsx

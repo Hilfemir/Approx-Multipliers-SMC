@@ -13,20 +13,17 @@ def factorial(x: int) -> int:
 	
 	ret = x
 	for i in range(x-1, 0, -1):
-		pairs.insert(i, ret)
+		#pairs.insert(i, ret)
 		ret *= i
 
 	return ret
 
 
-def binom_coeff(n: int, k: int) -> int:
+def binom_coeff(n: int, k: int) -> float:
 	f_n = factorial(n)
 	f_k = factorial(k)
 	f_nmk = factorial(n-k)
-	if f_k >= f_nmk:
-		pairs.insert(f_nmk, f_k)
-	else:
-		pairs.insert(f_k, f_nmk)
+	pairs.insert(f_nmk, f_k)
 	ret = f_n / (f_k * f_nmk)
 	return ret
 
@@ -35,4 +32,5 @@ for i in range(17):
 		if i >= j:
 			res = binom_coeff(i, j)
 
-pairs.pkl_dump("./binom.pkl")
+#pairs.pkl_dump("./binom.pkl")
+print(pairs)

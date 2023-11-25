@@ -1,0 +1,22 @@
+1. Úvod
+
+2. Přibližné výpočetní systémy
+ 2.1 Úvod do problematiky
+ 2.2 Současné využití přibližných výpočetních systémů
+ 2.3 Přibližné násobičky
+ 
+3. Statistické ověřování modelů
+ 3.1 Úvod do problematiky 
+ 3.2 Časované automaty
+ 3.3 UPPAAL SMC
+ 
+4. Rozbor a návrh řešení
+ - TBD
+ 
+5. Popis řešení
+ - TBD
+ 
+6. Zhodnocení výsledků
+ - TBD
+ 
+7. Závěr

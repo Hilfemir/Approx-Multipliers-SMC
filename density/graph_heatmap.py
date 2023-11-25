@@ -2,14 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
 import argparse
-import seaborn as sns
 import pandas as pd
 from pathlib import Path
 from scipy.ndimage import gaussian_filter
 
 from pairs import Pairs
 from stats import Stats as st
-from utils import find_data_file, fig_setup, get_range, bins_setup
+from utils import find_data_file, fig_setup, get_range, bins_setup, get_save_path
 	
 # parse args #
 parser = argparse.ArgumentParser(
@@ -96,6 +95,33 @@ parser.add_argument(
 	help="Color map used when plotting the histogram."
 )
 
+parser.add_argument(
+	'--savepath',
+	default=None,
+	type=str,
+	help='Where should the plot be saved.'
+	)
+
+parser.add_argument(
+	'--nosave',
+	action='store_true',
+	help="Don't save the plot."
+	)
+
+parser.add_argument(
+	'--noshow',
+	action='store_true',
+	help="Don't show the plot."
+	)
+
+parser.add_argument(
+	'--title',
+	'-t',
+	default=None,
+	type=str,
+	help="Title of the plot."
+	)
+
 args = parser.parse_args()
 dirname = args.dirname
 xmin = args.xmin
@@ -108,14 +134,27 @@ binsx = args.binsx
 binsy = args.binsy
 interpolation = args.interpolation
 cmap = args.cmap
+savepath = args.savepath
+nosave = args.nosave
+noshow = args.noshow
+title = args.title
 
 bins = bins_setup(bins, binsx, binsy)
 
+#obtain path of the data file
 try:
 	filename = find_data_file(dirname, fname)
 except Exception as e:
-	print("Error: directory not found.")
+	print("Error: directory/file not found.")
 	exit(1)
+
+#obtain path where the plot shall be saved
+try:
+	savepath = get_save_path(savepath, filename, 'heatmap')
+except Exception as e:
+	print(e)
+	print("Error: invalid savefig path.")
+	exit(2)
 
 #load data from the pickle file
 data = Pairs()
@@ -138,11 +177,15 @@ extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 fig = plt.figure(figsize=(20,20))
 ax = fig.add_subplot()
 
-fig_setup(ax, x, y, xmin, xmax, ymin, ymax)
+fig_setup(ax, x, y, xmin, xmax, ymin, ymax, title)
 
 im = ax.imshow(heatmap, extent=extent, origin='lower', interpolation=interpolation, cmap=cmap)
 ax.set_aspect('auto')
 
 plt.colorbar(im, ax=ax, label='Probability density')
 
-plt.show()
+if not noshow:
+	plt.show()
+
+if not nosave:
+	fig.savefig(savepath)
