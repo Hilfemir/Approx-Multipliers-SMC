@@ -1,0 +1,996 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>/* Feel free to cite and/or read details to the model using:
+  STRNADEL Josef. Statistical Model Checking of Approximate Circuits: Challenges and Opportunities. In: Proceedings of the 2020 Design, Automation &amp; Test in Europe Conference &amp; Exhibition (DATE). Grenoble: IEEE Computer Society, 2020, pp. 1574-1577. ISBN 978-3-9819263-4-7. Available from: https://ieeexplore.ieee.org/document/9116207 and https://www.fit.vut.cz/research/publication/12055/
+ */
+
+double rnd;
+
+broadcast chan change[100];
+int outcnt=0;
+
+const int NOPS = 7;
+typedef int[0,NOPS-1] tOp;
+
+const tOp OP_NOT = 0;
+const tOp OP_DLY = 1;
+const tOp OP_AND = 2;
+const tOp OP_NAND = 3;
+const tOp OP_OR = 4;
+const tOp OP_NOR = 5;
+const tOp OP_XOR = 6;
+
+//const int NCOM = 7;
+//tOp tbl_op[NCOM] = {
+//    2,                
+//    2,                
+//    4,                
+//    2,                
+//    2,                
+//    0,                
+//    1};
+
+const int NCOM = 9;
+tOp tbl_op[NCOM] = {
+    2,
+    2,
+    2,
+    2,
+    0,
+    4,
+    2,
+    2,
+    1};             
+
+int duration(tOp op){  
+    int duration=0;
+    if(op==OP_NOT) duration=3;
+    if(op==OP_DLY) duration=10;
+    if(op==OP_AND) duration=10;
+    if(op==OP_NAND) duration=13;
+    if(op==OP_OR) duration=10;
+    if(op==OP_NOR) duration=13;
+    if(op==OP_XOR) duration=20;
+    return duration;
+}
+
+broadcast chan go, pwrUp;
+
+const double COVERAGE_RATIO = 100.0;
+const int DLY_ZERO = 0;
+
+const int TBL_PWR2[31] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824};
+
+broadcast chan update;
+broadcast chan cmpDone;
+
+const int MAX_BITS = 1024;
+bool bits[MAX_BITS];
+bool difference=false;
+bool dif2=false;
+int diffctrl=0;
+int err_magn_v;    
+double err_magn_r;  
+
+int out_sum_all_acc;
+int out_sum_all_approx;
+int out_sum_all_diff;
+
+int bitsCovered;
+double inCoverage;
+
+bool allCovered=false;
+
+const int NIB_MUL2 = 4;                  
+const int NOB_MUL2 = 4;                  
+const int NTV_MUL2 = TBL_PWR2[NIB_MUL2]; 
+const int DLY_MUL2 = 20;                 
+
+/* ===------------------------  ------------------------==== */
+int getMasked(int w, int offset, int data){ 
+    int mask = (TBL_PWR2[w]-1);    
+   return (data &amp; (mask &lt;&lt; offset)) &gt;&gt; offset;     
+}    
+bool getBit(int pos, int data){ return getMasked(1, pos, data); }
+
+const int NIB_ANY = 4;                  
+const int NOB_ANY = 4;                  
+const int NTV_ANY = TBL_PWR2[NIB_ANY]; 
+const int DLY_ANY = 20;                 
+bool tbl_acc_any[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY];
+//
+const int NFUN = 1;
+typedef int[0,NFUN-1] tFun;
+//-------
+const tFun F_MUL = 0;
+//
+void fill_tbl_acc_any(int win, int wout, tFun f, int fdly){ 
+    int i, j, k, op0, op1, result;
+    for(i=0; i&lt;TBL_PWR2[win]; i++){    
+        for(j=0; j&lt;win; j++){
+            tbl_acc_any[i][j] = getBit(j,i);
+        }
+        if(f==F_MUL){
+            op0 = getMasked(win/2, 0, i);
+            op1 = getMasked(win/2, win/2, i);
+            result = op0*op1;
+        }
+        else { result = 0; }
+        for(k=0; k&lt;wout; k++){
+            tbl_acc_any[i][win+(wout-k-1)] = getBit(k,result);
+        }
+    }
+}
+
+/* ===------------------------  ------------------------==== */
+const int NPI = NIB_MUL2;    
+const int NPO = NOB_MUL2;   
+//
+const int NTV = NTV_MUL2; 
+const int DLY = DLY_MUL2;
+//
+const int PIxy[NPI] = {0,1,2,3};    
+const int POx[NPO] = {4,5,6,7};     
+//
+const int POy[NPO] = {8,9,10,11};     
+/* ===------------------------  ------------------------==== */
+
+const int MAX_INNER_NODES = 100;
+typedef struct {
+    int dly;
+    bool flag;
+} sNode;
+sNode nodes[MAX_INNER_NODES];
+
+const int MAX_INNER_GATES = 100;
+typedef struct {
+    bool active;
+    int in0;
+    int in1;
+    int inAvail;
+    int out0;
+    int dly;
+    int depth;
+    bool flag;
+} sGate;
+sGate gates[MAX_INNER_GATES];
+
+int approxCircNodes = 0;
+int approxCircGates = 0;
+int approxCircDly=0;
+int approxCircDepth=0;
+
+
+bool outEq(){
+    bool same=true;
+    int i;
+    for(i=0; i&lt;NPO; i++){
+        if((POx[i]&gt;=0) &amp;&amp; (POy[i]&gt;=0)){
+            if(bits[POx[i]] != bits[POy[i]]){
+                same = false;
+            }
+        }
+    }
+    return same;
+}
+
+void diff(){
+    int res_acc=0, res_approx=0;
+    int i;
+
+    difference = !outEq();
+
+     for(i=0; i&lt;=NPO-1; i++){                                       
+        res_acc += bits[i+NPI]*TBL_PWR2[i];
+        if(POy[i]&gt;=0) res_approx += bits[i+NPI+NPO]*TBL_PWR2[i];    
+    }
+    out_sum_all_acc += res_acc;
+    out_sum_all_approx += res_approx;
+    out_sum_all_diff = out_sum_all_acc - out_sum_all_approx;
+    err_magn_v = res_acc - res_approx;
+    if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
+}
+
+</declaration>
+	<template>
+		<name>tmul2any</name>
+		<parameter>int a0, int a1, int b0, int b1, int y0, int y1, int y2, int y3, bool &amp;ttbl[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY], const int  dly</parameter>
+		<declaration>clock x;
+
+int getIdx(int i){
+    int idx=-1;
+    
+    if(i==0){ idx = a0; } 
+    else if (i==1) { idx = a1; }
+    else if (i==2) { idx = b0; }
+    else if (i==3) { idx = b1; }
+    else if (i==4) { idx = y0; }
+    else if (i==5) { idx = y1; }
+    else if (i==6) { idx = y2; }
+    else if (i==7) { idx = y3; }
+    else {}
+
+    return idx;
+}
+
+
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i&lt;NIB_MUL2; i++){
+        result += bits[getIdx(i)]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+int getOut(){
+    int res, i;
+    for(i=NIB_MUL2; i&lt;NIB_MUL2+NOB_MUL2; i++){
+        res += bits[getIdx(i)]*TBL_PWR2[i-NIB_MUL2];
+    }
+    return res;    
+}
+
+void f(){
+    if(y3&gt;=0) bits[y3]=ttbl[bin2dec()][4];
+    if(y2&gt;=0) bits[y2]=ttbl[bin2dec()][5];
+    if(y1&gt;=0) bits[y1]=ttbl[bin2dec()][6];
+    if(y0&gt;=0) bits[y0]=ttbl[bin2dec()][7];
+
+    diffctrl++;
+}
+
+void inits(){
+    fill_tbl_acc_any(NIB_ANY, NOB_ANY, F_MUL, dly);
+}
+</declaration>
+		<location id="id0" x="-170" y="0">
+		</location>
+		<location id="id1" x="0" y="0">
+			<label kind="invariant" x="-25" y="17">x&lt;=dly</label>
+		</location>
+		<location id="id2" x="-374" y="0">
+			<committed/>
+		</location>
+		<init ref="id2"/>
+		<transition id="id3">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-297" y="0">inits()</label>
+		</transition>
+		<transition id="id4">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-152" y="-136">x==dly</label>
+			<label kind="assignment" x="17" y="-59">f()</label>
+			<nail x="0" y="-102"/>
+			<nail x="-170" y="-102"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-110" y="-25">update?</label>
+			<label kind="assignment" x="-93" y="0">x=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>tmul2_tb_exhaust</name>
+		<parameter>const int a0, const int a1, const int b0, const int b1, const int dly, const double covratio</parameter>
+		<declaration>clock x;
+clock tcover;
+int input=0;
+int nsame=0, inSame=0;
+double rCover;
+
+bool inCoverSet[NTV];
+
+int covered()
+{
+    int cnt=0;
+
+    for(i: int[0,NTV-1])
+    {
+        if(inCoverSet[i]) {
+            cnt++;
+        }
+    }
+
+    bitsCovered=cnt;
+
+    return cnt;
+}
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i&lt;NPI; i++){
+        result += bits[i]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+bool inCovered()
+{
+  return forall (i : int[0,NTV-1]) inCoverSet[i];    
+}
+
+
+
+void f(){
+    bits[a0] = getBit(0, input);
+    bits[a1] = getBit(1, input);
+    bits[b0] = getBit(2, input);
+    bits[b1] = getBit(3, input);
+
+    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+    else inSame = input;
+    inCoverSet[input] = true;
+    input = (input+1) % NTV;
+    covered();
+
+    rCover = 100.0*bitsCovered / NTV; 
+}
+
+void inits(){
+    int i;
+    for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
+    for(i:int[0,NPI-1]){
+        if(exists(j:int[0,NPI-1]) PIxy[j]==i){ 
+            nodes[i].flag=true;    
+            nodes[i].dly=0;        
+        }
+        approxCircNodes++;
+    }
+    for(i=0; i&lt;approxCircGates; i++) gates[i].flag=false;    
+    while(exists(i:int[0,MAX_INNER_GATES-1]) (gates[i].flag==false &amp;&amp; i&lt;approxCircGates)){
+        approxCircDepth++;
+        for(i=0; i&lt;approxCircGates; i++) {
+            if(!gates[i].flag &amp;&amp; nodes[gates[i].in0].flag &amp;&amp; nodes[gates[i].in1].flag){  
+                nodes[gates[i].out0].dly = (nodes[gates[i].in0].dly&gt;nodes[gates[i].in1].dly?nodes[gates[i].in0].dly:nodes[gates[i].in1].dly) + duration(tbl_op[i]);
+                nodes[gates[i].out0].flag=true;
+                approxCircNodes++;
+                if(nodes[gates[i].out0].dly&gt;approxCircDly){ approxCircDly=nodes[gates[i].out0].dly; }
+
+                gates[i].flag=true;   
+            }  
+        }
+    }
+}</declaration>
+		<location id="id6" x="-136" y="0">
+			<name x="-153" y="8">apply</name>
+			<committed/>
+		</location>
+		<location id="id7" x="-374" y="0">
+			<name x="-382" y="8">get</name>
+			<committed/>
+		</location>
+		<location id="id8" x="34" y="0">
+			<name x="17" y="8">done</name>
+			<label kind="invariant" x="0" y="-34">tcover'==0</label>
+		</location>
+		<location id="id9" x="-246" y="-102">
+			<name x="-255" y="-136">wait</name>
+		</location>
+		<location id="id10" x="-510" y="0">
+			<urgent/>
+		</location>
+		<init ref="id10"/>
+		<transition id="id11">
+			<source ref="id10"/>
+			<target ref="id7"/>
+			<label kind="assignment" x="-459" y="0">inits()</label>
+		</transition>
+		<transition id="id12">
+			<source ref="id6"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-221" y="-93">!inCovered()</label>
+			<nail x="-136" y="-102"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id6"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-93" y="-25">inCovered()</label>
+			<label kind="assignment" x="-110" y="0">allCovered=true,
+x=0</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-289" y="-25">update!</label>
+			<label kind="assignment" x="-280" y="0">f(), x=0</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id9"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-365" y="-93">cmpDone?</label>
+			<nail x="-374" y="-102"/>
+		</transition>
+	</template>
+	<template>
+		<name>tmul2_tb_nondet</name>
+		<parameter>const int a0, const int a1, const int b0, const int b1, const int dly, const double covratio</parameter>
+		<declaration>clock x;
+clock tcover;
+int input=0;
+int nsame=0, inSame=0;
+double rCover;
+int idx=0;
+
+bool inCoverSet[NTV];
+
+int covered()
+{
+    int cnt=0;
+
+    for(i: int[0,NTV-1])
+    {
+        if(inCoverSet[i]) {
+            cnt++;
+        }
+    }
+
+    bitsCovered=cnt;
+
+    return cnt;
+}
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i&lt;NPI; i++){
+        result += bits[i]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+bool inCovered()
+{
+  return forall (i : int[0,NTV-1]) inCoverSet[i];    
+}
+
+void f(int i){
+    input = bin2dec();
+   if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+  else inSame = input;
+   inCoverSet[bin2dec()] = true;
+    covered();
+
+    rCover = 100.0*bitsCovered / NTV; 
+
+    inCoverage = 0.0;
+}
+
+void inits(){
+    int i;
+    for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
+    for(i:int[0,NPI-1]){
+        if(exists(j:int[0,NPI-1]) PIxy[j]==i){ 
+            nodes[i].flag=true;
+            nodes[i].dly=0;      
+        }
+        approxCircNodes++;
+    }
+    for(i=0; i&lt;approxCircGates; i++) gates[i].flag=false;    
+    while(exists(i:int[0,MAX_INNER_GATES-1]) (gates[i].flag==false &amp;&amp; i&lt;approxCircGates)){
+        approxCircDepth++;
+        for(i=0; i&lt;approxCircGates; i++) {
+            if(!gates[i].flag &amp;&amp; nodes[gates[i].in0].flag &amp;&amp; nodes[gates[i].in1].flag){  
+                nodes[gates[i].out0].dly = (nodes[gates[i].in0].dly&gt;nodes[gates[i].in1].dly?nodes[gates[i].in0].dly:nodes[gates[i].in1].dly) + duration(tbl_op[i]);
+                nodes[gates[i].out0].flag=true;
+                approxCircNodes++;
+                if(nodes[gates[i].out0].dly&gt;approxCircDly){ approxCircDly=nodes[gates[i].out0].dly; }
+
+                gates[i].flag=true;
+            }  
+        }
+    }
+}</declaration>
+		<location id="id16" x="-119" y="-102">
+			<name x="-129" y="-136">wait</name>
+		</location>
+		<location id="id17" x="-246" y="0">
+			<name x="-255" y="8">get</name>
+			<committed/>
+		</location>
+		<location id="id18" x="170" y="0">
+			<name x="153" y="8">done</name>
+			<label kind="invariant" x="136" y="-34">tcover'==0</label>
+		</location>
+		<location id="id19" x="0" y="0">
+			<name x="-17" y="8">apply</name>
+			<committed/>
+		</location>
+		<location id="id20" x="-246" y="-102">
+			<committed/>
+		</location>
+		<location id="id21" x="-374" y="0">
+			<urgent/>
+		</location>
+		<init ref="id21"/>
+		<transition id="id22">
+			<source ref="id21"/>
+			<target ref="id17"/>
+			<label kind="assignment" x="-331" y="0">inits()</label>
+		</transition>
+		<transition id="id23">
+			<source ref="id20"/>
+			<target ref="id17"/>
+			<label kind="select" x="-238" y="-68">i: int[a0, b1]</label>
+			<label kind="assignment" x="-238" y="-51">bits[i] ^= 1, idx=i</label>
+		</transition>
+		<transition id="id24">
+			<source ref="id16"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-212" y="-102">cmpDone?</label>
+		</transition>
+		<transition id="id25">
+			<source ref="id19"/>
+			<target ref="id16"/>
+			<label kind="guard" x="-93" y="-93">!inCovered()</label>
+			<nail x="0" y="-102"/>
+		</transition>
+		<transition id="id26">
+			<source ref="id17"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-153" y="-25">update!</label>
+			<label kind="assignment" x="-144" y="0">f(idx)</label>
+		</transition>
+		<transition id="id27">
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="guard" x="42" y="-25">inCovered()</label>
+			<label kind="assignment" x="34" y="0">allCovered=true</label>
+		</transition>
+	</template>
+	<template>
+		<name>tmul2_tb_random</name>
+		<parameter>const int a0, const int a1, const int b0, const int b1, const int dly, const double covratio</parameter>
+		<declaration>clock x;
+clock tcover;
+int input=0;
+int nsame=0, inSame=0;
+double rCover;
+int idx=0;
+
+bool inCoverSet[NTV];
+
+int covered()
+{
+    int cnt=0;
+
+    for(i: int[0,NTV-1])
+    {
+        if(inCoverSet[i]) {
+            cnt++;
+        }
+    }
+
+    bitsCovered=cnt;
+
+    return cnt;
+}
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i&lt;NPI; i++){
+        result += bits[i]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+bool inCovered()
+{
+  return forall (i : int[0,NTV-1]) inCoverSet[i];    
+}
+
+void f(int i){
+    int j;
+    int imax = fint(exp2(NPI));
+
+//    rnd = random(100);
+//    rnd = random_arcsine(-10,10);
+//    rnd = random_beta(0.1,5);
+//    rnd = random_gamma(0.5,5);
+//    rnd = random_normal(10,1);
+//    rnd = random_poisson(1.0);
+//    rnd = random_weibull(0.5,5);
+//    rnd = random_tri(0,10,100);
+
+    j=fint(random(NPI));                   // pro (NPI) je out 0...NPI-1
+ //   j=fint(random_normal(NPI/2.0,0.5));    // pro (NPI/2.0, 0.5) je out NPI/2 +- 0.5
+ //   j=fint(random_poisson(1.0));           // pro (1.0) je out 1.0 +- 
+//    j=fint(random_arcsine(0.0, NPI-1));    // pro (0.0, NPI-1) je out mezi 0...NPI-1 (aka random())
+  //  j=fint(random_tri(0.0, 0.5, NPI-1));    // pro (0.0, 0.5, NPI-1) je out mezi 0...NPI-1 (aka random()), se stredem u 0.5
+  //  j = fint(random_weibull(10, 3.0));    // pro (10.0, 3.0) je out mezi 0...3 (aka random()), se stredem vys (pro 10)
+  //  j = fint(random_gamma(1.0,0.5));    // pro (1.0, 0.5) je out mezi 0...5 (aka random()), se stredem niz (kolem 1.0)
+    if(j &lt; 0) j=0;
+    if(j &gt; (NPI-1)) j=NPI-1;
+    bits[j] ^= 1;
+
+   if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+   else inSame = input;
+   inCoverSet[bin2dec()] = true;
+    covered();
+
+    rCover = 100.0*bitsCovered / NTV; 
+
+    inCoverage = 0.0;
+}
+
+void inits(){
+    int i;
+    for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
+    for(i:int[0,NPI-1]){
+        if(exists(j:int[0,NPI-1]) PIxy[j]==i){ 
+            nodes[i].flag=true;    
+            nodes[i].dly=0;        
+        }
+        approxCircNodes++;
+    }
+    for(i=0; i&lt;approxCircGates; i++) gates[i].flag=false;
+    while(exists(i:int[0,MAX_INNER_GATES-1]) (gates[i].flag==false &amp;&amp; i&lt;approxCircGates)){
+        approxCircDepth++;
+        for(i=0; i&lt;approxCircGates; i++) {
+            if(!gates[i].flag &amp;&amp; nodes[gates[i].in0].flag &amp;&amp; nodes[gates[i].in1].flag){  
+                nodes[gates[i].out0].dly = (nodes[gates[i].in0].dly&gt;nodes[gates[i].in1].dly?nodes[gates[i].in0].dly:nodes[gates[i].in1].dly) + duration(tbl_op[i]);
+                nodes[gates[i].out0].flag=true;
+                approxCircNodes++;
+                if(nodes[gates[i].out0].dly&gt;approxCircDly){ approxCircDly=nodes[gates[i].out0].dly; }
+
+                gates[i].flag=true; 
+            }  
+        }
+    }
+}</declaration>
+		<location id="id28" x="-119" y="-102">
+			<name x="-129" y="-136">wait</name>
+		</location>
+		<location id="id29" x="-246" y="0">
+			<name x="-255" y="8">get</name>
+			<committed/>
+		</location>
+		<location id="id30" x="170" y="0">
+			<name x="153" y="8">done</name>
+			<label kind="invariant" x="136" y="-34">tcover'==0</label>
+		</location>
+		<location id="id31" x="0" y="0">
+			<name x="-17" y="8">apply</name>
+			<committed/>
+		</location>
+		<location id="id32" x="-246" y="-102">
+			<committed/>
+		</location>
+		<location id="id33" x="-374" y="0">
+			<urgent/>
+		</location>
+		<init ref="id33"/>
+		<transition id="id34">
+			<source ref="id33"/>
+			<target ref="id29"/>
+			<label kind="assignment" x="-331" y="0">inits()</label>
+		</transition>
+		<transition id="id35">
+			<source ref="id32"/>
+			<target ref="id29"/>
+		</transition>
+		<transition id="id36">
+			<source ref="id28"/>
+			<target ref="id32"/>
+			<label kind="synchronisation" x="-212" y="-102">cmpDone?</label>
+		</transition>
+		<transition id="id37">
+			<source ref="id31"/>
+			<target ref="id28"/>
+			<label kind="guard" x="-93" y="-93">!inCovered()</label>
+			<nail x="0" y="-102"/>
+		</transition>
+		<transition id="id38">
+			<source ref="id29"/>
+			<target ref="id31"/>
+			<label kind="synchronisation" x="-153" y="-25">update!</label>
+			<label kind="assignment" x="-144" y="0">f(idx)</label>
+		</transition>
+		<transition id="id39">
+			<source ref="id31"/>
+			<target ref="id30"/>
+			<label kind="guard" x="42" y="-25">inCovered()</label>
+			<label kind="assignment" x="34" y="0">allCovered=true</label>
+		</transition>
+	</template>
+	<template>
+		<name>syncPrimary</name>
+		<declaration>int idx;</declaration>
+		<location id="id40" x="-748" y="-306">
+		</location>
+		<location id="id41" x="-646" y="-306">
+			<committed/>
+		</location>
+		<location id="id42" x="-510" y="-306">
+			<committed/>
+		</location>
+		<init ref="id40"/>
+		<transition id="id43">
+			<source ref="id42"/>
+			<target ref="id40"/>
+			<label kind="guard" x="-646" y="-399">idx&gt;=NPI</label>
+			<nail x="-510" y="-374"/>
+			<nail x="-748" y="-374"/>
+		</transition>
+		<transition id="id44">
+			<source ref="id42"/>
+			<target ref="id41"/>
+			<label kind="guard" x="-595" y="-323">idx&lt;NPI</label>
+			<nail x="-578" y="-272"/>
+		</transition>
+		<transition id="id45">
+			<source ref="id41"/>
+			<target ref="id42"/>
+			<label kind="synchronisation" x="-612" y="-340">change[idx]!</label>
+			<label kind="assignment" x="-629" y="-280">idx++</label>
+		</transition>
+		<transition id="id46">
+			<source ref="id40"/>
+			<target ref="id41"/>
+			<label kind="synchronisation" x="-730" y="-323">update?</label>
+			<label kind="assignment" x="-714" y="-306">idx=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>eval_diff</name>
+		<parameter>const int dly</parameter>
+		<declaration>clock x;</declaration>
+		<location id="id47" x="-238" y="0">
+			<label kind="invariant" x="-297" y="-8">x&lt;=dly</label>
+		</location>
+		<location id="id48" x="-102" y="0">
+			<committed/>
+		</location>
+		<init ref="id47"/>
+		<transition id="id49">
+			<source ref="id48"/>
+			<target ref="id47"/>
+			<label kind="synchronisation" x="-178" y="51">cmpDone!</label>
+			<label kind="assignment" x="-246" y="110">outcnt=0, diffctrl=0, x=0</label>
+			<nail x="-102" y="110"/>
+			<nail x="-238" y="110"/>
+		</transition>
+		<transition id="id50">
+			<source ref="id47"/>
+			<target ref="id47"/>
+			<label kind="guard" x="-331" y="-93">diffctrl&lt;2
+&amp;&amp; x==dly</label>
+			<label kind="assignment" x="-289" y="-42">x=0</label>
+			<nail x="-263" y="-76"/>
+			<nail x="-229" y="-76"/>
+		</transition>
+		<transition id="id51">
+			<source ref="id47"/>
+			<target ref="id48"/>
+			<label kind="guard" x="-204" y="0">diffctrl==2</label>
+			<label kind="assignment" x="-212" y="-68">err_magn_v=0,
+err_magn_r=0.0,
+diff()</label>
+		</transition>
+	</template>
+	<template>
+		<name>gate2</name>
+		<parameter>const int id, const int a0, const int a1, const int y0, broadcast chan &amp;cin0, broadcast chan &amp;cin1, broadcast chan &amp;cout0</parameter>
+		<declaration>clock x;
+
+void inits(){
+    int i;
+
+    // collect info about the approx.circuit topology 
+    gates[id].active = true;
+    gates[id].in0 = a0; 
+    gates[id].in1 = a1; 
+    gates[id].inAvail = 0; 
+    gates[id].out0 = y0; 
+    gates[id].dly = duration(tbl_op[id]);
+    gates[id].depth = -1;
+    gates[id].flag = false;
+
+    approxCircGates++;    
+}
+
+void outGen(tOp op){
+ //   outSync(y0);
+
+    if(op == OP_AND){
+        bits[y0] = bits[a0] &amp; bits[a1];        
+    }
+    else if(op == OP_NAND){
+        bits[y0] = not (bits[a0] &amp; bits[a1]);        
+    }
+    else if(op == OP_OR){
+        bits[y0] = bits[a0] | bits[a1];        
+    }
+    else if(op == OP_NOR){
+        bits[y0] = not (bits[a0] | bits[a1]);        
+    }
+    else if(op == OP_XOR){
+        bits[y0] = (bits[a0] != bits[a1]);        
+    }
+    else if(op == OP_NOT){
+        bits[y0] = not bits[a0];
+    }
+    else {    // unsupported operation
+    }
+
+    if(id==2){ 
+        if(diffctrl&lt;2) diffctrl++;
+    }  
+}</declaration>
+		<location id="id52" x="-170" y="0">
+		</location>
+		<location id="id53" x="0" y="0">
+			<label kind="invariant" x="-17" y="17">x&lt;=duration(tbl_op[id])</label>
+		</location>
+		<location id="id54" x="-272" y="0">
+			<committed/>
+		</location>
+		<init ref="id54"/>
+		<transition id="id55">
+			<source ref="id54"/>
+			<target ref="id52"/>
+			<label kind="assignment" x="-238" y="0">inits()</label>
+		</transition>
+		<transition id="id56">
+			<source ref="id52"/>
+			<target ref="id53"/>
+			<label kind="synchronisation" x="-144" y="0">cin1?</label>
+			<label kind="assignment" x="-76" y="0">x=0</label>
+			<nail x="-85" y="0"/>
+		</transition>
+		<transition id="id57">
+			<source ref="id53"/>
+			<target ref="id52"/>
+			<label kind="guard" x="-110" y="-127">x==duration(tbl_op[id])</label>
+			<label kind="synchronisation" x="8" y="-68">cout0!</label>
+			<label kind="assignment" x="-144" y="-102">outGen(tbl_op[id])</label>
+			<nail x="0" y="-102"/>
+			<nail x="-170" y="-102"/>
+		</transition>
+		<transition id="id58">
+			<source ref="id52"/>
+			<target ref="id53"/>
+			<label kind="synchronisation" x="-136" y="-42">cin0?</label>
+			<label kind="assignment" x="-59" y="-42">x=0</label>
+			<nail x="-85" y="-34"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+synPri = syncPrimary();
+mul2A = tmul2any(PIxy[0],PIxy[1],PIxy[2],PIxy[3],    POx[0],POx[1],POx[2],POx[3],    tbl_acc_any,     DLY_MUL2);
+
+mul2Atb = tmul2_tb_exhaust(PIxy[0],PIxy[1],PIxy[2],PIxy[3],    DLY_MUL2, COVERAGE_RATIO);
+//mul2Atb = tmul2_tb_random(PIxy[0],PIxy[1],PIxy[2],PIxy[3],    DLY_MUL2, COVERAGE_RATIO);
+
+ediff = eval_diff(5);
+
+//g24 = gate2(4,    PIxy[0],PIxy[2],    POy[0],    change[0],change[2],change[13]);
+//g23 = gate2(3,    PIxy[0],PIxy[3],    12,        change[0],change[3],change[12]);
+//g22 = gate2(2,    11,12,              POy[1],    change[11],change[12],change[14]);
+//g21 = gate2(1,    PIxy[1],PIxy[2],    11,        change[1],change[2],change[11]);
+//g20 = gate2(0,    PIxy[1],PIxy[3],    POy[2],    change[1],change[3],change[15]);
+
+//const int id, const int a0, const int a1, const int y0, broadcast chan &amp;cin0, broadcast chan &amp;cin1, broadcast chan &amp;cout0
+g20 = gate2(0, PIxy[0], PIxy[2], POy[0], change[0], change[2], change[11]);
+g21 = gate2(1, PIxy[0], PIxy[3], 12, change[0], change[3], change[12]);
+g22 = gate2(2, PIxy[1], PIxy[2], 13, change[1], change[2], change[13]);
+g23 = gate2(3, PIxy[1], PIxy[3], 14, change[1], change[3], change[14]);
+g24 = gate2(4, POy[0], POy[0], 15, change[11], change[99], change[15]);
+g25 = gate2(5, 12, 13, POy[1], change[12], change[13], change[16]);
+g26 = gate2(6, 14, 15, POy[2], change[14], change[15], change[17]);
+g27 = gate2(7, POy[0], 14, POy[3], change[11], change[14], change[18]);
+
+// List one or more processes to be composed into a system.
+system 
+synPri,
+mul2A, 
+mul2Atb,
+ediff
+,g20
+,g21
+,g22
+,g23
+,g24
+,g25
+,g26
+,g27;    
+</system>
+	<queries>
+		<query>
+			<formula>E[&lt;=25000; 10] (max:mul2Atb.tcover)
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=350; 100] (max:bitsCovered)
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=25000] (&lt;&gt;bitsCovered&gt;14)
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=350;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 8+bits[4], 10+bits[5], 12+bits[6], 14+bits[7], bitsCovered, 16+allCovered}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=1250;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 10+bits[4], 12+bits[5], 14+bits[6], 16+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], 28+bits[12], 32+difference, out_sum_all_acc, out_sum_all_approx}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=1500;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 8+bits[4], 10+bits[5], 12+bits[6], 14+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], bitsCovered, 20+allCovered, 30+mul2Atb.inSame, 40+mul2Atb.input, 30+mul2Atb.nsame, mul2Atb.rCover, 60+difference*10}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=2500;5] {100*((((100.0*(out_sum_all_acc-out_sum_all_approx))/(100.0*(out_sum_all_acc+1))))), out_sum_all_acc, out_sum_all_approx}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=2000;5] {40+difference, 50+10*err_magn_v, 100*err_magn_r, out_sum_all_acc, out_sum_all_approx, 80+out_sum_all_diff, mul2Atb.rCover, 100*((1+1.0*out_sum_all_acc)/(1+1.0*out_sum_all_approx))}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=4000;20] {out_sum_all_diff}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=400;5] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 10+bits[4], 12+bits[5], 14+bits[6], 16+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], 30+bits[14], 32+bits[15], 34+bits[16], 36+bits[13], 38+bits[12], 40+difference, 45+diffctrl, 50+outcnt}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>sup: err_magn_v
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=2500; 10] (max:err_magn_v)
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=2500; 10] (max:err_magn_r)
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=25000; 10] (max:out_sum_all_diff)
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=5000;200] {bitsCovered, 100*allCovered, mul2Atb.rCover}
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=50000] (&lt;&gt;allCovered)
+			</formula>
+			<comment/>
+		</query>
+	</queries>
+</nta>

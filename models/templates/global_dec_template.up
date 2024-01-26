@@ -1,0 +1,167 @@
+double rnd;
+
+broadcast chan change[1000];
+int outcnt=0;
+
+const int NOPS = 7;
+typedef int[0,NOPS-1] tOp;
+
+const tOp OP_NOT = 0;
+const tOp OP_DLY = 1;
+const tOp OP_AND = 2;
+const tOp OP_NAND = 3;
+const tOp OP_OR = 4;
+const tOp OP_NOR = 5;
+const tOp OP_XOR = 6;
+
+const int NCOM = 7;
+tOp tbl_op[NCOM] = {2, 2, 4, 2, 2, 0, 1};         
+
+int duration(tOp op){  
+    int duration=0;
+    if(op==OP_NOT) duration=3;
+    if(op==OP_DLY) duration=10;
+    if(op==OP_AND) duration=10;
+    if(op==OP_NAND) duration=13;
+    if(op==OP_OR) duration=10;
+    if(op==OP_NOR) duration=13;
+    if(op==OP_XOR) duration=20;
+    return duration;
+}
+
+broadcast chan go, pwrUp;
+
+const double COVERAGE_RATIO = 100.0;
+const int DLY_ZERO = 0;
+
+const int TBL_PWR2[31] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824};
+
+broadcast chan update;
+broadcast chan cmpDone;
+
+const int MAX_BITS = 1024;
+bool bits[MAX_BITS];
+bool difference=false;
+bool dif2=false;
+int diffctrl=0;
+int err_magn_v;    
+double err_magn_r;  
+
+int out_sum_all_acc;
+int out_sum_all_approx;
+int out_sum_all_diff;
+
+int bitsCovered;
+double inCoverage;
+
+bool allCovered=false;
+
+const int NIB_MUL2 = 4;              
+const int NOB_MUL2 = 4;        
+const int NTV_MUL2 = TBL_PWR2[NIB_MUL2]; 
+const int DLY_MUL2 = 20;                 
+
+/* ===------------------------  ------------------------==== */
+int getMasked(int w, int offset, int data){ 
+    int mask = (TBL_PWR2[w]-1);    
+   return (data & (mask << offset)) >> offset;     
+}    
+bool getBit(int pos, int data){ return getMasked(1, pos, data); }
+
+const int NIB_ANY = 4;                  
+const int NOB_ANY = 4;                  
+const int NTV_ANY = TBL_PWR2[NIB_ANY]; 
+const int DLY_ANY = 20;                 
+bool tbl_acc_any[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY];
+//
+const int NFUN = 1;
+typedef int[0,NFUN-1] tFun;
+//-------
+const tFun F_MUL = 0;
+//
+void fill_tbl_acc_any(int win, int wout, tFun f, int fdly){ 
+    int i, j, k, op0, op1, result;
+    for(i=0; i<TBL_PWR2[win]; i++){    
+        for(j=0; j<win; j++){
+            tbl_acc_any[i][j] = getBit(j,i);
+        }
+        if(f==F_MUL){
+            op0 = getMasked(win/2, 0, i);
+            op1 = getMasked(win/2, win/2, i);
+            result = op0*op1;
+        }
+        else { result = 0; }
+        for(k=0; k<wout; k++){
+            tbl_acc_any[i][win+(wout-k-1)] = getBit(k,result);
+        }
+    }
+}
+
+/* ===------------------------  ------------------------==== */
+const int NPI = NIB_MUL2;    
+const int NPO = NOB_MUL2;   
+//
+const int NTV = NTV_MUL2; 
+const int DLY = DLY_MUL2;
+//
+const int PIxy[NPI] = {0,1,2,3};    from typing import Any
+const int POx[NPO] = {4,5,6,7};     
+//
+const int POy[NPO] = {8,9,10,-1};     
+/* ===------------------------  ------------------------==== */
+
+const int MAX_INNER_NODES = 1000;
+typedef struct {
+    int dly;
+    bool flag;
+} sNode;
+sNode nodes[MAX_INNER_NODES];
+
+const int MAX_INNER_GATES = 1000;
+typedef struct {
+    bool active;
+    int in0;
+    int in1;
+    int inAvail;
+    int out0;
+    int dly;
+    int depth;
+    bool flag;
+} sGate;
+sGate gates[MAX_INNER_GATES];
+
+int approxCircNodes = 0;
+int approxCircGates = 0;
+int approxCircDly=0;
+int approxCircDepth=0;
+
+
+bool outEq(){
+    bool same=true;
+    int i;
+    for(i=0; i<NPO; i++){
+        if((POx[i]>=0) && (POy[i]>=0)){
+            if(bits[POx[i]] != bits[POy[i]]){
+                same = false;
+            }
+        }
+    }
+    return same;
+}
+
+void diff(){
+    int res_acc=0, res_approx=0;
+    int i;
+
+    difference = !outEq();
+
+     for(i=0; i<=NPO-1; i++){                                       
+        res_acc += bits[i+NPI]*TBL_PWR2[i];
+        if(POy[i]>=0) res_approx += bits[i+NPI+NPO]*TBL_PWR2[i];    
+    }
+    out_sum_all_acc += res_acc;
+    out_sum_all_approx += res_approx;
+    out_sum_all_diff = out_sum_all_acc - out_sum_all_approx;
+    err_magn_v = res_acc - res_approx;
+    if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
+}
