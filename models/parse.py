@@ -18,6 +18,10 @@ class Parser(object):
 
 		self.op_sequence = [] #sequence of operations used in logic gates
 
+		#template parameters
+		self.input_params = "const int &PIxy[NPI]"
+		self.output_params = "const int &POx[NPO]"
+
 		#mappings of names in verilog files to names in UPPAAL files
 		self.PIxy = {}
 		self.POy = {}
@@ -42,8 +46,6 @@ class Parser(object):
 		"""Checks for input/output declarations in the verilog file and
 		parses them accordingly.
 		"""
-		global input_bits, output_bits
-
 		re_pat = r'(input|output)\s\[([0-9]+)\:0\]\s([a-zA-Z]+);'
 		match = re.match(re_pat, line)
 
@@ -97,9 +99,11 @@ class Parser(object):
 		the verilog input file.
 		"""
 		with open("./templates/global_dec_template.up") as f:
-			global_dec = f.readlines()
+			original = f.readlines()
 
-		for i, line in enumerate(global_dec):
+		global_dec = original
+
+		for i, line in enumerate(original):
 			line = line.strip()
 			#number of input bits
 			if line == "const int NIB_MUL2 = 4;":
@@ -159,9 +163,85 @@ class Parser(object):
 
 	####################################################################
 		
+	def generate_tmul2_any(self):
+		"""loads up the tmul2_any UPPAAL template and updates it with the data obtained from
+		the verilog input file.
+		"""
+		with open("./templates/tmul2_any_template.up") as f:
+			original = f.readlines()
+
+		tmul2_any = original
+
+		for i, line in enumerate(original):
+			line = line.strip()
+
+			#bits array assignments
+			if line == "void f(){":
+				file_index = i+1
+				ttbl_index_delta = 1
+
+				#generate one line for each bit starting from MSB
+				for j in range(self.output_bits-1, -1, -1):
+					tmul2_any.insert(file_index, f"    if(POx[{j}]>=0) bits[POx[{j}]]=ttbl[bin2dec()][{j+ttbl_index_delta}];\n")
+					file_index += 1
+					ttbl_index_delta += 2
+
+		print("".join(tmul2_any))
+
+	####################################################################
+		
+	def generate_tmul2_tb_exhaust(self):
+		"""loads up the tmul2_tb_exhaust UPPAAL template and updates it with the data obtained from
+		the verilog input file.
+		"""
+		with open("./templates/tmul2_tb_exhaust_template.up") as f:
+			original = f.readlines()
+
+		tmul2_tb_exhaust = original
+
+		for i, line in enumerate(original):
+			line = line.strip()
+
+			#bits array assignments
+			if line == "void f(){":
+				file_index = i+1
+
+				for j in range(self.input_bits):
+					tmul2_tb_exhaust.insert(file_index, f"    bits[PIxy[{j}]] = getBit({j}, input);\n")
+					file_index += 1
+
+		print("".join(tmul2_tb_exhaust))
+
+	####################################################################
+		
+	def generate_system_dec(self):
+		"""loads up the system_dec UPPAAL template and updates it with the data obtained from
+		the verilog input file.
+		"""
+		with open("./templates/system_dec_template.up") as f:
+			original = f.readlines()
+
+		for i, line in enumerate(original):
+			line = line.strip()
+		
+			if line == "//gates":
+				file_index = i
+				
+
+	####################################################################
+		
 	def generate_files(self):
 		#global declarations file
-		self.generate_global_dec()
+		#self.generate_global_dec()
+
+		#tmul2_any file
+		#self.generate_tmul2_any()
+
+		#tmul2_tb_exhaust file
+		#self.generate_tmul2_tb_exhaust()
+
+		#system declarations file
+		self.generate_system_dec()
 
 
 def main():

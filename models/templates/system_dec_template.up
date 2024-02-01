@@ -1,0 +1,19 @@
+// Place template instantiations here.
+
+synPri = syncPrimary();
+mul2A = tmul2any(PIxy, POx, tbl_acc_any, DLY_MUL2);
+
+mul2Atb = tmul2_tb_exhaust(PIxy, DLY_MUL2, COVERAGE_RATIO);
+//mul2Atb = tmul2_tb_random(PIxy, DLY_MUL2, COVERAGE_RATIO);
+
+ediff = eval_diff(5);
+
+//gates
+
+// List one or more processes to be composed into a system.
+system
+synPri,
+mul2A, 
+mul2Atb,
+ediff,
+    

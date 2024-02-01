@@ -1,0 +1,43 @@
+clock x;
+
+int getIdx(int i){
+    int idx=-1;
+
+    if(i < NPI) {
+        idx = PIxy[i];
+    }
+    else {
+        idx = POx[i-NPI];
+    }
+
+    return idx;
+}
+
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i<NIB_MUL2; i++){
+        result += bits[getIdx(i)]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+int getOut(){
+    int res, i;
+    for(i=NIB_MUL2; i<NIB_MUL2+NOB_MUL2; i++){
+        res += bits[getIdx(i)]*TBL_PWR2[i-NIB_MUL2];
+    }
+    return res;    
+}
+
+void f(){
+
+    diffctrl++;
+}
+
+void inits(){
+    fill_tbl_acc_any(NIB_ANY, NOB_ANY, F_MUL, dly);
+}

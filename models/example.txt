@@ -104,7 +104,7 @@ const int NPO = NOB_MUL2;
 const int NTV = NTV_MUL2; 
 const int DLY = DLY_MUL2;
 //
-const int PIxy[NPI] = {0,1,2,3};    from typing import Any
+const int PIxy[NPI] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 const int POx[NPO] = {16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
 //
 const int POy[NPO] = {32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47};
@@ -164,4 +164,158 @@ void diff(){
     out_sum_all_diff = out_sum_all_acc - out_sum_all_approx;
     err_magn_v = res_acc - res_approx;
     if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
+}
+
+
+
+
+clock x;
+
+int getIdx(int i){
+    int idx=-1;
+
+    if(i < NPI) {
+        idx = PIxy[i];
+    }
+    else {
+        idx = POx[i-NPI];
+    }
+
+    return idx;
+}
+
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i<NIB_MUL2; i++){
+        result += bits[getIdx(i)]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+int getOut(){
+    int res, i;
+    for(i=NIB_MUL2; i<NIB_MUL2+NOB_MUL2; i++){
+        res += bits[getIdx(i)]*TBL_PWR2[i-NIB_MUL2];
+    }
+    return res;    
+}
+
+void f(){
+    if(POx[15]>=0) bits[POx[15]]=ttbl[bin2dec()][16];
+    if(POx[14]>=0) bits[POx[14]]=ttbl[bin2dec()][17];
+    if(POx[13]>=0) bits[POx[13]]=ttbl[bin2dec()][18];
+    if(POx[12]>=0) bits[POx[12]]=ttbl[bin2dec()][19];
+    if(POx[11]>=0) bits[POx[11]]=ttbl[bin2dec()][20];
+    if(POx[10]>=0) bits[POx[10]]=ttbl[bin2dec()][21];
+    if(POx[9]>=0) bits[POx[9]]=ttbl[bin2dec()][22];
+    if(POx[8]>=0) bits[POx[8]]=ttbl[bin2dec()][23];
+    if(POx[7]>=0) bits[POx[7]]=ttbl[bin2dec()][24];
+    if(POx[6]>=0) bits[POx[6]]=ttbl[bin2dec()][25];
+    if(POx[5]>=0) bits[POx[5]]=ttbl[bin2dec()][26];
+    if(POx[4]>=0) bits[POx[4]]=ttbl[bin2dec()][27];
+    if(POx[3]>=0) bits[POx[3]]=ttbl[bin2dec()][28];
+    if(POx[2]>=0) bits[POx[2]]=ttbl[bin2dec()][29];
+    if(POx[1]>=0) bits[POx[1]]=ttbl[bin2dec()][30];
+    if(POx[0]>=0) bits[POx[0]]=ttbl[bin2dec()][31];
+
+    diffctrl++;
+}
+
+void inits(){
+    fill_tbl_acc_any(NIB_ANY, NOB_ANY, F_MUL, dly);
+}
+
+
+
+
+
+clock x;
+clock tcover;
+int input=0;
+int nsame=0, inSame=0;
+double rCover;
+
+bool inCoverSet[NTV];
+
+int covered()
+{
+    int cnt=0;
+
+    for(i: int[0,NTV-1])
+    {
+        if(inCoverSet[i]) {
+            cnt++;
+        }
+    }
+
+    bitsCovered=cnt;
+
+    return cnt;
+}
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i<NPI; i++){
+        result += bits[i]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+bool inCovered()
+{
+  return forall (i : int[0,NTV-1]) inCoverSet[i];    
+}
+
+
+
+void f(){
+    bits[PIxy[0]] = getBit(0, input);
+    bits[PIxy[1]] = getBit(1, input);
+    bits[PIxy[2]] = getBit(2, input);
+    bits[PIxy[3]] = getBit(3, input);
+    bits[PIxy[4]] = getBit(4, input);
+    bits[PIxy[5]] = getBit(5, input);
+    bits[PIxy[6]] = getBit(6, input);
+    bits[PIxy[7]] = getBit(7, input);
+
+    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+    else inSame = input;
+    inCoverSet[input] = true;
+    input = (input+1) % NTV;
+    covered();
+
+    rCover = 100.0*bitsCovered / NTV; 
+}
+
+void inits(){
+    int i;
+    for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
+    for(i:int[0,NPI-1]){
+        if(exists(j:int[0,NPI-1]) PIxy[j]==i){ 
+            nodes[i].flag=true;    
+            nodes[i].dly=0;        
+        }
+        approxCircNodes++;
+    }
+    for(i=0; i<approxCircGates; i++) gates[i].flag=false;    
+    while(exists(i:int[0,MAX_INNER_GATES-1]) (gates[i].flag==false && i<approxCircGates)){
+        approxCircDepth++;
+        for(i=0; i<approxCircGates; i++) {
+            if(!gates[i].flag && nodes[gates[i].in0].flag && nodes[gates[i].in1].flag){  
+                nodes[gates[i].out0].dly = (nodes[gates[i].in0].dly>nodes[gates[i].in1].dly?nodes[gates[i].in0].dly:nodes[gates[i].in1].dly) + duration(tbl_op[i]);
+                nodes[gates[i].out0].flag=true;
+                approxCircNodes++;
+                if(nodes[gates[i].out0].dly>approxCircDly){ approxCircDly=nodes[gates[i].out0].dly; }
+
+                gates[i].flag=true;   
+            }  
+        }
+    }
 }
