@@ -1,0 +1,84 @@
+<template>
+		<name>gate2</name>
+		<parameter>const int id, const int a0, const int a1, const int y0, broadcast chan &amp;cin0, broadcast chan &amp;cin1, broadcast chan &amp;cout0</parameter>
+		<declaration>clock x;
+
+void inits(){
+    int i;
+
+    // collect info about the approx.circuit topology 
+    gates[id].active = true;
+    gates[id].in0 = a0; 
+    gates[id].in1 = a1; 
+    gates[id].inAvail = 0; 
+    gates[id].out0 = y0; 
+    gates[id].dly = duration(tbl_op[id]);
+    gates[id].depth = -1;
+    gates[id].flag = false;
+
+    approxCircGates++;    
+}
+
+void outGen(tOp op){
+ //   outSync(y0);
+
+    if(op == OP_AND){
+        bits[y0] = bits[a0] &amp; bits[a1];        
+    }
+    else if(op == OP_NAND){
+        bits[y0] = not (bits[a0] &amp; bits[a1]);        
+    }
+    else if(op == OP_OR){
+        bits[y0] = bits[a0] | bits[a1];        
+    }
+    else if(op == OP_NOR){
+        bits[y0] = not (bits[a0] | bits[a1]);        
+    }
+    else if(op == OP_XOR){
+        bits[y0] = (bits[a0] != bits[a1]);        
+    }
+    else {    // unsupported operation
+    }
+
+    if(id==2){ 
+        if(diffctrl&lt;2) diffctrl++;
+    }  
+}</declaration>
+		<location id="id25" x="-170" y="0">
+		</location>
+		<location id="id26" x="0" y="0">
+			<label kind="invariant" x="-17" y="17">x&lt;=duration(tbl_op[id])</label>
+		</location>
+		<location id="id27" x="-272" y="0">
+			<committed/>
+		</location>
+		<init ref="id27"/>
+		<transition>
+			<source ref="id27"/>
+			<target ref="id25"/>
+			<label kind="assignment" x="-238" y="0">inits()</label>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="-144" y="0">cin1?</label>
+			<label kind="assignment" x="-76" y="0">x=0</label>
+			<nail x="-85" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id25"/>
+			<label kind="guard" x="-110" y="-127">x==duration(tbl_op[id])</label>
+			<label kind="synchronisation" x="8" y="-68">cout0!</label>
+			<label kind="assignment" x="-144" y="-102">outGen(tbl_op[id])</label>
+			<nail x="0" y="-102"/>
+			<nail x="-170" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="-136" y="-42">cin0?</label>
+			<label kind="assignment" x="-59" y="-42">x=0</label>
+			<nail x="-85" y="-34"/>
+		</transition>
+	</template>

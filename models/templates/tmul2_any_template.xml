@@ -1,0 +1,78 @@
+<template>
+<name>tmul2any</name>
+<parameter>const int &amp;PIxy[NPI], const int &amp;POx[NPO], bool &amp;ttbl[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY], const int  dly</parameter>
+<declaration>
+clock x;
+
+int getIdx(int i){
+    int idx=-1;
+
+    if(i &lt; NPI) {
+        idx = PIxy[i];
+    }
+    else {
+        idx = POx[i-NPI];
+    }
+
+    return idx;
+}
+
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i&lt;NIB_MUL2; i++){
+        result += bits[getIdx(i)]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+int getOut(){
+    int res, i;
+    for(i=NIB_MUL2; i&lt;NIB_MUL2+NOB_MUL2; i++){
+        res += bits[getIdx(i)]*TBL_PWR2[i-NIB_MUL2];
+    }
+    return res;    
+}
+
+void f(){
+
+    diffctrl++;
+}
+
+void inits(){
+    fill_tbl_acc_any(NIB_ANY, NOB_ANY, F_MUL, dly);
+}
+
+</declaration>
+<location id="id0" x="-170" y="0">
+</location>
+<location id="id1" x="0" y="0">
+	<label kind="invariant" x="-25" y="17">x&lt;=dly</label>
+</location>
+<location id="id2" x="-374" y="0">
+	<committed/>
+</location>
+<init ref="id2"/>
+<transition>
+	<source ref="id2"/>
+	<target ref="id0"/>
+	<label kind="assignment" x="-297" y="0">inits()</label>
+</transition>
+<transition>
+	<source ref="id1"/>
+	<target ref="id0"/>
+	<label kind="guard" x="-152" y="-136">x==dly</label>
+	<label kind="assignment" x="17" y="-59">f()</label>
+	<nail x="0" y="-102"/>
+	<nail x="-170" y="-102"/>
+</transition>
+<transition>
+	<source ref="id0"/>
+	<target ref="id1"/>
+	<label kind="synchronisation" x="-110" y="-25">update?</label>
+	<label kind="assignment" x="-93" y="0">x=0</label>
+</transition>
+</template>

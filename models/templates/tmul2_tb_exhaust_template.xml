@@ -1,0 +1,133 @@
+<template>
+<name>tmul2_tb_exhaust</name>
+<parameter>const int &amp;PIxy[NPI], const int dly, const double covratio</parameter>
+<declaration>
+clock x;
+clock tcover;
+int input=0;
+int nsame=0, inSame=0;
+double rCover;
+
+bool inCoverSet[NTV];
+
+int covered()
+{
+    int cnt=0;
+
+    for(i: int[0,NTV-1])
+    {
+        if(inCoverSet[i]) {
+            cnt++;
+        }
+    }
+
+    bitsCovered=cnt;
+
+    return cnt;
+}
+
+int bin2dec()
+{
+    int result=0, i;
+    for(i=0; i&lt;NPI; i++){
+        result += bits[i]*TBL_PWR2[i];
+    }
+
+    return result;
+}
+
+
+bool inCovered()
+{
+  return forall (i : int[0,NTV-1]) inCoverSet[i];    
+}
+
+
+
+void f(){
+
+    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+    else inSame = input;
+    inCoverSet[input] = true;
+    input = (input+1) % NTV;
+    covered();
+
+    rCover = 100.0*bitsCovered / NTV; 
+}
+
+void inits(){
+    int i;
+    for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
+    for(i:int[0,NPI-1]){
+        if(exists(j:int[0,NPI-1]) PIxy[j]==i){ 
+            nodes[i].flag=true;    
+            nodes[i].dly=0;        
+        }
+        approxCircNodes++;
+    }
+    for(i=0; i&lt;approxCircGates; i++) gates[i].flag=false;    
+    while(exists(i:int[0,MAX_INNER_GATES-1]) (gates[i].flag==false &amp;&amp; i&lt;approxCircGates)){
+        approxCircDepth++;
+        for(i=0; i&lt;approxCircGates; i++) {
+            if(!gates[i].flag &amp;&amp; nodes[gates[i].in0].flag &amp;&amp; nodes[gates[i].in1].flag){  
+                nodes[gates[i].out0].dly = (nodes[gates[i].in0].dly&gt;nodes[gates[i].in1].dly?nodes[gates[i].in0].dly:nodes[gates[i].in1].dly) + duration(tbl_op[i]);
+                nodes[gates[i].out0].flag=true;
+                approxCircNodes++;
+                if(nodes[gates[i].out0].dly&lt;approxCircDly){ approxCircDly=nodes[gates[i].out0].dly; }
+
+                gates[i].flag=true;   
+            }  
+        }
+    }
+}
+</declaration>
+		<location id="id3" x="-136" y="0">
+			<name x="-153" y="8">apply</name>
+			<committed/>
+		</location>
+		<location id="id4" x="-374" y="0">
+			<name x="-382" y="8">get</name>
+			<committed/>
+		</location>
+		<location id="id5" x="34" y="0">
+			<name x="17" y="8">done</name>
+			<label kind="invariant" x="0" y="-34">tcover'==0</label>
+		</location>
+		<location id="id6" x="-246" y="-102">
+			<name x="-255" y="-136">wait</name>
+		</location>
+		<location id="id7" x="-510" y="0">
+			<urgent/>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="-459" y="0">inits()</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-221" y="-93">!inCovered()</label>
+			<nail x="-136" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-93" y="-25">inCovered()</label>
+			<label kind="assignment" x="-110" y="0">allCovered=true,
+x=0</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-289" y="-25">update!</label>
+			<label kind="assignment" x="-280" y="0">f(), x=0</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-365" y="-93">cmpDone?</label>
+			<nail x="-374" y="-102"/>
+		</transition>
+	</template>

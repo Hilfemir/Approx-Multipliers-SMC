@@ -1,10 +1,92 @@
 import re
+import sys
+from xml.etree.ElementTree import PI
 
 log_ops = {
 	"|" : 4,
 	"&" : 2,
 	"^" : 6
 	}
+
+class SignalAssign(object):
+	def __init__(self, params):
+		self.params = params
+		
+		self.id = ""
+		
+		self.in1 = ""
+		self.in2 = ""
+
+		self.out = ""
+
+		self.change_in1 = ""
+		self.change_in2 = ""
+		self.change_out = ""
+
+	####################################################################
+
+	def __repr__(self):
+		ret = f"id: {self.id}\n"
+		ret += f"input: {self.in1}, {self.in2}\n"
+		#print(f"output: {self.out}")
+		ret += f"change channels: {self.change_in1}, {self.change_in2}\n"
+
+		return ret
+
+	####################################################################
+
+	@staticmethod
+	def parse_input_sig(sig: str, PIxy_mapping: dict) -> tuple:
+		"""Determines whether the input signal is an output of a different gate or if it's one
+		of the original input bits and returns the correct presentations.
+		"""
+		pattern1 = r'^sig_([0-9]+)$' #eg. sig_221
+		pattern2 = r'^[A-Z]\[[0-9]+\]$' #eg. A[1]
+		ret_id = ""
+		ret_channel = ""
+
+		#signal is an output of a different gate
+		if match := re.match(pattern1, sig):
+			ret_id = match.group(1)
+			ret_channel = f"change[{ret_id}]"
+
+		elif match := re.match(pattern2, sig):
+			ret_id = PIxy_mapping[sig]
+
+			if num_match := re.search(r"[0-9]+", ret_id):
+				ret_channel = f"change[{num_match[0]}]"
+		
+		return ret_id, ret_channel
+
+	####################################################################
+
+	def parse_params(self, PIxy_mapping: dict, output_signals: dict):
+		#extract id
+		self.id = self.params[0].split('_')[-1]
+
+		#output signal id
+		if self.id in output_signals:
+			self.out = f"POy[{output_signals[self.id]}]"
+		else:
+			self.out = self.id
+
+		#output broadcast channel
+		self.change_out = f"change[{self.id}]"
+
+		#input signal ids and broadcast channels
+		self.in1, self.change_in1 = self.parse_input_sig(self.params[1], PIxy_mapping)
+		self.in2, self.change_in2 = self.parse_input_sig(self.params[3], PIxy_mapping)
+
+	####################################################################
+
+	def generate_gate(self, PIxy_mapping: dict, id: int, output_signals: dict) -> str:
+		self.parse_params(PIxy_mapping, output_signals)
+
+		return f"g{self.id} = gate2({id}, {self.in1}, {self.in2}, {self.out}, {self.change_in1}, {self.change_in2}, {self.change_out});\n"
+
+#################################################################################
+#################################################################################
+#################################################################################
 
 class Parser(object):
 	def __init__(self):
@@ -17,6 +99,10 @@ class Parser(object):
 		self.channel_count = 100 #number of broadcast channels
 
 		self.op_sequence = [] #sequence of operations used in logic gates
+		self.signals = [] #list of signal assignments
+
+		self.output_signals = {} #dict of the signals that represent the output bits
+		self.output_zeros = [] #list of output bits that are always 0 (not computed by the mult.)
 
 		#template parameters
 		self.input_params = "const int &PIxy[NPI]"
@@ -26,30 +112,19 @@ class Parser(object):
 		self.PIxy = {}
 		self.POy = {}
 
-	####################################################################
-
-	def print_status(self):
-		print(f'input bits: {self.input_bits}')
-		print(f'output bits: {self.output_bits}')
-		print(f'number of bc channels: {self.channel_count}')
-
-		print("\nMappings:")
-		print(self.PIxy)
-		print(self.POy)
-
-		print("\nLogical operator sequence:")
-		print(self.op_sequence)
+		#parts of the ultimate UPPAAL file
+		self.out_files = []
 
 	####################################################################
 
-	def io_decs(self, line):
+	def io_decs(self, line: str):
 		"""Checks for input/output declarations in the verilog file and
 		parses them accordingly.
 		"""
 		re_pat = r'(input|output)\s\[([0-9]+)\:0\]\s([a-zA-Z]+);'
 		match = re.match(re_pat, line)
 
-		if match is None:
+		if match is None or line.endswith("1'b0;"):
 			return
 
 		if match.group(1) == "output":
@@ -62,7 +137,7 @@ class Parser(object):
 
 	####################################################################
 
-	def signal_assignments(self, line):
+	def signal_assignments(self, line: str):
 		"""Checks for signal assignments in the verilog file and
 		parses them accordingly.
 		"""
@@ -76,6 +151,24 @@ class Parser(object):
 
 		op = match.group(3)
 		self.op_sequence.append(log_ops[op])
+
+		signal = SignalAssign(match.groups())
+		self.signals.append(signal)
+
+	####################################################################
+		
+	def output_assignments(self, line: str):
+		"""Checks for assignments of signals to output bits in the verilog file
+		and parses them accordingly.
+		"""
+		sig_pat = r'assign\s+O\[([0-9]+)\]\s+=\s+sig_([0-9]+);'
+		zero_pat = r"assign\s+O\[([0-9]+)\]\s+=\s+1'b0;"
+
+		if match := re.match(sig_pat, line):
+			self.output_signals[match.group(2)] = match.group(1)	
+		
+		elif match := re.match(zero_pat, line):
+			self.output_zeros.append(int(match.group(1)))
 
 	####################################################################
 		
@@ -94,11 +187,11 @@ class Parser(object):
 
 	####################################################################
 		
-	def generate_global_dec(self):
+	def generate_global_dec(self) -> str:
 		"""loads up the global_dec UPPAAL template and updates it with the data obtained from
 		the verilog input file.
 		"""
-		with open("./templates/global_dec_template.up") as f:
+		with open("./templates/global_dec_template.xml") as f:
 			original = f.readlines()
 
 		global_dec = original
@@ -145,7 +238,11 @@ class Parser(object):
 
 			#output bits indexing (inaccurate multiplier)
 			elif line == "const int POy[NPO] = {8,9,10,-1};":
-				num_sequence = ", ".join([str(i) for i in list(range(self.input_bits*2+self.output_bits, self.input_bits*2+self.output_bits*2))])
+				num_sequence = list(range(self.input_bits*2+self.output_bits, self.input_bits*2+self.output_bits*2))
+				for index in self.output_zeros:
+					num_sequence[index] = -1
+
+				num_sequence = ", ".join([str(i) for i in num_sequence])
 				global_dec[i] = f"const int POy[NPO] = {{{num_sequence}}};\n"
 
 			#logical operator sequence size
@@ -159,15 +256,15 @@ class Parser(object):
 				seq = ", ".join([str(s) for s in self.op_sequence])
 				global_dec[i] = f"tOp tbl_op[NCOM] = {{{seq}}};\n"
 
-		print("".join(global_dec))
+		return "".join(global_dec)
 
 	####################################################################
 		
-	def generate_tmul2_any(self):
+	def generate_tmul2_any(self) -> str:
 		"""loads up the tmul2_any UPPAAL template and updates it with the data obtained from
 		the verilog input file.
 		"""
-		with open("./templates/tmul2_any_template.up") as f:
+		with open("./templates/tmul2_any_template.xml") as f:
 			original = f.readlines()
 
 		tmul2_any = original
@@ -186,15 +283,15 @@ class Parser(object):
 					file_index += 1
 					ttbl_index_delta += 2
 
-		print("".join(tmul2_any))
+		return "".join(tmul2_any)
 
 	####################################################################
 		
-	def generate_tmul2_tb_exhaust(self):
+	def generate_tmul2_tb_exhaust(self) -> str:
 		"""loads up the tmul2_tb_exhaust UPPAAL template and updates it with the data obtained from
 		the verilog input file.
 		"""
-		with open("./templates/tmul2_tb_exhaust_template.up") as f:
+		with open("./templates/tmul2_tb_exhaust_template.xml") as f:
 			original = f.readlines()
 
 		tmul2_tb_exhaust = original
@@ -210,56 +307,118 @@ class Parser(object):
 					tmul2_tb_exhaust.insert(file_index, f"    bits[PIxy[{j}]] = getBit({j}, input);\n")
 					file_index += 1
 
-		print("".join(tmul2_tb_exhaust))
+		return "".join(tmul2_tb_exhaust)
 
 	####################################################################
 		
-	def generate_system_dec(self):
+	def generate_system_dec(self) -> str:
 		"""loads up the system_dec UPPAAL template and updates it with the data obtained from
 		the verilog input file.
 		"""
-		with open("./templates/system_dec_template.up") as f:
+		#prepare the gates
+		gates = []
+		for i, sig in enumerate(self.signals):
+			gate = sig.generate_gate(self.PIxy, i, self.output_signals)
+			gates.append(gate)
+
+		with open("./templates/system_dec_template.xml") as f:
 			original = f.readlines()
+
+		system_dec = original
 
 		for i, line in enumerate(original):
 			line = line.strip()
-		
+
+			if line == "//mul2Atb = tmul2_tb_nondet(PIxy[0], PIxy[3], DLY_MUL2, COVERAGE_RATIO);":
+				system_dec[i] = f"//mul2Atb = tmul2_tb_nondet(PIxy[0], PIxy[{self.input_bits-1}], DLY_MUL2, COVERAGE_RATIO);\n"
+
 			if line == "//gates":
-				file_index = i
-				
+				file_index = i+1
+				for gate in gates:
+					system_dec.insert(file_index, gate)
+					file_index += 1
+
+		#composition
+		for gate in gates:
+			name = gate.split(" ")[0]
+			system_dec.append(f"{name},\n")
+
+		system_dec[-1] = system_dec[-1][:-2] + ";\n"
+
+		system_dec.append("</system>\n")
+
+		return "".join(system_dec)
+
+	####################################################################
+
+	def append_template(self, path: str):
+		"""Loads up a template for part of the xml file that requires no
+		changing. Appends it to the out_files list.
+		"""
+		with open(path) as f:
+			ret = f.readlines()
+
+		ret = "".join(ret)
+		self.out_files.append(ret)
 
 	####################################################################
 		
-	def generate_files(self):
+	def generate_parts(self):
+		"""Takes all the templates one by one and prepares them for the final
+		file generation.
+		"""
 		#global declarations file
-		#self.generate_global_dec()
+		self.out_files.append(self.generate_global_dec())
 
 		#tmul2_any file
-		#self.generate_tmul2_any()
+		self.out_files.append(self.generate_tmul2_any())
 
 		#tmul2_tb_exhaust file
-		#self.generate_tmul2_tb_exhaust()
+		self.out_files.append(self.generate_tmul2_tb_exhaust())
+
+		#tmul2_tb_nondet file
+		self.append_template("./templates/tmul2_tb_nondet_template.xml")
+
+		#tmul2_tb_random file
+		self.append_template("./templates/tmul2_tb_random_template.xml")
+
+		#syncPrimary file
+		self.append_template("./templates/syncPrimary_template.xml")
+
+		#eval_diff file
+		self.append_template("./templates/eval_diff_template.xml")
+
+		#gate2 file
+		self.append_template("./templates/gate2_template.xml")
 
 		#system declarations file
-		self.generate_system_dec()
+		self.out_files.append(self.generate_system_dec())
+
+		#queries
+		self.append_template("./templates/queries_template.xml")
 
 
 def main():
 	parser = Parser()
 
-	with open("./verilog/mul8u_LK8.v") as f:
+	with open("./verilog/mul8u_1SX.v") as f:
 		for line in f:
 			#input/output declarations
 			parser.io_decs(line)
 
-			#signal assignment
+			#signal assignments
 			parser.signal_assignments(line)
+
+			#output assignments
+			parser.output_assignments(line)
 
 	parser.PIxy_mapping()
 	parser.POy_mapping()
 
-	#parser.print_status()
-	parser.generate_files()
+	parser.generate_parts()
+
+	for file in parser.out_files:
+		print(file)
 
 if __name__ == "__main__":
     main()

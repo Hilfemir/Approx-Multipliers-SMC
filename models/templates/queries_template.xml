@@ -1,0 +1,99 @@
+	<queries>
+		<query>
+			<formula>E[&lt;=25000; 10] (max:mul2Atb.tcover)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E[&lt;=350; 100] (max:bitsCovered)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=25000] (&lt;&gt;bitsCovered&gt;14)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=350;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 8+bits[4], 10+bits[5], 12+bits[6], 14+bits[7], bitsCovered, 16+allCovered}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=1250;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 10+bits[4], 12+bits[5], 14+bits[6], 16+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], 28+bits[12], 32+difference, out_sum_all_acc, out_sum_all_approx}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=1500;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 8+bits[4], 10+bits[5], 12+bits[6], 14+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], bitsCovered, 20+allCovered, 30+mul2Atb.inSame, 40+mul2Atb.input, 30+mul2Atb.nsame, mul2Atb.rCover, 60+difference*10}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=2500;5] {100*((((100.0*(out_sum_all_acc-out_sum_all_approx))/(100.0*(out_sum_all_acc+1))))), out_sum_all_acc, out_sum_all_approx}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=2000;5] {40+difference, 50+10*err_magn_v, 100*err_magn_r, out_sum_all_acc, out_sum_all_approx, 80+out_sum_all_diff, mul2Atb.rCover, 100*((1+1.0*out_sum_all_acc)/(1+1.0*out_sum_all_approx))}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=4000;20] {out_sum_all_diff}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=400;5] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 10+bits[4], 12+bits[5], 14+bits[6], 16+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], 30+bits[14], 32+bits[15], 34+bits[16], 36+bits[13], 38+bits[12], 40+difference, 45+diffctrl, 50+outcnt}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>sup: err_magn_v
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E[&lt;=2500; 10] (max:err_magn_v)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E[&lt;=2500; 10] (max:err_magn_r)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E[&lt;=25000; 10] (max:out_sum_all_diff)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=5000;200] {bitsCovered, 100*allCovered, mul2Atb.rCover}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=50000] (&lt;&gt;allCovered)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>

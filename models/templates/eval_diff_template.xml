@@ -1,0 +1,37 @@
+<template>
+		<name>eval_diff</name>
+		<parameter>const int dly</parameter>
+		<declaration>clock x;</declaration>
+		<location id="id23" x="-238" y="0">
+			<label kind="invariant" x="-297" y="-8">x&lt;=dly</label>
+		</location>
+		<location id="id24" x="-102" y="0">
+			<committed/>
+		</location>
+		<init ref="id23"/>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="-178" y="51">cmpDone!</label>
+			<label kind="assignment" x="-246" y="110">outcnt=0, diffctrl=0, x=0</label>
+			<nail x="-102" y="110"/>
+			<nail x="-238" y="110"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id23"/>
+			<label kind="guard" x="-331" y="-93">diffctrl&lt;2
+&amp;&amp; x==dly</label>
+			<label kind="assignment" x="-289" y="-42">x=0</label>
+			<nail x="-263" y="-76"/>
+			<nail x="-229" y="-76"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-204" y="0">diffctrl==2</label>
+			<label kind="assignment" x="-212" y="-68">err_magn_v=0,
+err_magn_r=0.0,
+diff()</label>
+		</transition>
+	</template>

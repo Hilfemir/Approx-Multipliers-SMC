@@ -1,0 +1,38 @@
+<template>
+		<name>syncPrimary</name>
+		<declaration>int idx;</declaration>
+		<location id="id20" x="-748" y="-306">
+		</location>
+		<location id="id21" x="-646" y="-306">
+			<committed/>
+		</location>
+		<location id="id22" x="-510" y="-306">
+			<committed/>
+		</location>
+		<init ref="id20"/>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-646" y="-399">idx&gt;=NPI</label>
+			<nail x="-510" y="-374"/>
+			<nail x="-748" y="-374"/>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id21"/>
+			<label kind="guard" x="-595" y="-323">idx&lt;NPI</label>
+			<nail x="-578" y="-272"/>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id22"/>
+			<label kind="synchronisation" x="-612" y="-340">change[idx]!</label>
+			<label kind="assignment" x="-629" y="-280">idx++</label>
+		</transition>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id21"/>
+			<label kind="synchronisation" x="-730" y="-323">update?</label>
+			<label kind="assignment" x="-714" y="-306">idx=0</label>
+		</transition>
+	</template>
