@@ -121,19 +121,26 @@ class Parser(object):
 		"""Checks for input/output declarations in the verilog file and
 		parses them accordingly.
 		"""
-		re_pat = r'(input|output)\s\[([0-9]+)\:0\]\s([a-zA-Z]+);'
-		match = re.match(re_pat, line)
+		line = line.strip()
+		
+		re_pat_in1 = r'input\s\[([0-9]+)\:0\]\s([a-zA-Z]+);'
+		re_pat_in2 = r'input\s\[([0-9]+)\:0\]\s([a-zA-Z]+),\s*([a-zA-Z]+);'
+		re_pat_out = r'output\s\[([0-9]+)\:0\]\s([a-zA-Z]+);'
 
-		if match is None or line.endswith("1'b0;"):
-			return
-
-		if match.group(1) == "output":
-			self.output_bits = int(match.group(2)) + 1
-			self.output_name = match.group(3)
-
-		else: #input
+		if match := re.match(re_pat_in1, line):
 			self.input_bits = int(match.group(2)) + 1
 			self.input_names.append(match.group(3))
+
+		elif match := re.match(re_pat_in2, line):
+			#TODO!!!
+			self.input_bits = int(match.group(2)+1) * 2
+			print(self.input_bits)
+			#self.
+			return
+
+		elif match := re.match(re_pat_out):
+			self.output_bits = int(match.group(2)) + 1
+			self.output_name = match.group(3)
 
 	####################################################################
 
@@ -141,12 +148,14 @@ class Parser(object):
 		"""Checks for signal assignments in the verilog file and
 		parses them accordingly.
 		"""
-		re_pat = r'assign (sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
+		line = line.strip()
+
+		re_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
 		match = re.match(re_pat, line)
 
 		if match is None:
 			return
-		
+
 		self.channel_count += 1
 
 		op = match.group(3)
@@ -161,6 +170,8 @@ class Parser(object):
 		"""Checks for assignments of signals to output bits in the verilog file
 		and parses them accordingly.
 		"""
+		line = line.strip()
+
 		sig_pat = r'assign\s+O\[([0-9]+)\]\s+=\s+sig_([0-9]+);'
 		zero_pat = r"assign\s+O\[([0-9]+)\]\s+=\s+1'b0;"
 
@@ -401,7 +412,7 @@ class Parser(object):
 def main():
 	parser = Parser()
 
-	with open("./verilog/mul8u_1SX.v") as f:
+	with open("/home/michalb/Downloads/ehw-fit-evoapproxlib-v1.2022-0-g5c6185e/ehw-fit-evoapproxlib-5c6185e/multiplers/7x7_unsigned/pareto_pwr_mae/mul7u_003.v") as f:
 		for line in f:
 			#input/output declarations
 			parser.io_decs(line)

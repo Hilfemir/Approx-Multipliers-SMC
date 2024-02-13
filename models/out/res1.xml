@@ -62,17 +62,19 @@ double inCoverage;
 
 bool allCovered=false;
 
+const int MAX_INT = 65536;
+
 const int NIB_MUL2 = 16;
 const int NOB_MUL2 = 16;
 const int NTV_MUL2 = TBL_PWR2[NIB_MUL2]; 
 const int DLY_MUL2 = 20;                 
 
 /* ===------------------------  ------------------------==== */
-int getMasked(int w, int offset, int[0,1073741824] data){ 
+int getMasked(int w, int offset, int[0,MAX_INT] data){ 
     int mask = (TBL_PWR2[w]-1);    
    return (data &amp; (mask &lt;&lt; offset)) &gt;&gt; offset;     
 }    
-bool getBit(int pos, int[0,1073741824] data){ return getMasked(1, pos, data); }
+bool getBit(int pos, int[0,MAX_INT] data){ return getMasked(1, pos, data); }
 
 const int NIB_ANY = 16;
 const int NOB_ANY = 16;
@@ -86,8 +88,8 @@ typedef int[0,NFUN-1] tFun;
 const tFun F_MUL = 0;
 //
 void fill_tbl_acc_any(int win, int wout, tFun f, int fdly){
-    int[0,1073741824] i;
-    int[0,1073741824] result;
+    int[0,MAX_INT] i;
+    int[0,MAX_INT] result;
     int j, k, op0, op1;
     for(i=0; i&lt;TBL_PWR2[win]; i++){    
         for(j=0; j&lt;win; j++){
