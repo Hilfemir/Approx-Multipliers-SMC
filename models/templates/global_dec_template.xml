@@ -12,6 +12,8 @@ int outcnt=0;
 const int NOPS = 7;
 typedef int[0,NOPS-1] tOp;
 
+const int MAX_INT = 65536;
+
 const tOp OP_NOT = 0;
 const tOp OP_DLY = 1;
 const tOp OP_AND = 2;
@@ -68,11 +70,11 @@ const int NTV_MUL2 = TBL_PWR2[NIB_MUL2];
 const int DLY_MUL2 = 20;                 
 
 /* ===------------------------  ------------------------==== */
-int getMasked(int w, int offset, int data){ 
+int getMasked(int w, int offset, int[0,MAX_INT] data){ 
     int mask = (TBL_PWR2[w]-1);    
    return (data &amp; (mask &lt;&lt; offset)) &gt;&gt; offset;     
 }    
-bool getBit(int pos, int data){ return getMasked(1, pos, data); }
+bool getBit(int pos, int[0,MAX_INT] data){ return getMasked(1, pos, data); }
 
 const int NIB_ANY = 4;                  
 const int NOB_ANY = 4;                  
@@ -86,8 +88,9 @@ typedef int[0,NFUN-1] tFun;
 const tFun F_MUL = 0;
 //
 void fill_tbl_acc_any(int win, int wout, tFun f, int fdly){ 
-    int[0,1073741824] i;
-    int j, k, op0, op1, result;
+    int[0,MAX_INT] i;
+    int[0,MAX_INT] result;
+    int j, k, op0, op1;
     for(i=0; i&lt;TBL_PWR2[win]; i++){    
         for(j=0; j&lt;win; j++){
             tbl_acc_any[i][j] = getBit(j,i);

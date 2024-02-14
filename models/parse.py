@@ -60,9 +60,12 @@ class SignalAssign(object):
 
 	####################################################################
 
-	def parse_params(self, PIxy_mapping: dict, output_signals: dict):
-		#extract id
-		self.id = self.params[0].split('_')[-1]
+	def parse_params(self, PIxy_mapping: dict, output_signals: dict, latest_id: int):
+		#determine whether id is signal id or output bit index
+		if self.params[0].startswith("O"):
+			self.id = latest_id + 1
+		else:
+			self.id = self.params[0].split('_')[-1]
 
 		#output signal id
 		if self.id in output_signals:
@@ -98,15 +101,15 @@ class Parser(object):
 
 		self.channel_count = 100 #number of broadcast channels
 
+		self.latest_id = 0 #id of the last added signal assignment
+
 		self.op_sequence = [] #sequence of operations used in logic gates
 		self.signals = [] #list of signal assignments
 
 		self.output_signals = {} #dict of the signals that represent the output bits
 		self.output_zeros = [] #list of output bits that are always 0 (not computed by the mult.)
 
-		#template parameters
-		self.input_params = "const int &PIxy[NPI]"
-		self.output_params = "const int &POx[NPO]"
+		self.max_int = 32768 #upper bound of some int values in the UPPAAL file
 
 		#mappings of names in verilog files to names in UPPAAL files
 		self.PIxy = {}
@@ -128,19 +131,18 @@ class Parser(object):
 		re_pat_out = r'output\s\[([0-9]+)\:0\]\s([a-zA-Z]+);'
 
 		if match := re.match(re_pat_in1, line):
-			self.input_bits = int(match.group(2)) + 1
-			self.input_names.append(match.group(3))
+			self.input_bits = int(match.group(1)) + 1
+			self.input_names.append(match.group(2))
 
 		elif match := re.match(re_pat_in2, line):
-			#TODO!!!
-			self.input_bits = int(match.group(2)+1) * 2
-			print(self.input_bits)
-			#self.
-			return
+			self.input_bits = (int(match.group(1)) + 1) * 2
+			self.input_names.extend([match.group(2), match.group(3)])
 
-		elif match := re.match(re_pat_out):
-			self.output_bits = int(match.group(2)) + 1
-			self.output_name = match.group(3)
+		elif match := re.match(re_pat_out, line):
+			self.output_bits = int(match.group(1)) + 1
+			self.output_name = match.group(2)
+
+			self.max_int = pow(2, self.output_bits-1)
 
 	####################################################################
 
@@ -150,19 +152,28 @@ class Parser(object):
 		"""
 		line = line.strip()
 
-		re_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
-		match = re.match(re_pat, line)
+		gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
 
-		if match is None:
-			return
+		#eg. assign O[7] = sig_203 ^ sig_199;
+		out_pat = r'assign\s+(O\[[0-9]+\])\s+=\s+sig_([0-9]+)\s+([&^|])\s+sig_([0-9]+)\s*;'
 
-		self.channel_count += 1
+		if match := re.match(gate_pat, line):
+			self.channel_count += 1
 
-		op = match.group(3)
-		self.op_sequence.append(log_ops[op])
+			op = match.group(3)
+			self.op_sequence.append(log_ops[op])
 
-		signal = SignalAssign(match.groups())
-		self.signals.append(signal)
+			signal = SignalAssign(match.groups())
+			self.signals.append(signal)
+
+		elif match := re.match(out_pat, line):
+			self.channel_count += 1
+
+			op = match.group(3)
+			self.op_sequence.append(log_ops[op])
+
+			signal = SignalAssign(match.groups())
+			self.signals.append(signal)
 
 	####################################################################
 		
@@ -172,8 +183,11 @@ class Parser(object):
 		"""
 		line = line.strip()
 
-		sig_pat = r'assign\s+O\[([0-9]+)\]\s+=\s+sig_([0-9]+);'
-		zero_pat = r"assign\s+O\[([0-9]+)\]\s+=\s+1'b0;"
+		#eg. assign O[1] = sig_100;
+		sig_pat = r'assign\s+O\[([0-9]+)\]\s+=\s+sig_([0-9]+)\s*;'
+
+		#eg. assign O[2] = 1'b0;
+		zero_pat = r"assign\s+O\[([0-9]+)\]\s+=\s+1'b0\s*;"
 
 		if match := re.match(sig_pat, line):
 			self.output_signals[match.group(2)] = match.group(1)	
@@ -209,6 +223,10 @@ class Parser(object):
 
 		for i, line in enumerate(original):
 			line = line.strip()
+			#max int value
+			if line == "const int MAX_INT = 65536;":
+				global_dec[i] = f"const int MAX_INT = {self.max_int};\n"
+
 			#number of input bits
 			if line == "const int NIB_MUL2 = 4;":
 				global_dec[i] = f"const int NIB_MUL2 = {self.input_bits * 2};\n"
@@ -428,8 +446,8 @@ def main():
 
 	parser.generate_parts()
 
-	for file in parser.out_files:
-		print(file)
+	#for file in parser.out_files:
+		#print(file)
 
 if __name__ == "__main__":
     main()
