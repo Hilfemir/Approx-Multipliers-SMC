@@ -1,5 +1,5 @@
 import re
-import sys
+import argparse
 from xml.etree.ElementTree import PI
 
 log_ops = {
@@ -28,7 +28,7 @@ class SignalAssign(object):
 	def __repr__(self):
 		ret = f"id: {self.id}\n"
 		ret += f"input: {self.in1}, {self.in2}\n"
-		#print(f"output: {self.out}")
+		ret += f"output: {self.out}\n"
 		ret += f"change channels: {self.change_in1}, {self.change_in2}\n"
 
 		return ret
@@ -63,13 +63,16 @@ class SignalAssign(object):
 	def parse_params(self, PIxy_mapping: dict, output_signals: dict, latest_id: int):
 		#determine whether id is signal id or output bit index
 		if self.params[0].startswith("O"):
-			self.id = latest_id + 1
+			self.id = str(int(latest_id) + 1)
 		else:
 			self.id = self.params[0].split('_')[-1]
 
 		#output signal id
 		if self.id in output_signals:
 			self.out = f"POy[{output_signals[self.id]}]"
+		elif self.params[0].startswith("O"):
+			if match := re.match(r'O\[([0-9]+)\]', self.params[0]):
+				self.out = f'POy[{match.group(1)}]'
 		else:
 			self.out = self.id
 
@@ -82,8 +85,8 @@ class SignalAssign(object):
 
 	####################################################################
 
-	def generate_gate(self, PIxy_mapping: dict, id: int, output_signals: dict) -> str:
-		self.parse_params(PIxy_mapping, output_signals)
+	def generate_gate(self, PIxy_mapping: dict, id: int, output_signals: dict, latest_id: int) -> str:
+		self.parse_params(PIxy_mapping, output_signals, latest_id)
 
 		return f"g{self.id} = gate2({id}, {self.in1}, {self.in2}, {self.out}, {self.change_in1}, {self.change_in2}, {self.change_out});\n"
 
@@ -101,7 +104,7 @@ class Parser(object):
 
 		self.channel_count = 100 #number of broadcast channels
 
-		self.latest_id = 0 #id of the last added signal assignment
+		self.latest_id = 0 #id of the last added signal assignment (gate)
 
 		self.op_sequence = [] #sequence of operations used in logic gates
 		self.signals = [] #list of signal assignments
@@ -111,11 +114,11 @@ class Parser(object):
 
 		self.max_int = 32768 #upper bound of some int values in the UPPAAL file
 
-		#mappings of names in verilog files to names in UPPAAL files
+		#mappings of bit indexes in verilog files to bit indexes in UPPAAL files
 		self.PIxy = {}
 		self.POy = {}
 
-		#parts of the ultimate UPPAAL file
+		#parts of the final UPPAAL/xml file
 		self.out_files = []
 
 	####################################################################
@@ -155,7 +158,7 @@ class Parser(object):
 		gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
 
 		#eg. assign O[7] = sig_203 ^ sig_199;
-		out_pat = r'assign\s+(O\[[0-9]+\])\s+=\s+sig_([0-9]+)\s+([&^|])\s+sig_([0-9]+)\s*;'
+		out_pat = r'assign\s+(O\[[0-9]+\])\s+=\s+(sig_[0-9]+)\s+([&^|])\s+(sig_[0-9]+)\s*;'
 
 		if match := re.match(gate_pat, line):
 			self.channel_count += 1
@@ -347,8 +350,10 @@ class Parser(object):
 		#prepare the gates
 		gates = []
 		for i, sig in enumerate(self.signals):
-			gate = sig.generate_gate(self.PIxy, i, self.output_signals)
+			gate = sig.generate_gate(self.PIxy, i, self.output_signals, self.latest_id)
 			gates.append(gate)
+
+			self.latest_id = sig.id
 
 		with open("./templates/system_dec_template.xml") as f:
 			original = f.readlines()
@@ -362,7 +367,7 @@ class Parser(object):
 				system_dec[i] = f"//mul2Atb = tmul2_tb_nondet(PIxy[0], PIxy[{self.input_bits-1}], DLY_MUL2, COVERAGE_RATIO);\n"
 
 			if line == "//gates":
-				file_index = i+1
+				file_index = i + 1
 				for gate in gates:
 					system_dec.insert(file_index, gate)
 					file_index += 1
@@ -428,9 +433,19 @@ class Parser(object):
 
 
 def main():
+	argparser = argparse.ArgumentParser(
+	                    prog='parse.py',
+	                    description='Generate .xml UPPAAL files from verilog templates.')
+	
+	argparser.add_argument('filepath')
+	args = argparser.parse_args()
+
+	path = args.filepath
+	out_path = f"./out/{path.split('/')[-1][:-2]}.xml"
+
 	parser = Parser()
 
-	with open("/home/michalb/Downloads/ehw-fit-evoapproxlib-v1.2022-0-g5c6185e/ehw-fit-evoapproxlib-5c6185e/multiplers/7x7_unsigned/pareto_pwr_mae/mul7u_003.v") as f:
+	with open(path) as f:
 		for line in f:
 			#input/output declarations
 			parser.io_decs(line)
@@ -444,10 +459,13 @@ def main():
 	parser.PIxy_mapping()
 	parser.POy_mapping()
 
+	#generate parts of the output file
 	parser.generate_parts()
 
-	#for file in parser.out_files:
-		#print(file)
+	#write output to xml file
+	output = "\n".join(parser.out_files)
+	with open(out_path, "w") as f:
+		f.write(output)
 
 if __name__ == "__main__":
     main()
