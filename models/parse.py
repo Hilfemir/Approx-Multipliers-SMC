@@ -5,7 +5,11 @@ from xml.etree.ElementTree import PI
 log_ops = {
 	"|" : 4,
 	"&" : 2,
-	"^" : 6
+	"^" : 6,
+	"NAND" : 3,
+	"NOR" : 5,
+	"XNOR" : 7,
+	"NOT" : 0
 	}
 
 class SignalAssign(object):
@@ -23,20 +27,22 @@ class SignalAssign(object):
 		self.change_in2 = ""
 		self.change_out = ""
 
+		self.op = ""
+
 	####################################################################
 
 	def __repr__(self):
 		ret = f"id: {self.id}\n"
 		ret += f"input: {self.in1}, {self.in2}\n"
 		ret += f"output: {self.out}\n"
-		ret += f"change channels: {self.change_in1}, {self.change_in2}\n"
+		ret += f"change channels: {self.change_in1}, {self.change_in2}, {self.change_out}\n"
 
 		return ret
 
 	####################################################################
 
 	@staticmethod
-	def parse_input_sig(sig: str, PIxy_mapping: dict) -> tuple:
+	def parse_input_sig(sig: str, PIxy_mapping: dict, POy_mapping: dict) -> tuple:
 		"""Determines whether the input signal is an output of a different gate or if it's one
 		of the original input bits and returns the correct presentations.
 		"""
@@ -51,7 +57,10 @@ class SignalAssign(object):
 			ret_channel = f"change[{ret_id}]"
 
 		elif match := re.match(pattern2, sig):
-			ret_id = PIxy_mapping[sig]
+			if sig.startswith("O"):
+				ret_id = POy_mapping[sig]
+			else:
+				ret_id = PIxy_mapping[sig]
 
 			if num_match := re.search(r"[0-9]+", ret_id):
 				ret_channel = f"change[{num_match[0]}]"
@@ -60,7 +69,7 @@ class SignalAssign(object):
 
 	####################################################################
 
-	def parse_params(self, PIxy_mapping: dict, output_signals: dict, latest_id: int):
+	def parse_params(self, PIxy_mapping: dict, POy_mapping: dict, output_signals: dict, latest_id: str):
 		#determine whether id is signal id or output bit index
 		if self.params[0].startswith("O"):
 			self.id = str(int(latest_id) + 1)
@@ -80,14 +89,15 @@ class SignalAssign(object):
 		self.change_out = f"change[{self.id}]"
 
 		#input signal ids and broadcast channels
-		self.in1, self.change_in1 = self.parse_input_sig(self.params[1], PIxy_mapping)
-		self.in2, self.change_in2 = self.parse_input_sig(self.params[3], PIxy_mapping)
+		self.in1, self.change_in1 = self.parse_input_sig(self.params[1], PIxy_mapping, POy_mapping)
+		self.in2, self.change_in2 = self.parse_input_sig(self.params[3], PIxy_mapping, POy_mapping)
+
+		#log. operation
+		self.op = self.params[2]
 
 	####################################################################
 
-	def generate_gate(self, PIxy_mapping: dict, id: int, output_signals: dict, latest_id: int) -> str:
-		self.parse_params(PIxy_mapping, output_signals, latest_id)
-
+	def generate_gate(self, id: int) -> str:
 		return f"g{self.id} = gate2({id}, {self.in1}, {self.in2}, {self.out}, {self.change_in1}, {self.change_in2}, {self.change_out});\n"
 
 #################################################################################
@@ -104,7 +114,7 @@ class Parser(object):
 
 		self.channel_count = 100 #number of broadcast channels
 
-		self.latest_id = 0 #id of the last added signal assignment (gate)
+		self.latest_id = '0' #id of the last added signal assignment (gate)
 
 		self.op_sequence = [] #sequence of operations used in logic gates
 		self.signals = [] #list of signal assignments
@@ -148,6 +158,33 @@ class Parser(object):
 			self.max_int = pow(2, self.output_bits-1)
 
 	####################################################################
+			
+	def prev_signal_in_params(self, prev_signal: SignalAssign) -> tuple[str, str, str]:
+		in1 = prev_signal.in1
+		in2 = prev_signal.in2
+
+		reversed_PIxy = {value : key for key, value in self.PIxy.items()}
+		reversed_POy = {value : key for key, value in self.POy.items()}
+
+		if in1 in reversed_PIxy:
+			in1 = reversed_PIxy[in1]
+		elif in1 in reversed_POy:
+			in1 = reversed_POy[in1]
+		else:
+			in1 = f"sig_{in1}"
+
+		if in2 in reversed_PIxy:
+			in2 = reversed_PIxy[in2]
+		elif in2 in reversed_POy:
+			in2 = reversed_POy[in2]
+		else:
+			in2 = f"sig_{in2}"
+
+		op = prev_signal.op
+
+		return in1, in2, op
+
+	####################################################################
 
 	def signal_assignments(self, line: str):
 		"""Checks for signal assignments in the verilog file and
@@ -155,28 +192,73 @@ class Parser(object):
 		"""
 		line = line.strip()
 
+		if "~" in line:
+			raise Exception("Error: NOT Operation not yet implemented in the script.")
+
+		#eg. assign sig_118 = !(sig_115 & B[3]);
+		negated_gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*!\((.*?)\s(.*?)\s(.*?)\);'
+
+		#eg. assign sig_118 = sig_115 & B[3];
 		gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
 
 		#eg. assign O[7] = sig_203 ^ sig_199;
-		out_pat = r'assign\s+(O\[[0-9]+\])\s+=\s+(sig_[0-9]+)\s+([&^|])\s+(sig_[0-9]+)\s*;'
+		out_pat = r'assign\s+(O\[[0-9]+\])\s*=\s*(.*?)\s(.*?)\s(.*?);'
 
-		if match := re.match(gate_pat, line):
-			self.channel_count += 1
+		#out_pat = r'assign\s+(O\[[0-9]+\])\s+=\s+(sig_[0-9]+)\s+([&^|])\s+(sig_[0-9]+)\s*;'
 
+		#eg. assign O[5] = A[0] & B[0];
+		out_pat2 = r'assign\s+(O\[[0-9]+\])\s+=\s+([A-Z]+\[[0-9]+\])\s+([&^|])\s+([A-Z]+\[[0-9]+\])\s*;'
+
+		#eg. assign O[8] = O[0];
+		out_pat3 = r'assign\s+(O\[[0-9]+\])\s+=\s+O\[([0-9]+)\]\s*;'
+
+		if match := re.match(negated_gate_pat, line):
+			op = match.group(3)
+
+			neg_ops = {
+				"&" : "NAND",
+				"|" : "NOR",
+				"^" : "XNOR"
+				}
+			
+			neg_op = neg_ops[op]
+			self.op_sequence.append(log_ops[neg_op])
+			groups = list(match.groups())
+
+		elif match := re.match(gate_pat, line):
 			op = match.group(3)
 			self.op_sequence.append(log_ops[op])
-
-			signal = SignalAssign(match.groups())
-			self.signals.append(signal)
+			groups = list(match.groups())
 
 		elif match := re.match(out_pat, line):
-			self.channel_count += 1
-
 			op = match.group(3)
 			self.op_sequence.append(log_ops[op])
+			groups = list(match.groups())
 
-			signal = SignalAssign(match.groups())
-			self.signals.append(signal)
+		elif match := re.match(out_pat2, line):
+			op = match.group(3)
+			self.op_sequence.append(log_ops[op])
+			groups = list(match.groups())
+
+		elif match := re.match(out_pat3, line):
+			prev_out = f'POy[{match.group(2)}]'
+			prev_signal = next(x for x in self.signals if x.out == prev_out)
+			
+			in1, in2, op = self.prev_signal_in_params(prev_signal)
+
+			groups = [match.group(1), in1, op, in2]
+
+		else:
+			return
+
+		self.channel_count += 1
+
+		signal = SignalAssign(groups)
+		signal.parse_params(self.PIxy, self.POy, self.output_signals, self.latest_id)
+
+		self.signals.append(signal)
+
+		self.latest_id = signal.id
 
 	####################################################################
 		
@@ -212,6 +294,22 @@ class Parser(object):
 
 	def POy_mapping(self):
 		self.POy = {f'{self.output_name}[{i}]' : f'POy[{i}]' for i in range(self.output_bits)}
+
+	####################################################################
+		
+	def update_signals(self):
+		for sig in self.signals:
+			if sig.in1.startswith("PO"):
+				input_signal = next(x for x in self.signals if x.out == sig.in1)
+				sig.change_in1 = input_signal.change_out
+			
+			if sig.in2.startswith("PO"):
+				try:
+					input_signal = next(x for x in self.signals if x.out == sig.in2)
+				except:
+					print(sig)
+
+				sig.change_in2 = input_signal.change_out
 
 	####################################################################
 		
@@ -350,10 +448,8 @@ class Parser(object):
 		#prepare the gates
 		gates = []
 		for i, sig in enumerate(self.signals):
-			gate = sig.generate_gate(self.PIxy, i, self.output_signals, self.latest_id)
+			gate = sig.generate_gate(i)
 			gates.append(gate)
-
-			self.latest_id = sig.id
 
 		with open("./templates/system_dec_template.xml") as f:
 			original = f.readlines()
@@ -438,6 +534,7 @@ def main():
 	                    description='Generate .xml UPPAAL files from verilog templates.')
 	
 	argparser.add_argument('filepath')
+	argparser.add_argument('--noout', action="store_true", default=False)
 	args = argparser.parse_args()
 
 	path = args.filepath
@@ -450,22 +547,31 @@ def main():
 			#input/output declarations
 			parser.io_decs(line)
 
+	parser.PIxy_mapping()
+	parser.POy_mapping()
+
+	with open(path) as f:
+		for line in f:
 			#signal assignments
-			parser.signal_assignments(line)
+			try:
+				parser.signal_assignments(line)
+			except Exception as e:
+				print(e)
+				return
 
 			#output assignments
 			parser.output_assignments(line)
 
-	parser.PIxy_mapping()
-	parser.POy_mapping()
+	parser.update_signals()
 
 	#generate parts of the output file
 	parser.generate_parts()
 
 	#write output to xml file
-	output = "\n".join(parser.out_files)
-	with open(out_path, "w") as f:
-		f.write(output)
+	if not args.noout:
+		output = "\n".join(parser.out_files)
+		with open(out_path, "w") as f:
+			f.write(output)
 
 if __name__ == "__main__":
     main()
