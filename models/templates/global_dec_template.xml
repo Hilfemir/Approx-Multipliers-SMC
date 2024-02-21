@@ -9,7 +9,7 @@ double rnd;
 broadcast chan change[1000];
 int outcnt=0;
 
-const int NOPS = 8;
+const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
 
 const int MAX_INT = 65536;
@@ -22,6 +22,7 @@ const tOp OP_OR = 4;
 const tOp OP_NOR = 5;
 const tOp OP_XOR = 6;
 const tOp OP_XNOR = 7;
+const tOp OP_SET = 8;
 
 const int NCOM = 7;
 tOp tbl_op[NCOM] = {2, 2, 4, 2, 2, 0, 1};         
@@ -36,6 +37,7 @@ int duration(tOp op){
     if(op==OP_NOR) duration=13;
     if(op==OP_XOR) duration=20;
     if(op==OP_XNOR) duration=23;
+    if(op==OP_SET) duration=0;
     return duration;
 }
 
@@ -57,9 +59,9 @@ int diffctrl=0;
 int err_magn_v;    
 double err_magn_r;  
 
-int out_sum_all_acc;
-int out_sum_all_approx;
-int out_sum_all_diff;
+int[-1073741824, 1073741824] out_sum_all_acc;
+int[-1073741824, 1073741824] out_sum_all_approx;
+int[-1073741824, 1073741824] out_sum_all_diff;
 
 int bitsCovered;
 double inCoverage;

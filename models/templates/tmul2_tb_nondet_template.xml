@@ -28,7 +28,8 @@ int covered()
 
 int bin2dec()
 {
-    int result=0, i;
+    int[0, 1073741824] result=0;
+	int i;
     for(i=0; i&lt;NPI; i++){
         result += bits[i]*TBL_PWR2[i];
     }

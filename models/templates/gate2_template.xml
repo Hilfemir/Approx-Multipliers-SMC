@@ -40,6 +40,10 @@ void outGen(tOp op){
     else if(op == OP_XNOR){
         bits[y0] = (bits[a0] == bits[a1]);
     }
+    else if(op == OP_SET){
+        //not really a gate but should be fine
+        bits[y0] = bits[a0];
+    }
     else {    // unsupported operation
     }
 

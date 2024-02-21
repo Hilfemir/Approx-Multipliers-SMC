@@ -1,6 +1,5 @@
 import re
 import argparse
-from xml.etree.ElementTree import PI
 
 log_ops = {
 	"|" : 4,
@@ -9,7 +8,8 @@ log_ops = {
 	"NAND" : 3,
 	"NOR" : 5,
 	"XNOR" : 7,
-	"NOT" : 0
+	"NOT" : 0,
+	"SET" : 8
 	}
 
 class SignalAssign(object):
@@ -69,7 +69,7 @@ class SignalAssign(object):
 
 	####################################################################
 
-	def parse_params(self, PIxy_mapping: dict, POy_mapping: dict, output_signals: dict, latest_id: str):
+	def parse_params(self, PIxy_mapping: dict, POy_mapping: dict, output_signals: dict, latest_id: str, chan_size=1000):
 		#determine whether id is signal id or output bit index
 		if self.params[0].startswith("O"):
 			self.id = str(int(latest_id) + 1)
@@ -89,8 +89,13 @@ class SignalAssign(object):
 		self.change_out = f"change[{self.id}]"
 
 		#input signal ids and broadcast channels
-		self.in1, self.change_in1 = self.parse_input_sig(self.params[1], PIxy_mapping, POy_mapping)
-		self.in2, self.change_in2 = self.parse_input_sig(self.params[3], PIxy_mapping, POy_mapping)
+		if self.params[1] == self.params[3]:
+			self.in1, self.change_in1 = self.parse_input_sig(self.params[1], PIxy_mapping, POy_mapping)
+			self.in2, _ = self.parse_input_sig(self.params[3], PIxy_mapping, POy_mapping)
+			self.change_in2 = f"change[{chan_size-1}]"
+		else:
+			self.in1, self.change_in1 = self.parse_input_sig(self.params[1], PIxy_mapping, POy_mapping)
+			self.in2, self.change_in2 = self.parse_input_sig(self.params[3], PIxy_mapping, POy_mapping)
 
 		#log. operation
 		self.op = self.params[2]
@@ -112,7 +117,7 @@ class Parser(object):
 		self.output_bits = 0 #number of output bits
 		self.output_name = "O" #name of the output variable in the verilog file
 
-		self.channel_count = 100 #number of broadcast channels
+		self.channel_count = 1000 #number of broadcast channels
 
 		self.latest_id = '0' #id of the last added signal assignment (gate)
 
@@ -148,14 +153,14 @@ class Parser(object):
 			self.input_names.append(match.group(2))
 
 		elif match := re.match(re_pat_in2, line):
-			self.input_bits = (int(match.group(1)) + 1) * 2
+			self.input_bits = int(match.group(1)) + 1
 			self.input_names.extend([match.group(2), match.group(3)])
 
 		elif match := re.match(re_pat_out, line):
 			self.output_bits = int(match.group(1)) + 1
 			self.output_name = match.group(2)
 
-			self.max_int = pow(2, self.output_bits-1)
+			self.max_int = pow(2, self.output_bits)
 
 	####################################################################
 			
@@ -192,9 +197,6 @@ class Parser(object):
 		"""
 		line = line.strip()
 
-		if "~" in line:
-			raise Exception("Error: NOT Operation not yet implemented in the script.")
-
 		#eg. assign sig_118 = !(sig_115 & B[3]);
 		negated_gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*!\((.*?)\s(.*?)\s(.*?)\);'
 
@@ -204,13 +206,23 @@ class Parser(object):
 		#eg. assign O[7] = sig_203 ^ sig_199;
 		out_pat = r'assign\s+(O\[[0-9]+\])\s*=\s*(.*?)\s(.*?)\s(.*?);'
 
-		#out_pat = r'assign\s+(O\[[0-9]+\])\s+=\s+(sig_[0-9]+)\s+([&^|])\s+(sig_[0-9]+)\s*;'
-
 		#eg. assign O[5] = A[0] & B[0];
-		out_pat2 = r'assign\s+(O\[[0-9]+\])\s+=\s+([A-Z]+\[[0-9]+\])\s+([&^|])\s+([A-Z]+\[[0-9]+\])\s*;'
+		out_pat2 = r'assign\s+(O\[[0-9]+\])\s*=\s*([A-Z]+\[[0-9]+\])\s+([&^|])\s+([A-Z]+\[[0-9]+\])\s*;'
 
 		#eg. assign O[8] = O[0];
-		out_pat3 = r'assign\s+(O\[[0-9]+\])\s+=\s+O\[([0-9]+)\]\s*;'
+		out_pat3 = r'assign\s+(O\[[0-9]+\])\s*=\s*O\[([0-9]+)\]\s*;'
+
+		#eg. assign O[2] = B[0];
+		out_pat4 = r'assign\s+(O\[[0-9]+\])\s+=\s*([A-Z]+\[[0-9]+\])\s*;'
+
+		#eg. assign O[15] = sig_335;
+		out_pat5 = r'assign\s+(O\[[0-9]+\])\s*=\s*sig_([0-9]+)\s*;'
+
+		#eg. assign sig_182 = ~sig_203;
+		neg_pat = r'assign\s+(sig_[0-9]+)\s*=\s*~\s*(.*?)\s*;'
+
+		#eg. assign sig_182 = sig_179;
+		same_sig_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(sig_[0-9]+)\s*;'
 
 		if match := re.match(negated_gate_pat, line):
 			op = match.group(3)
@@ -221,23 +233,19 @@ class Parser(object):
 				"^" : "XNOR"
 				}
 			
-			neg_op = neg_ops[op]
-			self.op_sequence.append(log_ops[neg_op])
+			op = neg_ops[op]
 			groups = list(match.groups())
 
 		elif match := re.match(gate_pat, line):
 			op = match.group(3)
-			self.op_sequence.append(log_ops[op])
 			groups = list(match.groups())
 
 		elif match := re.match(out_pat, line):
 			op = match.group(3)
-			self.op_sequence.append(log_ops[op])
 			groups = list(match.groups())
 
 		elif match := re.match(out_pat2, line):
 			op = match.group(3)
-			self.op_sequence.append(log_ops[op])
 			groups = list(match.groups())
 
 		elif match := re.match(out_pat3, line):
@@ -248,10 +256,32 @@ class Parser(object):
 
 			groups = [match.group(1), in1, op, in2]
 
+		elif match := re.match(out_pat4, line):
+			groups = [match.group(1), match.group(2), "SET", match.group(2)]
+			op = "SET"
+
+		elif match := re.match(out_pat5, line):
+			id = match.group(2)
+			prev_signal = next(x for x in self.signals if x.id == id)
+			prev_signal.out = self.POy[match.group(1)]
+
+			return #does not create a new gate, just updates an existing one
+
+		elif match := re.match(neg_pat, line):
+			groups = [match.group(1), match.group(2), "NOT", match.group(2)]
+			op = "NOT"
+
+		elif match := re.match(same_sig_pat, line):
+			groups = [match.group(1), match.group(2), "SET", match.group(2)]
+			op = "SET"
+
+		elif line.startswith("assign sig"):
+			raise Exception(f"Error: Unknown Signal assign Expression.\n{line}")
+		
 		else:
 			return
-
-		self.channel_count += 1
+		
+		self.op_sequence.append(log_ops[op])
 
 		signal = SignalAssign(groups)
 		signal.parse_params(self.PIxy, self.POy, self.output_signals, self.latest_id)
@@ -275,7 +305,7 @@ class Parser(object):
 		zero_pat = r"assign\s+O\[([0-9]+)\]\s+=\s+1'b0\s*;"
 
 		if match := re.match(sig_pat, line):
-			self.output_signals[match.group(2)] = match.group(1)	
+			self.output_signals[match.group(2)] = match.group(1)
 		
 		elif match := re.match(zero_pat, line):
 			self.output_zeros.append(int(match.group(1)))
@@ -284,7 +314,7 @@ class Parser(object):
 		
 	def PIxy_mapping(self):
 		partA = {f'{self.input_names[0]}[{i}]' : f'PIxy[{i}]' for i in range(self.input_bits)}
-		partB = {f'{self.input_names[1]}[{i}]' : f'PIxy[{i+8}]' for i in range(self.input_bits)}
+		partB = {f'{self.input_names[1]}[{i}]' : f'PIxy[{i+self.input_bits}]' for i in range(self.input_bits)}
 		
 		partA.update(partB)
 		
