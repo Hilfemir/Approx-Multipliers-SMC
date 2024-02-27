@@ -22,6 +22,8 @@ void inits(){
 void outGen(tOp op){
  //   outSync(y0);
 
+	bool original_bit = bits[y0];
+
     if(op == OP_AND){
         bits[y0] = bits[a0] &amp; bits[a1];        
     }
@@ -46,6 +48,10 @@ void outGen(tOp op){
     }
     else {    // unsupported operation
     }
+
+	if(original_bit != bits[y0]) {
+		bit_flips++;
+	}
 
     if(id==2){ 
         if(diffctrl&lt;2) diffctrl++;

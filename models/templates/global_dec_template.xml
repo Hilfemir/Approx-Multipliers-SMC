@@ -9,6 +9,8 @@ double rnd;
 broadcast chan change[1000];
 int outcnt=0;
 
+int bit_flips = 0;
+
 const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
 
@@ -59,8 +61,8 @@ int diffctrl=0;
 int err_magn_v;    
 double err_magn_r;  
 
-int[-1073741824, 1073741824] out_sum_all_acc;
-int[-1073741824, 1073741824] out_sum_all_approx;
+int[0, 1073741824] out_sum_all_acc;
+int[0, 1073741824] out_sum_all_approx;
 int[-1073741824, 1073741824] out_sum_all_diff;
 
 int bitsCovered;
