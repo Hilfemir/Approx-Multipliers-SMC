@@ -18,9 +18,10 @@ int getIdx(int i){
 }
 
 
-int bin2dec()
+int[0, MAX_INT] bin2dec()
 {
-    int result=0, i;
+    int[0, MAX_INT] result=0;
+    int i;
     for(i=0; i&lt;NIB_MUL2; i++){
         result += bits[getIdx(i)]*TBL_PWR2[i];
     }

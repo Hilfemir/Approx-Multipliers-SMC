@@ -58,7 +58,7 @@ bool bits[MAX_BITS];
 bool difference=false;
 bool dif2=false;
 int diffctrl=0;
-int err_magn_v;    
+int[-MAX_INT, MAX_INT] err_magn_v;    
 double err_magn_r;  
 
 int[0, 1073741824] out_sum_all_acc;
@@ -146,10 +146,10 @@ typedef struct {
 } sGate;
 sGate gates[MAX_INNER_GATES];
 
-int approxCircNodes = 0;
-int approxCircGates = 0;
+int[0, 1073741824] approxCircNodes = 0;
+int[0, 1073741824] approxCircGates = 0;
 int approxCircDly=0;
-int approxCircDepth=0;
+int[0, 1073741824] approxCircDepth=0;
 
 
 bool outEq(){
@@ -166,7 +166,8 @@ bool outEq(){
 }
 
 void diff(){
-    int res_acc=0, res_approx=0;
+    int[0, MAX_INT] res_acc=0;
+    int[0, MAX_INT] res_approx=0;
     int i;
 
     difference = !outEq();

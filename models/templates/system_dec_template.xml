@@ -4,9 +4,9 @@
 synPri = syncPrimary();
 mul2A = tmul2any(PIxy, POx, tbl_acc_any, DLY_MUL2);
 
-mul2Atb = tmul2_tb_exhaust(PIxy, DLY_MUL2, COVERAGE_RATIO);
+//mul2Atb = tmul2_tb_exhaust(PIxy, DLY_MUL2, COVERAGE_RATIO);
 //mul2Atb = tmul2_tb_nondet(PIxy[0], PIxy[3], DLY_MUL2, COVERAGE_RATIO);
-//mul2Atb = tmul2_tb_random(PIxy, DLY_MUL2, COVERAGE_RATIO);
+mul2Atb = tmul2_tb_random(DLY_MUL2, COVERAGE_RATIO);
 
 ediff = eval_diff(5);
 

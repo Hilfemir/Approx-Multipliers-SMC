@@ -263,9 +263,17 @@ class Parser(object):
 		elif match := re.match(out_pat5, line):
 			id = match.group(2)
 			prev_signal = next(x for x in self.signals if x.id == id)
-			prev_signal.out = self.POy[match.group(1)]
 
-			return #does not create a new gate, just updates an existing one
+			#multiple signals mapped to the same output
+			if prev_signal.out.startswith("PO"):
+				in1 = f"sig_{prev_signal.in1}" if not prev_signal.in1.startswith("PI") else prev_signal.in1
+				in2 = f"sig_{prev_signal.in2}" if not prev_signal.in2.startswith("PI") else prev_signal.in2
+				groups = [match.group(1), in1, prev_signal.op, in2]
+				op = prev_signal.op
+
+			else:
+				prev_signal.out = self.POy[match.group(1)]
+				return #does not create a new gate, just updates an existing one
 
 		elif match := re.match(neg_pat, line):
 			groups = [match.group(1), match.group(2), "NOT", match.group(2)]

@@ -26,9 +26,10 @@ int covered()
     return cnt;
 }
 
-int bin2dec()
+int[0, MAX_INT] bin2dec()
 {
-    int result=0, i;
+    int[0, MAX_INT] result=0;
+	int i;
     for(i=0; i&lt;NPI; i++){
         result += bits[i]*TBL_PWR2[i];
     }
@@ -44,7 +45,7 @@ bool inCovered()
 
 void f(int i){
     int j;
-    int imax = fint(exp2(NPI));
+    int[0, MAX_INT] imax = fint(exp2(NPI));
 
 //    rnd = random(100);
 //    rnd = random_arcsine(-10,10);
