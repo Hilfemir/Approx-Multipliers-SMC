@@ -77,6 +77,45 @@ void f(int i){
     inCoverage = 0.0;
 }
 
+double EP() {
+    //error probability
+    //number of different outputs divided by 2^NPI
+    double ret = dif_count / (1.0*PWR2_NPI);
+
+    return ret;
+}
+
+double MAE() {
+    //mean absolute error
+    //sum of differences (approx. vs acc.) divided by 2^NPI
+    double ret = out_sum_all_diff / (1.0*PWR2_NPI);
+
+    return ret;
+}
+
+double MSE() {
+    //mean squared error
+    //sum of squared differences divided by 2^NPI
+    double ret = out_sum_all_diff_squared / (1.0*PWR2_NPI);
+
+    return ret;
+}
+
+double MRE() {
+    //mean relative error
+    //mean error in relation to size of accurate output
+    double ret = out_sum_relative / (1.0*PWR2_NPI);
+
+    return ret;
+}
+
+void calc_metrics() {
+    error_prob = EP();
+    mean_abs_error = MAE();
+    mean_squared_error = MSE();
+    mean_relative_error = MRE();
+}
+
 void inits(){
     int i;
     for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
@@ -154,6 +193,6 @@ void inits(){
 			<source ref="id17"/>
 			<target ref="id16"/>
 			<label kind="guard" x="42" y="-25">inCovered()</label>
-			<label kind="assignment" x="34" y="0">allCovered=true</label>
+			<label kind="assignment" x="34" y="0">allCovered=true, calc_metrics()</label>
 		</transition>
 	</template>
