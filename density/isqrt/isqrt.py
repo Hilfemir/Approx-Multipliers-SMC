@@ -30,7 +30,8 @@ def isqrt(y: int) -> int:
 	return L
 
 for i in range(1000):
-	y = randrange(1, 1000)
+	y = randrange(1, 20000)
 	isqrt(y)
 
+#print(pairs)
 pairs.pkl_dump()

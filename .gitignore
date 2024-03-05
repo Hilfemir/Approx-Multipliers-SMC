@@ -1,2 +1,4 @@
 /.vscode
 /papers
+/__pycache__
+/density/__pycache__
