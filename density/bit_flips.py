@@ -39,16 +39,22 @@ def to_binary_str(a: int) -> str:
 
 
 def plot_res(title="Bit flip count", filename="out.png", savefig=False):
+	global bit_flips
+
 	if not filename.lower().endswith(".png"):
 		filename += ".png"
+
+	#normalize the bit flip counts
+	total_flips = sum(bit_flips.values())
+	bit_flips = {key : val / total_flips for key, val in bit_flips.items()}
 
 	indexes = bit_flips.keys()
 	values = bit_flips.values()
 	
 	# creating the bar plot
-	plt.bar(indexes, values, color ='cornflowerblue', 
+	plt.bar(indexes, values, color ='cornflowerblue',
 	        width = 0.4)
-	
+
 	plt.xlabel("Bit indexes")
 	plt.ylabel("Bit flips")
 	plt.title(title)
