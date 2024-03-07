@@ -50,13 +50,15 @@ void outGen(tOp op){
     }
 
 	if(original_bit != bits[y0]) {
-		bit_flips++;
+		bit_flips = bit_flips + 1;
+        bit_flips_sum = bit_flips_sum + 1;
 	}
 
     if(id==2){ 
         if(diffctrl&lt;2) diffctrl++;
     }  
-}</declaration>
+}
+</declaration>
 		<location id="id25" x="-170" y="0">
 		</location>
 		<location id="id26" x="0" y="0">

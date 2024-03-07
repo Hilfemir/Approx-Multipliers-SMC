@@ -23,7 +23,7 @@ module mul8u_2NDH (
 
 input [7:0] A;
 input [7:0] B;
-output [15:0] Z;
+output [15:0] O;
 
 wire sig_18;
 wire sig_20;
@@ -303,22 +303,22 @@ assign sig_360 = sig_73 & sig_357;
 assign sig_361 = sig_228 | sig_360;
 assign sig_362 = sig_92 | sig_361;
 
-assign Z[0] = sig_151;
-assign Z[1] = sig_222;
-assign Z[2] = sig_143;
-assign Z[3] = sig_143;
-assign Z[4] = sig_290;
-assign Z[5] = sig_289;
-assign Z[6] = sig_309;
-assign Z[7] = sig_309;
-assign Z[8] = sig_289;
-assign Z[9] = sig_274;
-assign Z[10] = sig_304;
-assign Z[11] = sig_359;
-assign Z[12] = sig_349;
-assign Z[13] = sig_356;
-assign Z[14] = sig_358;
-assign Z[15] = sig_362;
+assign O[0] = sig_151;
+assign O[1] = sig_222;
+assign O[2] = sig_143;
+assign O[3] = sig_143;
+assign O[4] = sig_290;
+assign O[5] = sig_289;
+assign O[6] = sig_309;
+assign O[7] = sig_309;
+assign O[8] = sig_289;
+assign O[9] = sig_274;
+assign O[10] = sig_304;
+assign O[11] = sig_359;
+assign O[12] = sig_349;
+assign O[13] = sig_356;
+assign O[14] = sig_358;
+assign O[15] = sig_362;
 
 endmodule
 

@@ -28,6 +28,8 @@ broadcast chan change[1000];
 int outcnt=0;
 
 double bit_flips = 0;
+double avg_flips_per_res = 0;
+double bit_flips_sum = 0;
 
 const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
@@ -222,19 +224,30 @@ double MRE() {
     return ret;
 }
 
+double avg_bitflips() {
+    //total number of bit flips divided by number of results
+    double ret = bit_flips_sum / res_count;
+
+    return ret;
+}
+
 void calc_metrics() {
     error_prob = EP();
     mean_abs_error = MAE();
     mean_squared_error = MSE();
     mean_relative_error = MRE();
+    avg_flips_per_res = avg_bitflips();
 }
 
+int[0, MAX_INT] res_acc=0;
+int[0, MAX_INT] res_approx=0;
+
 void diff(){
-    int[0, MAX_INT] res_acc=0;
-    int[0, MAX_INT] res_approx=0;
     int i;
     double res_dif;
     double relative_res_dif;
+    res_acc = 0;
+    res_approx = 0;
 
     difference = !outEq();
 
@@ -261,6 +274,8 @@ void diff(){
 
     err_magn_v = res_acc - res_approx;
     if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
+
+    bit_flips = 0;
 
     calc_metrics();
 }
