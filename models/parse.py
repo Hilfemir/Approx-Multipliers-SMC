@@ -313,7 +313,7 @@ class Parser(object):
 		zero_pat = r"assign\s+O\[([0-9]+)\]\s+=\s+1'b0\s*;"
 
 		if match := re.match(sig_pat, line):
-			self.output_signals[match.group(2)] = match.group(1)
+			self.output_signals[match.group(2)] = f"POy[{match.group(1)}]"
 		
 		elif match := re.match(zero_pat, line):
 			self.output_zeros.append(int(match.group(1)))
@@ -348,6 +348,12 @@ class Parser(object):
 					print(sig)
 
 				sig.change_in2 = input_signal.change_out
+
+			if sig.in1 in self.output_signals.keys():
+				sig.in1 = self.output_signals[sig.in1]
+
+			if sig.in2 in self.output_signals.keys():
+				sig.in2 = self.output_signals[sig.in2]
 
 	####################################################################
 		

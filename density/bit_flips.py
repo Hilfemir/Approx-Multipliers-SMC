@@ -83,9 +83,9 @@ def plot_res(title="Bit flip count", outname=None, savefig=False):
 	plt.figure(figsize=(15, 8))
 
 	# creating the bar plot
-	plt.bar(indexes, values, color ='cornflowerblue', 
+	plt.bar(indexes, values, color ='cornflowerblue',
 	        width = 0.4)
-	
+
 	plt.xlabel("Bit indexes")
 	plt.ylabel("Bit flip density")
 	plt.title(title)

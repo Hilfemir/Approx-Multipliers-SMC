@@ -4,12 +4,12 @@
 <declaration>/* Feel free to cite and/or read details to the model using:
   STRNADEL Josef. Statistical Model Checking of Approximate Circuits: Challenges and Opportunities. In: Proceedings of the 2020 Design, Automation &amp; Test in Europe Conference &amp; Exhibition (DATE). Grenoble: IEEE Computer Society, 2020, pp. 1574-1577. ISBN 978-3-9819263-4-7. Available from: https://ieeexplore.ieee.org/document/9116207 and https://www.fit.vut.cz/research/publication/12055/
  */
-int dif_count = 0;
-int res_count = 0;
+double dif_count = 0;
+double res_count = 0;
 
-int[0, 1073741824] out_sum_all_acc;
-int[0, 1073741824] out_sum_all_approx;
-int[-1073741824, 1073741824] out_sum_all_diff;
+double out_sum_all_acc;
+double out_sum_all_approx;
+double out_sum_all_diff;
 double out_sum_all_diff_squared;
 
 double out_sum_relative;
@@ -27,7 +27,9 @@ double rnd;
 broadcast chan change[1000];
 int outcnt=0;
 
-int bit_flips = 0;
+double bit_flips = 0;
+double avg_flips_per_res = 0;
+double bit_flips_sum = 0;
 
 const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
@@ -182,20 +184,70 @@ bool outEq(){
     }
     
     if (same == false) {
-        dif_count++;
+        dif_count = dif_count + 1;
     }
 
-    res_count++;
+    res_count = res_count + 1;
 
     return same;
 }
 
+double EP() {
+    //error probability
+    //number of different outputs divided by number of results
+    double ret = dif_count / res_count;
+
+    return ret;
+}
+
+double MAE() {
+    //mean absolute error
+    //sum of differences (approx. vs acc.) divided by number of results
+    double ret = out_sum_all_diff / res_count;
+
+    return ret;
+}
+
+double MSE() {
+    //mean squared error
+    //sum of squared differences divided by number of results
+    double ret = out_sum_all_diff_squared / res_count;
+
+    return ret;
+}
+
+double MRE() {
+    //mean relative error
+    //mean error in relation to size of accurate output
+    double ret = out_sum_relative / res_count;
+
+    return ret;
+}
+
+double avg_bitflips() {
+    //total number of bit flips divided by number of results
+    double ret = bit_flips_sum / res_count;
+
+    return ret;
+}
+
+void calc_metrics() {
+    error_prob = EP();
+    mean_abs_error = MAE();
+    mean_squared_error = MSE();
+    mean_relative_error = MRE();
+    avg_flips_per_res = avg_bitflips();
+}
+
+int[0, MAX_INT] res_acc=0;
+int[0, MAX_INT] res_approx=0;
+
 void diff(){
-    int[0, MAX_INT] res_acc=0;
-    int[0, MAX_INT] res_approx=0;
     int i;
     double res_dif;
     double relative_res_dif;
+    res_acc = 0;
+    res_approx = 0;
 
     difference = !outEq();
 
@@ -203,10 +255,10 @@ void diff(){
         res_acc += bits[i+NPI]*TBL_PWR2[i];
         if(POy[i]&gt;=0) res_approx += bits[i+NPI+NPO]*TBL_PWR2[i];    
     }
-    out_sum_all_acc += res_acc;
-    out_sum_all_approx += res_approx;
+    out_sum_all_acc = out_sum_all_acc + res_acc;
+    out_sum_all_approx = out_sum_all_approx + res_approx;
 
-    out_sum_all_diff = abs(out_sum_all_acc - out_sum_all_approx);
+    out_sum_all_diff = fabs(out_sum_all_acc - out_sum_all_approx);
     out_sum_all_diff_squared = out_sum_all_diff_squared + pow(abs(res_approx-res_acc),2);
     out_sum_relative = out_sum_relative + (abs(res_approx-res_acc) / fmax(1.0, 1.0*res_acc));
 
@@ -222,5 +274,9 @@ void diff(){
 
     err_magn_v = res_acc - res_approx;
     if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
+
+    bit_flips = 0;
+
+    calc_metrics();
 }
 </declaration>
