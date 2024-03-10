@@ -46,8 +46,8 @@ def randomword(length):
 
 # Example usage:
 for i in range(1000):
-	text = randomword(50)
-	pattern = text[random.randrange(0, 10) : random.randrange(11, 20)]
+	text = randomword(25)
+	pattern = text[random.randrange(0, 5) : random.randrange(6,10)]
 	result = rabin_karp_search(text, pattern)
 
 	if result != -1:
@@ -55,5 +55,6 @@ for i in range(1000):
 	else:
 		print("Pattern not found in the text")
 
-	print(pairs)
-	pairs.pkl_dump()
+pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

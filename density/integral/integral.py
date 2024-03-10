@@ -1,5 +1,6 @@
 import numpy as np
 from pathlib import Path
+import random
 
 import sys
 sys.path.append("..")
@@ -28,6 +29,10 @@ def integrate(a: float, b: float, steps: int = 1000):
 
 	return sum
 
-res = integrate(0, 100, 101)
+for i in range(1000):
+	b = random.randrange(5, 17)
+	res = integrate(0, b, 100)
 
-pairs.pkl_dump(filename="integral2.pkl")
+pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

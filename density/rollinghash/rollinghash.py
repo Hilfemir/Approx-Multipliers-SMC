@@ -55,5 +55,6 @@ for i in range(1000):
 	else:
 		print("Pattern not found in the text")
 
-print(pairs)
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

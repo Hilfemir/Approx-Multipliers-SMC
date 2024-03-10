@@ -16,17 +16,18 @@ def find_data_file(dirname: str, filename: str | None = None) -> Path:
 
 
 def get_save_path(path: str | None, data_path: Path, graph_type: str) -> Path:
-	"""graph_type: either 'singular' or 'heatmap'
+	"""graph_type: either 'singular', 'heatmap' or 'bit_flips'
 	"""
-	if graph_type not in ['singular', 'heatmap']:
-		raise ValueError("Error: graph_type has to be either 'singular' or 'heatmap'.")
+	if graph_type not in ['singular', 'heatmap', 'bit_flips']:
+		raise ValueError("Error: graph_type has to be either 'singular', 'heatmap' or 'bit_flips'.")
 	
-	if graph_type == 'singular':
-		dir = 'singulars'
-		suffix = '_singular.png'
-	else:
-		dir = 'heatmaps'
-		suffix = '_heatmap.png'
+	suff_options = {
+		'singular' : '_singular.png',
+		'heatmap' : '_heatmap.png',
+		'bit_flips' : '_bit_flips.png'
+		}
+	
+	suffix = suff_options[graph_type]
 
 	if path is not None:
 		if not path.endswith(suffix):
@@ -37,7 +38,7 @@ def get_save_path(path: str | None, data_path: Path, graph_type: str) -> Path:
 		filename = data_path.name[:-4]
 		filename += suffix
 
-	dest = Path(f'./{dir}', filename)
+	dest = Path(filename)
 	return dest
 
 

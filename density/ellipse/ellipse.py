@@ -89,9 +89,11 @@ def ellipse(A: int, B: int):
 
 
 for i in range(1000):
-	x = randrange(1, 10)
-	y = x + randrange(1, 10)
+	x = randrange(1, 6)
+	y = x + randrange(1, 7)
 	ellipse(x, y)
 
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

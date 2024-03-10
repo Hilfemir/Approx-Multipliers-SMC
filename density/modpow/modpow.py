@@ -31,11 +31,13 @@ def modpow(base: int, exponent: int, modulus: int) -> int:
 	return c
 
 for i in range(1000):
-	base = randrange(10000000, 100000000)
-	exponent = randrange(15, 35)
-	modulus = 497
+	base = randrange(0, 256)
+	exponent = randrange(15, 50)
+	modulus = 251
 	r = modpow(base, exponent, modulus)
 
 	print(r)
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

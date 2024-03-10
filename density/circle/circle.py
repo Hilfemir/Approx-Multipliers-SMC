@@ -36,7 +36,9 @@ def circle(cx: int, cy: int, r: int):
 for i in range(5, 100):
 	x = randrange(0, 50)
 	y = randrange(0, 50)
-	r = i + randrange(0,20)
+	r = i + randrange(0,150)
 	circle(x, y, r)
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

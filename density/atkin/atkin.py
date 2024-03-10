@@ -84,7 +84,9 @@ def sieve_off_atkin(limit):
 			print(a, end=" ")
 			 
 # Driver Code
-limit = 1000
+limit = 4000
 sieve_off_atkin(limit)
 
+print(pairs)
+print(f"max: {pairs.get_max_val()}")
 pairs.pkl_dump()

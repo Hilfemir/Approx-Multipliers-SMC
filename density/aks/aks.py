@@ -121,8 +121,8 @@ def aks(n):
 
 
 for i in range(100):
-    x = random.randrange(1, 501)
+    x = random.randrange(1, 256)
     print(aks(x))
-    
-print(pairs)
+
+print(f"max: {pairs.get_max_val()}")
 pairs.pkl_dump()

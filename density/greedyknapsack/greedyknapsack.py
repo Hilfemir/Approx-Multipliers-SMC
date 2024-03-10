@@ -40,15 +40,16 @@ def fractional_knapsack(value, weight, capacity):
 # Example usage:
 for i in range(1000):
 	#values = random.sample(range(10, 310, 10), 10)
-	values = random_numbers(10, 10, 310, 10)
+	values = random_numbers(10, 10, 600, 10)
 	#weights = random.sample(range(10, 60, 10), 10)
-	weights = random_numbers(10, 10, 50, 10)
-	knapsack_capacity = random.randrange(50, 150, 10)
+	weights = random_numbers(10, 10, 250, 10)
+	knapsack_capacity = random.randrange(50, 1000, 10)
 
 	total_value, selected_items = fractional_knapsack(values, weights, knapsack_capacity)
 
 	print(f"Total Value: {total_value}")
 	print(f"Selected Items: {selected_items}")
 
-print(pairs)
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

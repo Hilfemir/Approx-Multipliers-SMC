@@ -51,6 +51,8 @@ def pritchard(limit):
     return sorted(primes + newprimes)
 
 
-print('Number of primes up to 1,000,000:', len(pritchard(1000000)))
+print('Number of primes up to 256:', len(pritchard(256)))
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

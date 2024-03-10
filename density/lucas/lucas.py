@@ -72,7 +72,7 @@ for i in range(1000):
 	k = n - randrange(2, 50)
 	if k <= 0 or k < n:
 		k = n - 5
-	p = 497
+	p = 251
 	
 	try:
 		res = nCrModpLucas(n, k, p)
@@ -80,3 +80,5 @@ for i in range(1000):
 		continue
 	
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

@@ -48,8 +48,10 @@ def counting_sort(arr, exp):
 
 # Example usage:
 for i in range(1001):
-    arr = sample(range(1, 25001), 1000)
+    arr = sample(range(1, 256), 200)
     radix_sort(arr)
     #print("Sorted array:", arr)
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

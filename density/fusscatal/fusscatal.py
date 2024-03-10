@@ -39,8 +39,12 @@ def fusscatal(m: int, p: int, r: int) -> float:
 	return left * right
 
 
-for i in range(10):
-	res = fusscatal(i, 1, 4)
-	print(res)
+for m in range(5):
+	for p in range(4):
+		for r in range(6):
+			res = fusscatal(m, p, r)
+			print(res)
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

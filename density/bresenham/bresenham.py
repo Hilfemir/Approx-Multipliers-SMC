@@ -47,11 +47,13 @@ def line_bres(x1: int, y1: int, x2: int, y2: int):
 		else:
 			P += P1
 
-for i in range(1000):
+for i in range(10000):
 	x1 = randrange(0, 100)
-	x2 = randrange(101, 200)
+	x2 = randrange(101, 256)
 	y1 = randrange(0, 50)
-	y2 = randrange(51, 100)
+	y2 = randrange(51, 256)
 	line_bres(x1, y1, x2, y2)
 
+print(pairs)
+print(f"max: {pairs.get_max_val()}")
 pairs.pkl_dump()

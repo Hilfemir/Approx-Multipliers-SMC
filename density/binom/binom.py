@@ -27,8 +27,8 @@ def binom_coeff(n: int, k: int) -> float:
 	ret = f_n / (f_k * f_nmk)
 	return ret
 
-for i in range(17):
-	for j in range(17):
+for i in range(7):
+	for j in range(7):
 		if i >= j:
 			res = binom_coeff(i, j)
 

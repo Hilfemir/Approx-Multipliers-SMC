@@ -12,8 +12,10 @@ def factorial(m: int) -> int:
 
 	return ret
 
-for i in range(10):
+for i in range(7):
 	res = factorial(i)
 	print(res)
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

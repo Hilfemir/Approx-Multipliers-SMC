@@ -71,9 +71,10 @@ def random_vertices(size: int = 20):
 	return np.array(vertices)
 
 for i in range(1000):
-	img = np.zeros((20, 20))
+	size = 180
+	img = np.zeros((size, size))
 	#vertices = np.array([[2, 1], [8, 1], [5, 5], [2, 8], [8, 8]])
-	vertices = random_vertices()
+	vertices = random_vertices(size)
 
 	for i in range(len(vertices)):
 		x0, y0 = vertices[i]
@@ -82,7 +83,9 @@ for i in range(1000):
 
 	scanline_fill(img, vertices)
 
-	plt.imshow(img, cmap='gray', origin='lower')
-	plt.show()
+	#plt.imshow(img, cmap='gray', origin='lower')
+	#plt.show()
 
-#pairs.pkl_dump()
+pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

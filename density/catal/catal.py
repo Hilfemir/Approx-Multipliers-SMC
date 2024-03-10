@@ -31,7 +31,9 @@ def catalan(n):
     return catalan[n]
  
 # Driver code
-for i in range(10):
+for i in range(8):
     print(catalan(i))
  
 pairs.pkl_dump('catal.pkl')
+print(pairs)
+print(f"max: {pairs.get_max_val()}")

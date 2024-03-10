@@ -1,5 +1,6 @@
 import random
 from primelibpy import Prime as pr
+from random import choice
 
 import sys
 sys.path.append("..")
@@ -64,7 +65,9 @@ def decrypt(public_key, private_key, ciphertext):
 	return plaintext
 
 for i in range(1000):
-	p = pr.getRandomPrime("GoodPrime", 3)
+	pms = pr.getGoodPrime(100, 256)
+	p = choice(pms)
+
 	public_key, private_key = generate_keypair(p)
 
 	message = random.randrange(5, 50)
@@ -77,3 +80,5 @@ for i in range(1000):
 	print("Decrypted Message:", decrypted_message)
 
 pairs.pkl_dump()
+print(pairs)
+print(f"max: {pairs.get_max_val()}")
