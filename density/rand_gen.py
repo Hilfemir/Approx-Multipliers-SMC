@@ -1,80 +1,219 @@
+from multiprocessing import process
 import random
 import matplotlib.pyplot as plt
+from numpy import add
 import seaborn as sns
 import pandas as pd
 
-numbers = []
+numbers = [] #list of tuples (pairs of numbers)
+binaries = []
 
-for i in range(10000):
-	#Sieve of Pritchard - A
-	#alpha = 1.0
-	#beta = 0.8
-	#num = random.gammavariate(alpha, beta)
-	#num = int(num * 150)
+bit_flips = {
+	15 : 0,
+	14 : 0,
+	13 : 0,
+	12 : 0,
+	11 : 0,
+	10 : 0,
+	9 : 0,
+	8 : 0,
+	7 : 0,
+	6 : 0,
+	5 : 0,
+	4 : 0,
+	3 : 0,
+	2 : 0,
+	1 : 0,
+	0 : 0
+}
 
-	#Sieve of Pritchard - B
-	#num = random.uniform(0, 2000)
-	#num = int(num)
+index_names = {
+	15 : 'B[7]',
+	14 : 'B[6]',
+	13 : 'B[5]',
+	12 : 'B[4]',
+	11 : 'B[3]',
+	10 : 'B[2]',
+	9 : 'B[1]',
+	8 : 'B[0]',
+	7 : 'A[7]',
+	6 : 'A[6]',
+	5 : 'A[5]',
+	4 : 'A[4]',
+	3 : 'A[3]',
+	2 : 'A[2]',
+	1 : 'A[1]',
+	0 : 'A[0]'
+}
 
-	#AKS Primality test - A
-	#num = random.triangular(-50, 450, 70)
 
-	#AKS Primality test - B
-	#alpha = 2.0
-	#beta = 2.0
-	#num = random.betavariate(alpha, beta)
-	#num = int(num * 400)
+def add_bit_flips(a: int | None, b: int | None):
+	if a is not None:
+		bit_flips[a] += 1
 
-	#Ellipse Midpoint - A
-	#alpha = 0.5
-	#beta = 5.0
-	#num = random.betavariate(alpha, beta)
-	#num = int(num * 40)
+	if b is not None:
+		bit_flips[b] += 1
 
-	#Ellipse Midpoint - B
-	#mu = 9.0
-	#sigma = 15.0
-	#num = random.gauss(mu, sigma)
 
-	#Circle Point by Point - both A and B
-	#num = random.uniform(2, 255)
+def process_num(input: int | float, add_val=0, under_to: str | int = "min", over_to: str | int = "max") -> int:
+	input = int(input)
+	min = 0
+	max = 7
 
-	#Integer Square Root - both A and B
-	#num = random.triangular(-10, 150, 10)
-	#num = int(num)
+	if input < min:
+		if under_to == "max":
+			input = max
+		elif under_to == "min":
+			input = min
+		elif isinstance(under_to, int):
+			input = under_to
+		else:
+			raise ValueError("Error: gen_num() 'under_to' argument must be either 'max', 'min' or an int.")
 
-	#ElGamal Signature Scheme - A
-	#num = random.triangular(-20, 600, 20)
-	#num = int(num)
+	if input > max:
+		if over_to == "max":
+			input = max
+		elif over_to == "min":
+			input = min
+		elif isinstance(over_to, int):
+			input = over_to
+		else:
+			raise ValueError("Error: gen_num() 'over_to' argument must be either 'max', 'min' or an int.")
+		
+	return input + add_val
 
-	#ElGamal Signature Scheme - B
-	#alpha = 1.7
-	#beta = 1.7
-	#num = random.weibullvariate(alpha, beta)
-	#num = int(num * 200)
 
-	num = random.gammavariate(1.0,2.0)
-	num = int(num)
+def plot_ax(ax, indexes: list, values: list, color='cornflowerblue'):
+	#replace indexes with input bit names
+	indexes = [index_names[i] for i in indexes]
 
-	if num < 0:
-		num = 0
+	#normalize output values
+	if sum(values) > 0:
+		values = [(val / sum(values)) * 100 for val in values]
 
-	if num > 7:
-		num = 0
+	# creating the bar plot
+	ax.bar(indexes, values, color=color,
+	        width = 0.4)
 
-	numbers.append(num)
+	input_name = indexes[0][0] #either A or B
+	ax.set(
+		xlabel = f"Bity vstupu {input_name}",
+		ylabel = "Četnost přepnutí bitu (%)" if input_name == "A" else ""
+		)
 
-# Convert the list to a pandas Series
-series = pd.Series(numbers)
+	ax.grid(visible=True, axis='y', linestyle=':')
 
-# Count the occurrences of each value
-value_counts = series.value_counts(normalize=True).sort_index()
 
-plt.figure(figsize=(10, 6))
-value_counts.plot(kind='bar', color ='cornflowerblue')
-plt.xlabel('Value')
-plt.ylabel('Density')
-plt.grid(visible=True, axis='y', linestyle=':')
-plt.title('Frequency of Each Value in the List')
-plt.xticks(rotation=0)
-plt.show()
+def plot_res(outname=None, savefig=False):
+	indexes = list(bit_flips.keys())
+	values = list(bit_flips.values())
+
+	indexes.reverse() #first A then B
+	values.reverse()
+
+	fig = plt.figure(figsize=(20, 10))
+	gs = fig.add_gridspec(1, 2, hspace=0, wspace=0)
+	(ax1, ax2) = gs.subplots(sharex='col', sharey='row')
+
+	plot_ax(ax1, indexes[0:8], values[0:8])
+	plot_ax(ax2, indexes[8:16], values[8:16], color="orangered")
+
+	if savefig and outname is not None:
+		plt.savefig(f"./rand_generated/{outname}")
+
+	plt.show()
+
+def main():
+	for i in range(10000):
+		#isqrt
+		"""
+		num_a = random.gammavariate(1.0,2.0)
+		num_a = process_num(num_a, over_to="min")
+
+		num_b = random.gammavariate(1.0,2.0)
+		num_b = process_num(num_b, add_val=8, over_to="min")
+		"""
+
+		#####################################################
+
+		#lucas theorem
+		"""
+		num_a = random.uniform(0, 8)
+		num_a = process_num(num_a)
+
+		num_b = None
+		"""
+
+		#####################################################
+
+		#ellipse midpoint
+		"""
+		num_a = int(random.gauss(3,3))
+		num_a = process_num(num_a, under_to=1, over_to=2)
+
+		num_b = int(random.triangular(0, 7, 0))
+
+		if num_b == 6:
+			num_b = 4
+
+		elif num_b == 5:
+			num_b = 1
+
+		elif num_b == 4:
+			num_b = 0
+
+		num_b = process_num(num_b, add_val=8)
+		"""
+
+		#####################################################
+
+		#radix sort
+		"""
+		num_a = int(random.uniform(0,5))
+		num_a = process_num(num_a)
+
+		if num_a == 0:
+			num_a = 5
+		
+		elif num_a == 4:
+			num_a = 6
+
+		num_b = int(random.uniform(0,3))
+
+		if num_b == 2:
+			num_b = 3
+
+		num_b = process_num(num_b, add_val=8)
+		"""
+
+		#####################################################
+
+		#greedyknapsack
+		"""
+		num_a = int(random.uniform(0,8))
+		num_a = process_num(num_a)
+
+		num_b = int(random.triangular(0, 5, 0))
+		num_b = process_num(num_b, add_val=8)
+		"""
+		
+		#####################################################
+
+		#fuss-catalan number
+		num_a = int(random.gauss(2, 2))
+		num_a = process_num(num_a)
+
+		num_b = int(random.gammavariate(1,1.5))
+		num_b = process_num(num_b, add_val=8)
+
+		numbers.append((num_a, num_b))
+		add_bit_flips(num_a, num_b)
+		
+
+	print(bit_flips)
+
+	plot_res(outname="fusscatal_randgen.png", savefig=True)
+
+
+if __name__=="__main__": 
+	main()

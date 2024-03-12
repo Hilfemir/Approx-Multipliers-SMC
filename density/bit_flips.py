@@ -43,7 +43,7 @@ index_names = {
 	2 : 'A[2]',
 	1 : 'A[1]',
 	0 : 'A[0]'
-	}
+}
 
 def count_bit_flips(index: int):
 	"""Counts the number of bit flips of input number bits
@@ -68,34 +68,47 @@ def to_binary_str(a: int, b: int) -> str:
 	return ret
 
 
-def plot_res(title="Bit flip count", outname=None, savefig=False):
-	indexes = bit_flips.keys()
-	values = bit_flips.values()
-
+def plot_ax(ax, indexes: list, values: list, color='cornflowerblue'):
 	#replace indexes with input bit names
 	indexes = [index_names[i] for i in indexes]
-	indexes.reverse()
 
 	#normalize output values
-	values = [val / sum(values) for val in values]
-	values.reverse()
-	
-	plt.figure(figsize=(15, 8))
+	if sum(values) > 0:
+		values = [(val / sum(values)) * 100 for val in values]
 
 	# creating the bar plot
-	plt.bar(indexes, values, color ='cornflowerblue',
+	ax.bar(indexes, values, color=color,
 	        width = 0.4)
 
-	plt.xlabel("Bit indexes")
-	plt.ylabel("Bit flip density")
-	plt.title(title)
-	plt.grid(visible=True, axis='y', linestyle=':')
+	input_name = indexes[0][0] #either A or B
+	ax.set(
+		xlabel = f"Bity vstupu {input_name}",
+		ylabel = "Četnost přepnutí bitu (%)" if input_name == "A" else ""
+		)
+
+	ax.grid(visible=True, axis='y', linestyle=':')
+
+
+def plot_res(outname=None, savefig=False, noshow=False):
+	indexes = list(bit_flips.keys())
+	values = list(bit_flips.values())
+
+	indexes.reverse() #first A then B
+	values.reverse()
+
+	fig = plt.figure(figsize=(20, 10))
+	gs = fig.add_gridspec(1, 2, hspace=0, wspace=0)
+	(ax1, ax2) = gs.subplots(sharex='col', sharey='row')
+
+	plot_ax(ax1, indexes[0:8], values[0:8])
+	plot_ax(ax2, indexes[8:16], values[8:16], color="orangered")
 
 	if savefig:
 		plt.savefig(f"./bit_flips/{outname}")
 
-	plt.show()
-
+	if not noshow:
+		plt.show()
+		
 
 def main():
 	# parse args #
@@ -114,20 +127,18 @@ def main():
 		action='store_true',
 		help="Don't save the plot."
 		)
-
+	
 	parser.add_argument(
-		'--title',
-		'-t',
-		default="Bit flips",
-		type=str,
-		help="Title of the plot."
+		'--noshow',
+		action='store_true',
+		help="Don't show the plot."
 		)
 
 	args = parser.parse_args()
 
 	dirname = args.dirname
-	title = args.title
 	nosave = args.nosave
+	noshow = args.noshow
 
 	try:
 		filename = find_data_file(dirname)
@@ -156,9 +167,11 @@ def main():
 		count_bit_flips(i)
 
 	plot_res(
-		title=title,
 		outname=savepath,
-		savefig=not(nosave))
+		savefig=not(nosave),
+		noshow=noshow)
+	
+	print(f"{dirname} finished.")
 
 if __name__=="__main__": 
 	main()
