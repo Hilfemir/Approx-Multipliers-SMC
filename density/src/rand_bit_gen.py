@@ -119,7 +119,7 @@ def plot_res(outname=None, savefig=False):
 	plot_ax(ax2, indexes[8:16], values[8:16], color="orangered")
 
 	if savefig and outname is not None:
-		plt.savefig(f"./rand_generated/{outname}")
+		plt.savefig(f"./rand_generated_bits/{outname}")
 
 	plt.show()
 
