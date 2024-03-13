@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>/* Feel free to cite and/or read details to the model using:
+<declaration>/* Feel free to cite and/or read details to the model using:
   STRNADEL Josef. Statistical Model Checking of Approximate Circuits: Challenges and Opportunities. In: Proceedings of the 2020 Design, Automation &amp; Test in Europe Conference &amp; Exhibition (DATE). Grenoble: IEEE Computer Society, 2020, pp. 1574-1577. ISBN 978-3-9819263-4-7. Available from: https://ieeexplore.ieee.org/document/9116207 and https://www.fit.vut.cz/research/publication/12055/
  */
 double dif_count = 0;
@@ -28,6 +28,8 @@ broadcast chan change[1000];
 int outcnt=0;
 
 double bit_flips = 0;
+double avg_flips_per_res = 0;
+double bit_flips_sum = 0;
 
 const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
@@ -79,7 +81,7 @@ int diffctrl=0;
 int[-MAX_INT, MAX_INT] err_magn_v;    
 double err_magn_r;
 
-int[0, MAX_INT] bitsCovered;
+int bitsCovered;
 double inCoverage;
 
 bool allCovered=false;
@@ -222,19 +224,30 @@ double MRE() {
     return ret;
 }
 
+double avg_bitflips() {
+    //total number of bit flips divided by number of results
+    double ret = bit_flips_sum / res_count;
+
+    return ret;
+}
+
 void calc_metrics() {
     error_prob = EP();
     mean_abs_error = MAE();
     mean_squared_error = MSE();
     mean_relative_error = MRE();
+    avg_flips_per_res = avg_bitflips();
 }
 
+int[0, MAX_INT] res_acc=0;
+int[0, MAX_INT] res_approx=0;
+
 void diff(){
-    int[0, MAX_INT] res_acc=0;
-    int[0, MAX_INT] res_approx=0;
     int i;
     double res_dif;
     double relative_res_dif;
+    res_acc = 0;
+    res_approx = 0;
 
     difference = !outEq();
 
@@ -262,13 +275,15 @@ void diff(){
     err_magn_v = res_acc - res_approx;
     if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
 
+    bit_flips = 0;
+
     calc_metrics();
 }
 </declaration>
-	<template>
-		<name>tmul2any</name>
-		<parameter>const int &amp;PIxy[NPI], const int &amp;POx[NPO], bool &amp;ttbl[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY], const int  dly</parameter>
-		<declaration>
+<template>
+<name>tmul2any</name>
+<parameter>const int &amp;PIxy[NPI], const int &amp;POx[NPO], bool &amp;ttbl[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY], const int  dly</parameter>
+<declaration>
 clock x;
 
 int getIdx(int i){
@@ -306,22 +321,22 @@ int getOut(){
 }
 
 void f(){
-    if(POx[15]&gt;=0) bits[POx[15]]=ttbl[bin2dec()][16];
-    if(POx[14]&gt;=0) bits[POx[14]]=ttbl[bin2dec()][17];
-    if(POx[13]&gt;=0) bits[POx[13]]=ttbl[bin2dec()][18];
-    if(POx[12]&gt;=0) bits[POx[12]]=ttbl[bin2dec()][19];
-    if(POx[11]&gt;=0) bits[POx[11]]=ttbl[bin2dec()][20];
-    if(POx[10]&gt;=0) bits[POx[10]]=ttbl[bin2dec()][21];
-    if(POx[9]&gt;=0) bits[POx[9]]=ttbl[bin2dec()][22];
-    if(POx[8]&gt;=0) bits[POx[8]]=ttbl[bin2dec()][23];
-    if(POx[7]&gt;=0) bits[POx[7]]=ttbl[bin2dec()][24];
-    if(POx[6]&gt;=0) bits[POx[6]]=ttbl[bin2dec()][25];
-    if(POx[5]&gt;=0) bits[POx[5]]=ttbl[bin2dec()][26];
-    if(POx[4]&gt;=0) bits[POx[4]]=ttbl[bin2dec()][27];
-    if(POx[3]&gt;=0) bits[POx[3]]=ttbl[bin2dec()][28];
-    if(POx[2]&gt;=0) bits[POx[2]]=ttbl[bin2dec()][29];
-    if(POx[1]&gt;=0) bits[POx[1]]=ttbl[bin2dec()][30];
-    if(POx[0]&gt;=0) bits[POx[0]]=ttbl[bin2dec()][31];
+    if(POx[15]>=0) bits[POx[15]]=ttbl[bin2dec()][16];
+    if(POx[14]>=0) bits[POx[14]]=ttbl[bin2dec()][17];
+    if(POx[13]>=0) bits[POx[13]]=ttbl[bin2dec()][18];
+    if(POx[12]>=0) bits[POx[12]]=ttbl[bin2dec()][19];
+    if(POx[11]>=0) bits[POx[11]]=ttbl[bin2dec()][20];
+    if(POx[10]>=0) bits[POx[10]]=ttbl[bin2dec()][21];
+    if(POx[9]>=0) bits[POx[9]]=ttbl[bin2dec()][22];
+    if(POx[8]>=0) bits[POx[8]]=ttbl[bin2dec()][23];
+    if(POx[7]>=0) bits[POx[7]]=ttbl[bin2dec()][24];
+    if(POx[6]>=0) bits[POx[6]]=ttbl[bin2dec()][25];
+    if(POx[5]>=0) bits[POx[5]]=ttbl[bin2dec()][26];
+    if(POx[4]>=0) bits[POx[4]]=ttbl[bin2dec()][27];
+    if(POx[3]>=0) bits[POx[3]]=ttbl[bin2dec()][28];
+    if(POx[2]>=0) bits[POx[2]]=ttbl[bin2dec()][29];
+    if(POx[1]>=0) bits[POx[1]]=ttbl[bin2dec()][30];
+    if(POx[0]>=0) bits[POx[0]]=ttbl[bin2dec()][31];
 
     diffctrl++;
 }
@@ -331,39 +346,39 @@ void inits(){
 }
 
 </declaration>
-		<location id="id0" x="-170" y="0">
-		</location>
-		<location id="id1" x="0" y="0">
-			<label kind="invariant" x="-25" y="17">x&lt;=dly</label>
-		</location>
-		<location id="id2" x="-374" y="0">
-			<committed/>
-		</location>
-		<init ref="id2"/>
-		<transition id="id3">
-			<source ref="id2"/>
-			<target ref="id0"/>
-			<label kind="assignment" x="-297" y="0">inits()</label>
-		</transition>
-		<transition id="id4">
-			<source ref="id1"/>
-			<target ref="id0"/>
-			<label kind="guard" x="-152" y="-136">x==dly</label>
-			<label kind="assignment" x="17" y="-59">f()</label>
-			<nail x="0" y="-102"/>
-			<nail x="-170" y="-102"/>
-		</transition>
-		<transition id="id5">
-			<source ref="id0"/>
-			<target ref="id1"/>
-			<label kind="synchronisation" x="-110" y="-25">update?</label>
-			<label kind="assignment" x="-93" y="0">x=0</label>
-		</transition>
-	</template>
-	<template>
-		<name>tmul2_tb_exhaust</name>
-		<parameter>const int &amp;PIxy[NPI], const int dly, const double covratio</parameter>
-		<declaration>
+<location id="id0" x="-170" y="0">
+</location>
+<location id="id1" x="0" y="0">
+	<label kind="invariant" x="-25" y="17">x&lt;=dly</label>
+</location>
+<location id="id2" x="-374" y="0">
+	<committed/>
+</location>
+<init ref="id2"/>
+<transition>
+	<source ref="id2"/>
+	<target ref="id0"/>
+	<label kind="assignment" x="-297" y="0">inits()</label>
+</transition>
+<transition>
+	<source ref="id1"/>
+	<target ref="id0"/>
+	<label kind="guard" x="-152" y="-136">x==dly</label>
+	<label kind="assignment" x="17" y="-59">f()</label>
+	<nail x="0" y="-102"/>
+	<nail x="-170" y="-102"/>
+</transition>
+<transition>
+	<source ref="id0"/>
+	<target ref="id1"/>
+	<label kind="synchronisation" x="-110" y="-25">update?</label>
+	<label kind="assignment" x="-93" y="0">x=0</label>
+</transition>
+</template>
+<template>
+<name>tmul2_tb_exhaust</name>
+<parameter>const int &amp;PIxy[NPI], const int dly, const double covratio</parameter>
+<declaration>
 clock x;
 clock tcover;
 int input=0;
@@ -451,60 +466,60 @@ void inits(){
     }
 }
 </declaration>
-		<location id="id6" x="-136" y="0">
+		<location id="id3" x="-136" y="0">
 			<name x="-153" y="8">apply</name>
 			<committed/>
 		</location>
-		<location id="id7" x="-374" y="0">
+		<location id="id4" x="-374" y="0">
 			<name x="-382" y="8">get</name>
 			<committed/>
 		</location>
-		<location id="id8" x="34" y="0">
+		<location id="id5" x="34" y="0">
 			<name x="17" y="8">done</name>
 			<label kind="invariant" x="0" y="-34">tcover'==0</label>
 		</location>
-		<location id="id9" x="-246" y="-102">
+		<location id="id6" x="-246" y="-102">
 			<name x="-255" y="-136">wait</name>
 		</location>
-		<location id="id10" x="-510" y="0">
+		<location id="id7" x="-510" y="0">
 			<urgent/>
 		</location>
-		<init ref="id10"/>
-		<transition id="id11">
-			<source ref="id10"/>
-			<target ref="id7"/>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-459" y="0">inits()</label>
 		</transition>
-		<transition id="id12">
-			<source ref="id6"/>
-			<target ref="id9"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id6"/>
 			<label kind="guard" x="-221" y="-93">!inCovered()</label>
 			<nail x="-136" y="-102"/>
 		</transition>
-		<transition id="id13">
-			<source ref="id6"/>
-			<target ref="id8"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
 			<label kind="guard" x="-93" y="-25">inCovered()</label>
 			<label kind="assignment" x="-110" y="0">allCovered=true,
 x=0</label>
 		</transition>
-		<transition id="id14">
-			<source ref="id7"/>
-			<target ref="id6"/>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
 			<label kind="synchronisation" x="-289" y="-25">update!</label>
 			<label kind="assignment" x="-280" y="0">f(), x=0</label>
 		</transition>
-		<transition id="id15">
-			<source ref="id9"/>
-			<target ref="id7"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id4"/>
 			<label kind="synchronisation" x="-365" y="-93">cmpDone?</label>
 			<nail x="-374" y="-102"/>
 		</transition>
 	</template>
-	<template>
-		<name>tmul2_tb_nondet</name>
-		<parameter>const int range_min, const int range_max, const int dly, const double covratio</parameter>
-		<declaration>clock x;
+<template>
+	<name>tmul2_tb_nondet</name>
+	<parameter>const int range_min, const int range_max, const int dly, const double covratio</parameter>
+	<declaration>clock x;
 clock tcover;
 int input=0;
 int nsame=0, inSame=0;
@@ -583,59 +598,59 @@ void inits(){
         }
     }
 }</declaration>
-		<location id="id16" x="-119" y="-102">
+		<location id="id8" x="-119" y="-102">
 			<name x="-129" y="-136">wait</name>
 		</location>
-		<location id="id17" x="-246" y="0">
+		<location id="id9" x="-246" y="0">
 			<name x="-255" y="8">get</name>
 			<committed/>
 		</location>
-		<location id="id18" x="170" y="0">
+		<location id="id10" x="170" y="0">
 			<name x="153" y="8">done</name>
 			<label kind="invariant" x="136" y="-34">tcover'==0</label>
 		</location>
-		<location id="id19" x="0" y="0">
+		<location id="id11" x="0" y="0">
 			<name x="-17" y="8">apply</name>
 			<committed/>
 		</location>
-		<location id="id20" x="-246" y="-102">
+		<location id="id12" x="-246" y="-102">
 			<committed/>
 		</location>
-		<location id="id21" x="-374" y="0">
+		<location id="id13" x="-374" y="0">
 			<urgent/>
 		</location>
-		<init ref="id21"/>
-		<transition id="id22">
-			<source ref="id21"/>
-			<target ref="id17"/>
+		<init ref="id13"/>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id9"/>
 			<label kind="assignment" x="-331" y="0">inits()</label>
 		</transition>
-		<transition id="id23">
-			<source ref="id20"/>
-			<target ref="id17"/>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id9"/>
 			<label kind="select" x="-238" y="-68">i: int[range_min, range_max]</label>
 			<label kind="assignment" x="-238" y="-51">bits[i] ^= 1, idx=i</label>
 		</transition>
-		<transition id="id24">
-			<source ref="id16"/>
-			<target ref="id20"/>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="-212" y="-102">cmpDone?</label>
 		</transition>
-		<transition id="id25">
-			<source ref="id19"/>
-			<target ref="id16"/>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id8"/>
 			<label kind="guard" x="-93" y="-93">!inCovered()</label>
 			<nail x="0" y="-102"/>
 		</transition>
-		<transition id="id26">
-			<source ref="id17"/>
-			<target ref="id19"/>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id11"/>
 			<label kind="synchronisation" x="-153" y="-25">update!</label>
 			<label kind="assignment" x="-144" y="0">f(idx)</label>
 		</transition>
-		<transition id="id27">
-			<source ref="id19"/>
-			<target ref="id18"/>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id10"/>
 			<label kind="guard" x="42" y="-25">inCovered()</label>
 			<label kind="assignment" x="34" y="0">allCovered=true</label>
 		</transition>
@@ -687,32 +702,39 @@ bool inCovered()
 }
 
 void f(int i){
-    int j;
-    int[0, MAX_INT] imax = fint(exp2(NPI));
+    int j, k;
+    int min = 0;
+    int max = (NPI/2) - 1;
 
-//    rnd = random(100);
-//    rnd = random_arcsine(-10,10);
-//    rnd = random_beta(0.1,5);
-//    rnd = random_gamma(0.5,5);
-//    rnd = random_normal(10,1);
-//    rnd = random_poisson(1.0);
-//    rnd = random_weibull(0.5,5);
-//    rnd = random_tri(0,10,100);
+    //flipping bits in the first number (bits &lt;0,NPI/2-1&gt;)
+    //eg. &lt;0,7&gt; for an 8x8bit mult.
 
-    j=fint(random(NPI));                   // pro (NPI) je out 0...NPI-1
- //   j=fint(random_normal(NPI/2.0,0.5));    // pro (NPI/2.0, 0.5) je out NPI/2 +- 0.5
- //   j=fint(random_poisson(1.0));           // pro (1.0) je out 1.0 +- 
-//    j=fint(random_arcsine(0.0, NPI-1));    // pro (0.0, NPI-1) je out mezi 0...NPI-1 (aka random())
-  //  j=fint(random_tri(0.0, 0.5, NPI-1));    // pro (0.0, 0.5, NPI-1) je out mezi 0...NPI-1 (aka random()), se stredem u 0.5
-  //  j = fint(random_weibull(10, 3.0));    // pro (10.0, 3.0) je out mezi 0...3 (aka random()), se stredem vys (pro 10)
-  //  j = fint(random_gamma(1.0,0.5));    // pro (1.0, 0.5) je out mezi 0...5 (aka random()), se stredem niz (kolem 1.0)
-    if(j &lt; 0) j=0;
-    if(j &gt; (NPI-1)) j=NPI-1;
-    bits[j] ^= 1;
+    //generate which bit should change
+    j=fint(random(NPI/2));
 
-   if(inCoverSet[input]) { inSame = -1*input; nsame++; }
-   else inSame = input;
-   inCoverSet[bin2dec()] = true;
+    //overflow and underflow corrections
+    if(j &lt; min) j=min;
+    if(j &gt; max) j=max;
+
+    bits[j] ^= 1; //flip the selected bit, so 0 -&gt; 1, 1 -&gt; 0
+
+    //flipping bits in the second number (bits &lt;NPI/2,NPI-1&gt;)
+    //eg. &lt;8,15&gt; for an 8x8bit mult.
+    
+    //generate which bit should change
+    k = fint(random(NPI/2));
+
+    //overflow and underflow corrections
+    if(k &lt; min) k=min;
+    if(k &gt; max) k=max;
+    k += NPI/2; //shift to the correct bit range
+
+    bits[k] ^= 1; //flip the selected bit, so 0 -&gt; 1, 1 -&gt; 0
+
+    //check if this bit combination has already been used
+    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+    else inSame = input;
+    inCoverSet[bin2dec()] = true;
     covered();
 
     rCover = 100.0*bitsCovered / NTV; 
@@ -745,137 +767,137 @@ void inits(){
         }
     }
 }</declaration>
-		<location id="id28" x="-119" y="-102">
+		<location id="id14" x="-119" y="-102">
 			<name x="-129" y="-136">wait</name>
 		</location>
-		<location id="id29" x="-246" y="0">
+		<location id="id15" x="-246" y="0">
 			<name x="-255" y="8">get</name>
 			<committed/>
 		</location>
-		<location id="id30" x="170" y="0">
+		<location id="id16" x="170" y="0">
 			<name x="153" y="8">done</name>
 			<label kind="invariant" x="136" y="-34">tcover'==0</label>
 		</location>
-		<location id="id31" x="0" y="0">
+		<location id="id17" x="0" y="0">
 			<name x="-17" y="8">apply</name>
 			<committed/>
 		</location>
-		<location id="id32" x="-246" y="-102">
+		<location id="id18" x="-246" y="-102">
 			<committed/>
 		</location>
-		<location id="id33" x="-374" y="0">
+		<location id="id19" x="-374" y="0">
 			<urgent/>
 		</location>
-		<init ref="id33"/>
-		<transition id="id34">
-			<source ref="id33"/>
-			<target ref="id29"/>
+		<init ref="id19"/>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id15"/>
 			<label kind="assignment" x="-331" y="0">inits()</label>
 		</transition>
-		<transition id="id35">
-			<source ref="id32"/>
-			<target ref="id29"/>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id15"/>
 		</transition>
-		<transition id="id36">
-			<source ref="id28"/>
-			<target ref="id32"/>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id18"/>
 			<label kind="synchronisation" x="-212" y="-102">cmpDone?</label>
 		</transition>
-		<transition id="id37">
-			<source ref="id31"/>
-			<target ref="id28"/>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id14"/>
 			<label kind="guard" x="-93" y="-93">!inCovered()</label>
 			<nail x="0" y="-102"/>
 		</transition>
-		<transition id="id38">
-			<source ref="id29"/>
-			<target ref="id31"/>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id17"/>
 			<label kind="synchronisation" x="-153" y="-25">update!</label>
 			<label kind="assignment" x="-144" y="0">f(idx)</label>
 		</transition>
-		<transition id="id39">
-			<source ref="id31"/>
-			<target ref="id30"/>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id16"/>
 			<label kind="guard" x="42" y="-25">inCovered()</label>
 			<label kind="assignment" x="34" y="0">allCovered=true</label>
 		</transition>
 	</template>
-	<template>
+<template>
 		<name>syncPrimary</name>
 		<declaration>int idx;</declaration>
-		<location id="id40" x="-748" y="-306">
+		<location id="id20" x="-748" y="-306">
 		</location>
-		<location id="id41" x="-646" y="-306">
+		<location id="id21" x="-646" y="-306">
 			<committed/>
 		</location>
-		<location id="id42" x="-510" y="-306">
+		<location id="id22" x="-510" y="-306">
 			<committed/>
 		</location>
-		<init ref="id40"/>
-		<transition id="id43">
-			<source ref="id42"/>
-			<target ref="id40"/>
+		<init ref="id20"/>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id20"/>
 			<label kind="guard" x="-646" y="-399">idx&gt;=NPI</label>
 			<nail x="-510" y="-374"/>
 			<nail x="-748" y="-374"/>
 		</transition>
-		<transition id="id44">
-			<source ref="id42"/>
-			<target ref="id41"/>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id21"/>
 			<label kind="guard" x="-595" y="-323">idx&lt;NPI</label>
 			<nail x="-578" y="-272"/>
 		</transition>
-		<transition id="id45">
-			<source ref="id41"/>
-			<target ref="id42"/>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id22"/>
 			<label kind="synchronisation" x="-612" y="-340">change[idx]!</label>
 			<label kind="assignment" x="-629" y="-280">idx++</label>
 		</transition>
-		<transition id="id46">
-			<source ref="id40"/>
-			<target ref="id41"/>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id21"/>
 			<label kind="synchronisation" x="-730" y="-323">update?</label>
 			<label kind="assignment" x="-714" y="-306">idx=0</label>
 		</transition>
 	</template>
-	<template>
+<template>
 		<name>eval_diff</name>
 		<parameter>const int dly</parameter>
 		<declaration>clock x;</declaration>
-		<location id="id47" x="-238" y="0">
+		<location id="id23" x="-238" y="0">
 			<label kind="invariant" x="-297" y="-8">x&lt;=dly</label>
 		</location>
-		<location id="id48" x="-102" y="0">
+		<location id="id24" x="-102" y="0">
 			<committed/>
 		</location>
-		<init ref="id47"/>
-		<transition id="id49">
-			<source ref="id48"/>
-			<target ref="id47"/>
+		<init ref="id23"/>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id23"/>
 			<label kind="synchronisation" x="-178" y="51">cmpDone!</label>
 			<label kind="assignment" x="-246" y="110">outcnt=0, diffctrl=0, x=0</label>
 			<nail x="-102" y="110"/>
 			<nail x="-238" y="110"/>
 		</transition>
-		<transition id="id50">
-			<source ref="id47"/>
-			<target ref="id47"/>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id23"/>
 			<label kind="guard" x="-331" y="-93">diffctrl&lt;2
 &amp;&amp; x==dly</label>
 			<label kind="assignment" x="-289" y="-42">x=0</label>
 			<nail x="-263" y="-76"/>
 			<nail x="-229" y="-76"/>
 		</transition>
-		<transition id="id51">
-			<source ref="id47"/>
-			<target ref="id48"/>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
 			<label kind="guard" x="-204" y="0">diffctrl==2</label>
 			<label kind="assignment" x="-212" y="-68">err_magn_v=0,
 err_magn_r=0.0,
 diff()</label>
 		</transition>
 	</template>
-	<template>
+<template>
 		<name>gate2</name>
 		<parameter>const int id, const int a0, const int a1, const int y0, broadcast chan &amp;cin0, broadcast chan &amp;cin1, broadcast chan &amp;cout0</parameter>
 		<declaration>clock x;
@@ -928,51 +950,53 @@ void outGen(tOp op){
 
 	if(original_bit != bits[y0]) {
 		bit_flips = bit_flips + 1;
+        bit_flips_sum = bit_flips_sum + 1;
 	}
 
     if(id==2){ 
         if(diffctrl&lt;2) diffctrl++;
     }  
-}</declaration>
-		<location id="id52" x="-170" y="0">
+}
+</declaration>
+		<location id="id25" x="-170" y="0">
 		</location>
-		<location id="id53" x="0" y="0">
+		<location id="id26" x="0" y="0">
 			<label kind="invariant" x="-17" y="17">x&lt;=duration(tbl_op[id])</label>
 		</location>
-		<location id="id54" x="-272" y="0">
+		<location id="id27" x="-272" y="0">
 			<committed/>
 		</location>
-		<init ref="id54"/>
-		<transition id="id55">
-			<source ref="id54"/>
-			<target ref="id52"/>
+		<init ref="id27"/>
+		<transition>
+			<source ref="id27"/>
+			<target ref="id25"/>
 			<label kind="assignment" x="-238" y="0">inits()</label>
 		</transition>
-		<transition id="id56">
-			<source ref="id52"/>
-			<target ref="id53"/>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="-144" y="0">cin1?</label>
 			<label kind="assignment" x="-76" y="0">x=0</label>
 			<nail x="-85" y="0"/>
 		</transition>
-		<transition id="id57">
-			<source ref="id53"/>
-			<target ref="id52"/>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id25"/>
 			<label kind="guard" x="-110" y="-127">x==duration(tbl_op[id])</label>
 			<label kind="synchronisation" x="8" y="-68">cout0!</label>
 			<label kind="assignment" x="-144" y="-102">outGen(tbl_op[id])</label>
 			<nail x="0" y="-102"/>
 			<nail x="-170" y="-102"/>
 		</transition>
-		<transition id="id58">
-			<source ref="id52"/>
-			<target ref="id53"/>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="-136" y="-42">cin0?</label>
 			<label kind="assignment" x="-59" y="-42">x=0</label>
 			<nail x="-85" y="-34"/>
 		</transition>
 	</template>
-	<system>
+<system>
 // Place template instantiations here.
 
 synPri = syncPrimary();
@@ -1053,2194 +1077,65 @@ g242,
 g251,
 g252;
 </system>
+
 	<queries>
 		<query>
-			<formula>E[&lt;=25000; 10] (max:mul2Atb.tcover)
+			<formula>E[&lt;=1000000; 4] (max:out_sum_all_diff)
 			</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=350; 100] (max:bitsCovered)
-			</formula>
+			<formula>E[&lt;=1000000; 4] (max:dif_count)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=25000] (&lt;&gt;bitsCovered&gt;14)
-			</formula>
+			<formula>simulate[&lt;=1000000;1] {dif_count, res_count}</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>simulate [&lt;=350;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 8+bits[4], 10+bits[5], 12+bits[6], 14+bits[7], bitsCovered, 16+allCovered}
-			</formula>
-			<comment/>
+			<formula>simulate[&lt;=10000;1] {res_acc, res_approx}</formula>
+			<comment>int[0, MAX_INT] res_acc=0;
+int[0, MAX_INT] res_approx=0;</comment>
 		</query>
 		<query>
-			<formula>simulate [&lt;=1250;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 10+bits[4], 12+bits[5], 14+bits[6], 16+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], 28+bits[12], 32+difference, out_sum_all_acc, out_sum_all_approx}
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate [&lt;=1500;1] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 8+bits[4], 10+bits[5], 12+bits[6], 14+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], bitsCovered, 20+allCovered, 30+mul2Atb.inSame, 40+mul2Atb.input, 30+mul2Atb.nsame, mul2Atb.rCover, 60+difference*10}
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate [&lt;=2500;5] {100*((((100.0*(out_sum_all_acc-out_sum_all_approx))/(100.0*(out_sum_all_acc+1))))), out_sum_all_acc, out_sum_all_approx}
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate [&lt;=2000;5] {40+difference, 50+10*err_magn_v, 100*err_magn_r, out_sum_all_acc, out_sum_all_approx, 80+out_sum_all_diff, mul2Atb.rCover, 100*((1+1.0*out_sum_all_acc)/(1+1.0*out_sum_all_approx))}
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate [&lt;=4000;20] {out_sum_all_diff}
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate [&lt;=400;5] {bits[0], 2+bits[1], 4+bits[2], 6+bits[3], 10+bits[4], 12+bits[5], 14+bits[6], 16+bits[7], 20+bits[8], 22+bits[9], 24+bits[10], 26+bits[11], 30+bits[14], 32+bits[15], 34+bits[16], 36+bits[13], 38+bits[12], 40+difference, 45+diffctrl, 50+outcnt}
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>sup: err_magn_v
-			</formula>
-			<comment>Maximalni rozdil mezi vysledkem presne a priblizne nasobicky (pro stejny vstup)</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=2500; 10] (max:err_magn_v)
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=2500; 10] (max:err_magn_r)
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=25000; 10] (max:out_sum_all_diff)
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate [&lt;=5000;200] {bitsCovered, 100*allCovered, mul2Atb.rCover}
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>Pr[&lt;=50000] (&lt;&gt;allCovered)
-			</formula>
-			<comment/>
-			<result outcome="success" type="interval" value="≤ 0.0499441 (95% CI)" timestamp="2024-03-06 14:16:14 +0100">
-				<details>≤ 0.0499441 (95% CI)</details>
-			</result>
-		</query>
-		<query>
-			<formula>E[&lt;=2500; 10] (max:dif_count)</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate[&lt;=5000;1] {dif_count, res_count}</formula>
-			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-01 12:44:34 +0100">
-				<plot title="Simulations (1)" xaxis="time" yaxis="value">
-					<series title="dif_count" type="l" color="0xff0000" encoding="csv">0.0,0.0
-193.3803847769741,0.0
-193.3803847769741,1.0
-213.3803847769741,1.0
-213.3803847769741,2.0
-236.33233738713898,2.0
-236.33233738713898,3.0
-258.35736832697876,3.0
-258.35736832697876,4.0
-279.23288209480233,4.0
-279.23288209480233,5.0
-301.99847765034065,5.0
-301.99847765034065,6.0
-321.99847765034065,6.0
-321.99847765034065,7.0
-345.46143422601745,7.0
-345.46143422601745,8.0
-366.47621592273936,8.0
-366.47621592273936,9.0
-390.72057644603774,9.0
-390.72057644603774,10.0
-414.04301737318747,10.0
-414.04301737318747,11.0
-438.65203725057654,11.0
-438.65203725057654,12.0
-458.65203725057654,12.0
-458.65203725057654,13.0
-481.247320426628,13.0
-481.247320426628,14.0
-506.0553872224409,14.0
-506.0553872224409,15.0
-526.0553872224409,15.0
-526.0553872224409,16.0
-546.0553872224409,16.0
-546.0553872224409,17.0
-566.0553872224409,17.0
-566.0553872224409,18.0
-589.3275812803768,18.0
-589.3275812803768,19.0
-609.3275812803768,19.0
-609.3275812803768,20.0
-630.9315423853695,20.0
-630.9315423853695,21.0
-650.9315423853695,21.0
-650.9315423853695,22.0
-675.6378628849052,22.0
-675.6378628849052,23.0
-696.1922401632182,23.0
-696.1922401632182,24.0
-716.1922401632182,24.0
-716.1922401632182,25.0
-736.1922401632182,25.0
-736.1922401632182,26.0
-756.1922401632182,26.0
-756.1922401632182,27.0
-780.1885186054278,27.0
-780.1885186054278,28.0
-800.7695854140911,28.0
-800.7695854140911,29.0
-823.6148271278944,29.0
-823.6148271278944,30.0
-843.6148271278944,30.0
-843.6148271278944,31.0
-866.1764737777412,31.0
-866.1764737777412,32.0
-887.9467822099105,32.0
-887.9467822099105,33.0
-908.6600346048363,33.0
-908.6600346048363,34.0
-932.105442796601,34.0
-932.105442796601,35.0
-952.105442796601,35.0
-952.105442796601,36.0
-972.105442796601,36.0
-972.105442796601,37.0
-992.105442796601,37.0
-992.105442796601,38.0
-1012.105442796601,38.0
-1012.105442796601,39.0
-1032.7697584300768,39.0
-1032.7697584300768,40.0
-1054.2432310897857,40.0
-1054.2432310897857,41.0
-1076.3647190819029,41.0
-1076.3647190819029,42.0
-1096.3647190819029,42.0
-1096.3647190819029,43.0
-1116.3647190819029,43.0
-1116.3647190819029,44.0
-1136.3647190819029,44.0
-1136.3647190819029,45.0
-1157.2132527595386,45.0
-1157.2132527595386,46.0
-1180.378218202386,46.0
-1180.378218202386,47.0
-1200.378218202386,47.0
-1200.378218202386,48.0
-1220.378218202386,48.0
-1220.378218202386,49.0
-1240.378218202386,49.0
-1240.378218202386,50.0
-1260.378218202386,50.0
-1260.378218202386,51.0
-1282.4078895838466,51.0
-1282.4078895838466,52.0
-1307.315895294305,52.0
-1307.315895294305,53.0
-1327.315895294305,53.0
-1327.315895294305,54.0
-1351.2215818255208,54.0
-1351.2215818255208,55.0
-1373.8044710620306,55.0
-1373.8044710620306,56.0
-1393.8044710620306,56.0
-1393.8044710620306,57.0
-1413.8044710620306,57.0
-1413.8044710620306,58.0
-1435.4512829321902,58.0
-1435.4512829321902,59.0
-1455.4512829321902,59.0
-1455.4512829321902,60.0
-1475.4512829321902,60.0
-1475.4512829321902,61.0
-1496.533468090929,61.0
-1496.533468090929,62.0
-1516.533468090929,62.0
-1516.533468090929,63.0
-1536.533468090929,63.0
-1536.533468090929,64.0
-1556.533468090929,64.0
-1556.533468090929,65.0
-1576.533468090929,65.0
-1576.533468090929,66.0
-1598.37115195347,66.0
-1598.37115195347,67.0
-1622.7500481985044,67.0
-1622.7500481985044,68.0
-1647.22510489868,68.0
-1647.22510489868,69.0
-1667.22510489868,69.0
-1667.22510489868,70.0
-1690.443509867182,70.0
-1690.443509867182,71.0
-1711.2661363580264,71.0
-1711.2661363580264,72.0
-1731.2661363580264,72.0
-1731.2661363580264,73.0
-1751.2661363580264,73.0
-1751.2661363580264,74.0
-1771.2661363580264,74.0
-1771.2661363580264,75.0
-1793.487746117171,75.0
-1793.487746117171,76.0
-1813.487746117171,76.0
-1813.487746117171,77.0
-1836.6202023322694,77.0
-1836.6202023322694,78.0
-1856.6202023322694,78.0
-1856.6202023322694,79.0
-1876.6202023322694,79.0
-1876.6202023322694,80.0
-1899.7695372102316,80.0
-1899.7695372102316,81.0
-1921.762201160891,81.0
-1921.762201160891,82.0
-1945.1570846512914,82.0
-1945.1570846512914,83.0
-1969.828087913338,83.0
-1969.828087913338,84.0
-1991.640610465547,84.0
-1991.640610465547,85.0
-2011.9892786676064,85.0
-2011.9892786676064,86.0
-2031.9892786676064,86.0
-2031.9892786676064,87.0
-2051.9892786676064,87.0
-2051.9892786676064,88.0
-2075.0297410262283,88.0
-2075.0297410262283,89.0
-2099.574621351203,89.0
-2099.574621351203,90.0
-2119.574621351203,90.0
-2119.574621351203,91.0
-2143.4963348158635,91.0
-2143.4963348158635,92.0
-2163.4963348158635,92.0
-2163.4963348158635,93.0
-2183.4963348158635,93.0
-2183.4963348158635,94.0
-2203.4963348158635,94.0
-2203.4963348158635,95.0
-2227.285207218956,95.0
-2227.285207218956,96.0
-2247.285207218956,96.0
-2247.285207218956,97.0
-2269.671146563487,97.0
-2269.671146563487,98.0
-2289.671146563487,98.0
-2289.671146563487,99.0
-2309.671146563487,99.0
-2309.671146563487,100.0
-2329.671146563487,100.0
-2329.671146563487,101.0
-2349.671146563487,101.0
-2349.671146563487,102.0
-2370.0256653572433,102.0
-2370.0256653572433,103.0
-2393.2859553257003,103.0
-2393.2859553257003,104.0
-2413.2859553257003,104.0
-2413.2859553257003,105.0
-2438.190313940868,105.0
-2438.190313940868,106.0
-2458.745324196061,106.0
-2458.745324196061,107.0
-2478.745324196061,107.0
-2478.745324196061,108.0
-2503.6261749628466,108.0
-2503.6261749628466,109.0
-2523.6261749628466,109.0
-2523.6261749628466,110.0
-2543.6261749628466,110.0
-2543.6261749628466,111.0
-2563.6261749628466,111.0
-2563.6261749628466,112.0
-2587.6219832070637,112.0
-2587.6219832070637,113.0
-2607.6219832070637,113.0
-2607.6219832070637,114.0
-2627.6219832070637,114.0
-2627.6219832070637,115.0
-2647.6219832070637,115.0
-2647.6219832070637,116.0
-2667.6219832070637,116.0
-2667.6219832070637,117.0
-2687.6219832070637,117.0
-2687.6219832070637,118.0
-2707.6219832070637,118.0
-2707.6219832070637,119.0
-2730.983145623468,119.0
-2730.983145623468,120.0
-2750.983145623468,120.0
-2750.983145623468,121.0
-2770.983145623468,121.0
-2770.983145623468,122.0
-2790.983145623468,122.0
-2790.983145623468,123.0
-2811.692912293365,123.0
-2811.692912293365,124.0
-2835.2752913476434,124.0
-2835.2752913476434,125.0
-2855.2752913476434,125.0
-2855.2752913476434,126.0
-2879.2558101844043,126.0
-2879.2558101844043,127.0
-2901.249342978699,127.0
-2901.249342978699,128.0
-2921.249342978699,128.0
-2921.249342978699,129.0
-2942.6078532566316,129.0
-2942.6078532566316,130.0
-2962.6078532566316,130.0
-2962.6078532566316,131.0
-2982.6078532566316,131.0
-2982.6078532566316,132.0
-3002.6078532566316,132.0
-3002.6078532566316,133.0
-3066.0219383088406,133.0
-3066.0219383088406,134.0
-3087.44747780147,134.0
-3087.44747780147,135.0
-3108.520986539079,135.0
-3108.520986539079,136.0
-3128.520986539079,136.0
-3128.520986539079,137.0
-3149.592302108649,137.0
-3149.592302108649,138.0
-3171.463340068003,138.0
-3171.463340068003,139.0
-3196.070644094143,139.0
-3196.070644094143,140.0
-3216.070644094143,140.0
-3216.070644094143,141.0
-3240.834558989154,141.0
-3240.834558989154,142.0
-3260.834558989154,142.0
-3260.834558989154,143.0
-3280.834558989154,143.0
-3280.834558989154,144.0
-3300.834558989154,144.0
-3300.834558989154,145.0
-3322.9245155339595,145.0
-3322.9245155339595,146.0
-3343.3295877324417,146.0
-3343.3295877324417,147.0
-3366.9283101707697,147.0
-3366.9283101707697,148.0
-3386.9283101707697,148.0
-3386.9283101707697,149.0
-3406.9283101707697,149.0
-3406.9283101707697,150.0
-3426.9283101707697,150.0
-3426.9283101707697,151.0
-3451.165500591742,151.0
-3451.165500591742,152.0
-3471.165500591742,152.0
-3471.165500591742,153.0
-3491.165500591742,153.0
-3491.165500591742,154.0
-3516.1399635253474,154.0
-3516.1399635253474,155.0
-3537.7850328956265,155.0
-3537.7850328956265,156.0
-3557.7850328956265,156.0
-3557.7850328956265,157.0
-3577.7850328956265,157.0
-3577.7850328956265,158.0
-3597.7850328956265,158.0
-3597.7850328956265,159.0
-3620.5387899593916,159.0
-3620.5387899593916,160.0
-3640.5387899593916,160.0
-3640.5387899593916,161.0
-3660.5387899593916,161.0
-3660.5387899593916,162.0
-3684.213231302565,162.0
-3684.213231302565,163.0
-3707.1553573629353,163.0
-3707.1553573629353,164.0
-3727.1553573629353,164.0
-3727.1553573629353,165.0
-3747.1553573629353,165.0
-3747.1553573629353,166.0
-3767.793332444271,166.0
-3767.793332444271,167.0
-3787.793332444271,167.0
-3787.793332444271,168.0
-3808.503692926606,168.0
-3808.503692926606,169.0
-3830.140258038882,169.0
-3830.140258038882,170.0
-3850.140258038882,170.0
-3850.140258038882,171.0
-3870.140258038882,171.0
-3870.140258038882,172.0
-3894.6672576654237,172.0
-3894.6672576654237,173.0
-3914.6672576654237,173.0
-3914.6672576654237,174.0
-3934.6672576654237,174.0
-3934.6672576654237,175.0
-3956.3013648276683,175.0
-3956.3013648276683,176.0
-3978.815984883113,176.0
-3978.815984883113,177.0
-3998.815984883113,177.0
-3998.815984883113,178.0
-4019.4530934339855,178.0
-4019.4530934339855,179.0
-4039.507821367588,179.0
-4039.507821367588,180.0
-4059.507821367588,180.0
-4059.507821367588,181.0
-4079.507821367588,181.0
-4079.507821367588,182.0
-4099.507821367588,182.0
-4099.507821367588,183.0
-4122.904930290533,183.0
-4122.904930290533,184.0
-4142.904930290533,184.0
-4142.904930290533,185.0
-4166.598399865907,185.0
-4166.598399865907,186.0
-4186.598399865907,186.0
-4186.598399865907,187.0
-4206.598399865907,187.0
-4206.598399865907,188.0
-4226.598399865907,188.0
-4226.598399865907,189.0
-4246.598399865907,189.0
-4246.598399865907,190.0
-4266.598399865907,190.0
-4266.598399865907,191.0
-4286.598399865907,191.0
-4286.598399865907,192.0
-4311.264595388202,192.0
-4311.264595388202,193.0
-4331.305453862296,193.0
-4331.305453862296,194.0
-4351.305453862296,194.0
-4351.305453862296,195.0
-4373.597979357,195.0
-4373.597979357,196.0
-4393.597979357,196.0
-4393.597979357,197.0
-4418.145366321551,197.0
-4418.145366321551,198.0
-4438.332556904061,198.0
-4438.332556904061,199.0
-4461.606360680889,199.0
-4461.606360680889,200.0
-4484.4082754524425,200.0
-4484.4082754524425,201.0
-4506.0681538435165,201.0
-4506.0681538435165,202.0
-4526.0681538435165,202.0
-4526.0681538435165,203.0
-4546.0681538435165,203.0
-4546.0681538435165,204.0
-4566.0681538435165,204.0
-4566.0681538435165,205.0
-4586.0681538435165,205.0
-4586.0681538435165,206.0
-4608.990062272642,206.0
-4608.990062272642,207.0
-4629.447975385701,207.0
-4629.447975385701,208.0
-4649.447975385701,208.0
-4649.447975385701,209.0
-4669.447975385701,209.0
-4669.447975385701,210.0
-4689.447975385701,210.0
-4689.447975385701,211.0
-4713.853988677729,211.0
-4713.853988677729,212.0
-4733.853988677729,212.0
-4733.853988677729,213.0
-4757.563821654767,213.0
-4757.563821654767,214.0
-4777.563821654767,214.0
-4777.563821654767,215.0
-4800.387021389324,215.0
-4800.387021389324,216.0
-4820.387021389324,216.0
-4820.387021389324,217.0
-4843.446085546166,217.0
-4843.446085546166,218.0
-4863.931723329006,218.0
-4863.931723329006,219.0
-4883.931723329006,219.0
-4883.931723329006,220.0
-4903.931723329006,220.0
-4903.931723329006,221.0
-4928.108565231087,221.0
-4928.108565231087,222.0
-4948.108565231087,222.0
-4948.108565231087,223.0
-4968.108565231087,223.0
-4968.108565231087,224.0
-4988.108565231087,224.0
-4988.108565231087,225.0
-5000.0,225.0
-					</series>
-					<series title="res_count" type="l" color="0x00ffff" encoding="csv">0.0,0.0
-21.689623538404703,0.0
-21.689623538404703,1.0
-41.6896235384047,1.0
-41.6896235384047,2.0
-65.89793916675262,2.0
-65.89793916675262,3.0
-88.00116846570745,3.0
-88.00116846570745,4.0
-108.00116846570745,4.0
-108.00116846570745,5.0
-131.50379289174452,5.0
-131.50379289174452,6.0
-152.40753115271218,6.0
-152.40753115271218,7.0
-172.40753115271218,7.0
-172.40753115271218,8.0
-193.3803847769741,8.0
-193.3803847769741,9.0
-213.3803847769741,9.0
-213.3803847769741,10.0
-236.33233738713898,10.0
-236.33233738713898,11.0
-258.35736832697876,11.0
-258.35736832697876,12.0
-279.23288209480233,12.0
-279.23288209480233,13.0
-301.99847765034065,13.0
-301.99847765034065,14.0
-321.99847765034065,14.0
-321.99847765034065,15.0
-345.46143422601745,15.0
-345.46143422601745,16.0
-366.47621592273936,16.0
-366.47621592273936,17.0
-390.72057644603774,17.0
-390.72057644603774,18.0
-414.04301737318747,18.0
-414.04301737318747,19.0
-438.65203725057654,19.0
-438.65203725057654,20.0
-458.65203725057654,20.0
-458.65203725057654,21.0
-481.247320426628,21.0
-481.247320426628,22.0
-506.0553872224409,22.0
-506.0553872224409,23.0
-526.0553872224409,23.0
-526.0553872224409,24.0
-546.0553872224409,24.0
-546.0553872224409,25.0
-566.0553872224409,25.0
-566.0553872224409,26.0
-589.3275812803768,26.0
-589.3275812803768,27.0
-609.3275812803768,27.0
-609.3275812803768,28.0
-630.9315423853695,28.0
-630.9315423853695,29.0
-650.9315423853695,29.0
-650.9315423853695,30.0
-675.6378628849052,30.0
-675.6378628849052,31.0
-696.1922401632182,31.0
-696.1922401632182,32.0
-716.1922401632182,32.0
-716.1922401632182,33.0
-736.1922401632182,33.0
-736.1922401632182,34.0
-756.1922401632182,34.0
-756.1922401632182,35.0
-780.1885186054278,35.0
-780.1885186054278,36.0
-800.7695854140911,36.0
-800.7695854140911,37.0
-823.6148271278944,37.0
-823.6148271278944,38.0
-843.6148271278944,38.0
-843.6148271278944,39.0
-866.1764737777412,39.0
-866.1764737777412,40.0
-887.9467822099105,40.0
-887.9467822099105,41.0
-908.6600346048363,41.0
-908.6600346048363,42.0
-932.105442796601,42.0
-932.105442796601,43.0
-952.105442796601,43.0
-952.105442796601,44.0
-972.105442796601,44.0
-972.105442796601,45.0
-992.105442796601,45.0
-992.105442796601,46.0
-1012.105442796601,46.0
-1012.105442796601,47.0
-1032.7697584300768,47.0
-1032.7697584300768,48.0
-1054.2432310897857,48.0
-1054.2432310897857,49.0
-1076.3647190819029,49.0
-1076.3647190819029,50.0
-1096.3647190819029,50.0
-1096.3647190819029,51.0
-1116.3647190819029,51.0
-1116.3647190819029,52.0
-1136.3647190819029,52.0
-1136.3647190819029,53.0
-1157.2132527595386,53.0
-1157.2132527595386,54.0
-1180.378218202386,54.0
-1180.378218202386,55.0
-1200.378218202386,55.0
-1200.378218202386,56.0
-1220.378218202386,56.0
-1220.378218202386,57.0
-1240.378218202386,57.0
-1240.378218202386,58.0
-1260.378218202386,58.0
-1260.378218202386,59.0
-1282.4078895838466,59.0
-1282.4078895838466,60.0
-1307.315895294305,60.0
-1307.315895294305,61.0
-1327.315895294305,61.0
-1327.315895294305,62.0
-1351.2215818255208,62.0
-1351.2215818255208,63.0
-1373.8044710620306,63.0
-1373.8044710620306,64.0
-1393.8044710620306,64.0
-1393.8044710620306,65.0
-1413.8044710620306,65.0
-1413.8044710620306,66.0
-1435.4512829321902,66.0
-1435.4512829321902,67.0
-1455.4512829321902,67.0
-1455.4512829321902,68.0
-1475.4512829321902,68.0
-1475.4512829321902,69.0
-1496.533468090929,69.0
-1496.533468090929,70.0
-1516.533468090929,70.0
-1516.533468090929,71.0
-1536.533468090929,71.0
-1536.533468090929,72.0
-1556.533468090929,72.0
-1556.533468090929,73.0
-1576.533468090929,73.0
-1576.533468090929,74.0
-1598.37115195347,74.0
-1598.37115195347,75.0
-1622.7500481985044,75.0
-1622.7500481985044,76.0
-1647.22510489868,76.0
-1647.22510489868,77.0
-1667.22510489868,77.0
-1667.22510489868,78.0
-1690.443509867182,78.0
-1690.443509867182,79.0
-1711.2661363580264,79.0
-1711.2661363580264,80.0
-1731.2661363580264,80.0
-1731.2661363580264,81.0
-1751.2661363580264,81.0
-1751.2661363580264,82.0
-1771.2661363580264,82.0
-1771.2661363580264,83.0
-1793.487746117171,83.0
-1793.487746117171,84.0
-1813.487746117171,84.0
-1813.487746117171,85.0
-1836.6202023322694,85.0
-1836.6202023322694,86.0
-1856.6202023322694,86.0
-1856.6202023322694,87.0
-1876.6202023322694,87.0
-1876.6202023322694,88.0
-1899.7695372102316,88.0
-1899.7695372102316,89.0
-1921.762201160891,89.0
-1921.762201160891,90.0
-1945.1570846512914,90.0
-1945.1570846512914,91.0
-1969.828087913338,91.0
-1969.828087913338,92.0
-1991.640610465547,92.0
-1991.640610465547,93.0
-2011.9892786676064,93.0
-2011.9892786676064,94.0
-2031.9892786676064,94.0
-2031.9892786676064,95.0
-2051.9892786676064,95.0
-2051.9892786676064,96.0
-2075.0297410262283,96.0
-2075.0297410262283,97.0
-2099.574621351203,97.0
-2099.574621351203,98.0
-2119.574621351203,98.0
-2119.574621351203,99.0
-2143.4963348158635,99.0
-2143.4963348158635,100.0
-2163.4963348158635,100.0
-2163.4963348158635,101.0
-2183.4963348158635,101.0
-2183.4963348158635,102.0
-2203.4963348158635,102.0
-2203.4963348158635,103.0
-2227.285207218956,103.0
-2227.285207218956,104.0
-2247.285207218956,104.0
-2247.285207218956,105.0
-2269.671146563487,105.0
-2269.671146563487,106.0
-2289.671146563487,106.0
-2289.671146563487,107.0
-2309.671146563487,107.0
-2309.671146563487,108.0
-2329.671146563487,108.0
-2329.671146563487,109.0
-2349.671146563487,109.0
-2349.671146563487,110.0
-2370.0256653572433,110.0
-2370.0256653572433,111.0
-2393.2859553257003,111.0
-2393.2859553257003,112.0
-2413.2859553257003,112.0
-2413.2859553257003,113.0
-2438.190313940868,113.0
-2438.190313940868,114.0
-2458.745324196061,114.0
-2458.745324196061,115.0
-2478.745324196061,115.0
-2478.745324196061,116.0
-2503.6261749628466,116.0
-2503.6261749628466,117.0
-2523.6261749628466,117.0
-2523.6261749628466,118.0
-2543.6261749628466,118.0
-2543.6261749628466,119.0
-2563.6261749628466,119.0
-2563.6261749628466,120.0
-2587.6219832070637,120.0
-2587.6219832070637,121.0
-2607.6219832070637,121.0
-2607.6219832070637,122.0
-2627.6219832070637,122.0
-2627.6219832070637,123.0
-2647.6219832070637,123.0
-2647.6219832070637,124.0
-2667.6219832070637,124.0
-2667.6219832070637,125.0
-2687.6219832070637,125.0
-2687.6219832070637,126.0
-2707.6219832070637,126.0
-2707.6219832070637,127.0
-2730.983145623468,127.0
-2730.983145623468,128.0
-2750.983145623468,128.0
-2750.983145623468,129.0
-2770.983145623468,129.0
-2770.983145623468,130.0
-2790.983145623468,130.0
-2790.983145623468,131.0
-2811.692912293365,131.0
-2811.692912293365,132.0
-2835.2752913476434,132.0
-2835.2752913476434,133.0
-2855.2752913476434,133.0
-2855.2752913476434,134.0
-2879.2558101844043,134.0
-2879.2558101844043,135.0
-2901.249342978699,135.0
-2901.249342978699,136.0
-2921.249342978699,136.0
-2921.249342978699,137.0
-2942.6078532566316,137.0
-2942.6078532566316,138.0
-2962.6078532566316,138.0
-2962.6078532566316,139.0
-2982.6078532566316,139.0
-2982.6078532566316,140.0
-3002.6078532566316,140.0
-3002.6078532566316,141.0
-3022.9699898022227,141.0
-3022.9699898022227,142.0
-3046.0219383088406,142.0
-3046.0219383088406,143.0
-3066.0219383088406,143.0
-3066.0219383088406,144.0
-3087.44747780147,144.0
-3087.44747780147,145.0
-3108.520986539079,145.0
-3108.520986539079,146.0
-3128.520986539079,146.0
-3128.520986539079,147.0
-3149.592302108649,147.0
-3149.592302108649,148.0
-3171.463340068003,148.0
-3171.463340068003,149.0
-3196.070644094143,149.0
-3196.070644094143,150.0
-3216.070644094143,150.0
-3216.070644094143,151.0
-3240.834558989154,151.0
-3240.834558989154,152.0
-3260.834558989154,152.0
-3260.834558989154,153.0
-3280.834558989154,153.0
-3280.834558989154,154.0
-3300.834558989154,154.0
-3300.834558989154,155.0
-3322.9245155339595,155.0
-3322.9245155339595,156.0
-3343.3295877324417,156.0
-3343.3295877324417,157.0
-3366.9283101707697,157.0
-3366.9283101707697,158.0
-3386.9283101707697,158.0
-3386.9283101707697,159.0
-3406.9283101707697,159.0
-3406.9283101707697,160.0
-3426.9283101707697,160.0
-3426.9283101707697,161.0
-3451.165500591742,161.0
-3451.165500591742,162.0
-3471.165500591742,162.0
-3471.165500591742,163.0
-3491.165500591742,163.0
-3491.165500591742,164.0
-3516.1399635253474,164.0
-3516.1399635253474,165.0
-3537.7850328956265,165.0
-3537.7850328956265,166.0
-3557.7850328956265,166.0
-3557.7850328956265,167.0
-3577.7850328956265,167.0
-3577.7850328956265,168.0
-3597.7850328956265,168.0
-3597.7850328956265,169.0
-3620.5387899593916,169.0
-3620.5387899593916,170.0
-3640.5387899593916,170.0
-3640.5387899593916,171.0
-3660.5387899593916,171.0
-3660.5387899593916,172.0
-3684.213231302565,172.0
-3684.213231302565,173.0
-3707.1553573629353,173.0
-3707.1553573629353,174.0
-3727.1553573629353,174.0
-3727.1553573629353,175.0
-3747.1553573629353,175.0
-3747.1553573629353,176.0
-3767.793332444271,176.0
-3767.793332444271,177.0
-3787.793332444271,177.0
-3787.793332444271,178.0
-3808.503692926606,178.0
-3808.503692926606,179.0
-3830.140258038882,179.0
-3830.140258038882,180.0
-3850.140258038882,180.0
-3850.140258038882,181.0
-3870.140258038882,181.0
-3870.140258038882,182.0
-3894.6672576654237,182.0
-3894.6672576654237,183.0
-3914.6672576654237,183.0
-3914.6672576654237,184.0
-3934.6672576654237,184.0
-3934.6672576654237,185.0
-3956.3013648276683,185.0
-3956.3013648276683,186.0
-3978.815984883113,186.0
-3978.815984883113,187.0
-3998.815984883113,187.0
-3998.815984883113,188.0
-4019.4530934339855,188.0
-4019.4530934339855,189.0
-4039.507821367588,189.0
-4039.507821367588,190.0
-4059.507821367588,190.0
-4059.507821367588,191.0
-4079.507821367588,191.0
-4079.507821367588,192.0
-4099.507821367588,192.0
-4099.507821367588,193.0
-4122.904930290533,193.0
-4122.904930290533,194.0
-4142.904930290533,194.0
-4142.904930290533,195.0
-4166.598399865907,195.0
-4166.598399865907,196.0
-4186.598399865907,196.0
-4186.598399865907,197.0
-4206.598399865907,197.0
-4206.598399865907,198.0
-4226.598399865907,198.0
-4226.598399865907,199.0
-4246.598399865907,199.0
-4246.598399865907,200.0
-4266.598399865907,200.0
-4266.598399865907,201.0
-4286.598399865907,201.0
-4286.598399865907,202.0
-4311.264595388202,202.0
-4311.264595388202,203.0
-4331.305453862296,203.0
-4331.305453862296,204.0
-4351.305453862296,204.0
-4351.305453862296,205.0
-4373.597979357,205.0
-4373.597979357,206.0
-4393.597979357,206.0
-4393.597979357,207.0
-4418.145366321551,207.0
-4418.145366321551,208.0
-4438.332556904061,208.0
-4438.332556904061,209.0
-4461.606360680889,209.0
-4461.606360680889,210.0
-4484.4082754524425,210.0
-4484.4082754524425,211.0
-4506.0681538435165,211.0
-4506.0681538435165,212.0
-4526.0681538435165,212.0
-4526.0681538435165,213.0
-4546.0681538435165,213.0
-4546.0681538435165,214.0
-4566.0681538435165,214.0
-4566.0681538435165,215.0
-4586.0681538435165,215.0
-4586.0681538435165,216.0
-4608.990062272642,216.0
-4608.990062272642,217.0
-4629.447975385701,217.0
-4629.447975385701,218.0
-4649.447975385701,218.0
-4649.447975385701,219.0
-4669.447975385701,219.0
-4669.447975385701,220.0
-4689.447975385701,220.0
-4689.447975385701,221.0
-4713.853988677729,221.0
-4713.853988677729,222.0
-4733.853988677729,222.0
-4733.853988677729,223.0
-4757.563821654767,223.0
-4757.563821654767,224.0
-4777.563821654767,224.0
-4777.563821654767,225.0
-4800.387021389324,225.0
-4800.387021389324,226.0
-4820.387021389324,226.0
-4820.387021389324,227.0
-4843.446085546166,227.0
-4843.446085546166,228.0
-4863.931723329006,228.0
-4863.931723329006,229.0
-4883.931723329006,229.0
-4883.931723329006,230.0
-4903.931723329006,230.0
-4903.931723329006,231.0
-4928.108565231087,231.0
-4928.108565231087,232.0
-4948.108565231087,232.0
-4948.108565231087,233.0
-4968.108565231087,233.0
-4968.108565231087,234.0
-4988.108565231087,234.0
-4988.108565231087,235.0
-5000.0,235.0
-					</series>
-					<comment/>
-				</plot>
-			</result>
-		</query>
-		<query>
-			<formula>simulate[&lt;=5000;1] {error_prob}</formula>
-			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-06 14:48:21 +0100">
-				<plot title="Simulations (1)" xaxis="time" yaxis="value">
-					<series title="error_prob" type="l" color="0xff0000" encoding="csv">0.0,0.0
-40.0,0.0
-40.0,1.52587890625E-5
-63.32394709112123,1.52587890625E-5
-63.32394709112123,3.0517578125E-5
-85.1393289247062,3.0517578125E-5
-85.1393289247062,4.57763671875E-5
-105.1393289247062,4.57763671875E-5
-105.1393289247062,6.103515625E-5
-125.1393289247062,6.103515625E-5
-125.1393289247062,7.62939453125E-5
-145.1393289247062,7.62939453125E-5
-145.1393289247062,9.1552734375E-5
-165.1393289247062,9.1552734375E-5
-165.1393289247062,1.068115234375E-4
-186.37460786034353,1.068115234375E-4
-186.37460786034353,1.220703125E-4
-206.37460786034353,1.220703125E-4
-206.37460786034353,1.373291015625E-4
-248.93154467688873,1.373291015625E-4
-248.93154467688873,1.52587890625E-4
-269.39934847760014,1.52587890625E-4
-269.39934847760014,1.678466796875E-4
-289.39934847760014,1.678466796875E-4
-289.39934847760014,1.8310546875E-4
-309.39934847760014,1.8310546875E-4
-309.39934847760014,1.983642578125E-4
-329.39934847760014,1.983642578125E-4
-329.39934847760014,2.13623046875E-4
-349.39934847760014,2.13623046875E-4
-349.39934847760014,2.288818359375E-4
-369.39934847760014,2.288818359375E-4
-369.39934847760014,2.44140625E-4
-389.39934847760014,2.44140625E-4
-389.39934847760014,2.593994140625E-4
-412.9075197048951,2.593994140625E-4
-412.9075197048951,2.74658203125E-4
-435.655629344983,2.74658203125E-4
-435.655629344983,2.899169921875E-4
-456.84556719847023,2.899169921875E-4
-456.84556719847023,3.0517578125E-4
-478.21764339809306,3.0517578125E-4
-478.21764339809306,3.204345703125E-4
-498.9821622893214,3.204345703125E-4
-498.9821622893214,3.35693359375E-4
-519.5450448524207,3.35693359375E-4
-519.5450448524207,3.509521484375E-4
-542.4428838118911,3.509521484375E-4
-542.4428838118911,3.662109375E-4
-562.4428838118911,3.662109375E-4
-562.4428838118911,3.814697265625E-4
-584.9634533643257,3.814697265625E-4
-584.9634533643257,3.96728515625E-4
-606.2207881896757,3.96728515625E-4
-606.2207881896757,4.119873046875E-4
-630.6210497906432,4.119873046875E-4
-630.6210497906432,4.2724609375E-4
-650.6210497906432,4.2724609375E-4
-650.6210497906432,4.425048828125E-4
-670.6210497906432,4.425048828125E-4
-670.6210497906432,4.57763671875E-4
-691.1502062506042,4.57763671875E-4
-691.1502062506042,4.730224609375E-4
-711.1502062506042,4.730224609375E-4
-711.1502062506042,4.8828125E-4
-731.1502062506042,4.8828125E-4
-731.1502062506042,5.035400390625E-4
-751.1502062506042,5.035400390625E-4
-751.1502062506042,5.18798828125E-4
-771.1502062506042,5.18798828125E-4
-771.1502062506042,5.340576171875E-4
-791.1502062506042,5.340576171875E-4
-791.1502062506042,5.4931640625E-4
-814.5151269028429,5.4931640625E-4
-814.5151269028429,5.645751953125E-4
-834.5151269028429,5.645751953125E-4
-834.5151269028429,5.79833984375E-4
-854.5151269028429,5.79833984375E-4
-854.5151269028429,5.950927734375E-4
-874.5151269028429,5.950927734375E-4
-874.5151269028429,6.103515625E-4
-894.5151269028429,6.103515625E-4
-894.5151269028429,6.256103515625E-4
-919.0754426689819,6.256103515625E-4
-919.0754426689819,6.40869140625E-4
-982.1028870122973,6.40869140625E-4
-982.1028870122973,6.561279296875E-4
-1002.1028870122973,6.561279296875E-4
-1002.1028870122973,6.7138671875E-4
-1022.1028870122973,6.7138671875E-4
-1022.1028870122973,6.866455078125E-4
-1042.1028870122973,6.866455078125E-4
-1042.1028870122973,7.01904296875E-4
-1062.1028870122973,7.01904296875E-4
-1062.1028870122973,7.171630859375E-4
-1084.211312981788,7.171630859375E-4
-1084.211312981788,7.32421875E-4
-1109.178905118024,7.32421875E-4
-1109.178905118024,7.476806640625E-4
-1129.178905118024,7.476806640625E-4
-1129.178905118024,7.62939453125E-4
-1149.8908496636432,7.62939453125E-4
-1149.8908496636432,7.781982421875E-4
-1170.0580586586148,7.781982421875E-4
-1170.0580586586148,7.9345703125E-4
-1190.0580586586148,7.9345703125E-4
-1190.0580586586148,8.087158203125E-4
-1210.0580586586148,8.087158203125E-4
-1210.0580586586148,8.23974609375E-4
-1230.0580586586148,8.23974609375E-4
-1230.0580586586148,8.392333984375E-4
-1252.1248663787264,8.392333984375E-4
-1252.1248663787264,8.544921875E-4
-1272.1248663787264,8.544921875E-4
-1272.1248663787264,8.697509765625E-4
-1296.3739986286964,8.697509765625E-4
-1296.3739986286964,8.85009765625E-4
-1317.0233985956293,8.85009765625E-4
-1317.0233985956293,9.002685546875E-4
-1341.0361490899231,9.002685546875E-4
-1341.0361490899231,9.1552734375E-4
-1361.4686846605036,9.1552734375E-4
-1361.4686846605036,9.307861328125E-4
-1383.3378011290915,9.307861328125E-4
-1383.3378011290915,9.46044921875E-4
-1403.3378011290915,9.46044921875E-4
-1403.3378011290915,9.613037109375E-4
-1423.3378011290915,9.613037109375E-4
-1423.3378011290915,9.765625E-4
-1443.3378011290915,9.765625E-4
-1443.3378011290915,9.918212890625E-4
-1464.185129593825,9.918212890625E-4
-1464.185129593825,0.001007080078125
-1486.8661560455803,0.001007080078125
-1486.8661560455803,0.0010223388671875
-1506.8661560455803,0.0010223388671875
-1506.8661560455803,0.00103759765625
-1526.8661560455803,0.00103759765625
-1526.8661560455803,0.0010528564453125
-1546.8661560455803,0.0010528564453125
-1546.8661560455803,0.001068115234375
-1567.9516334203072,0.001068115234375
-1567.9516334203072,0.0010833740234375
-1587.9516334203072,0.0010833740234375
-1587.9516334203072,0.0010986328125
-1612.1892449550796,0.0010986328125
-1612.1892449550796,0.0011138916015625
-1632.3936575569678,0.0011138916015625
-1632.3936575569678,0.001129150390625
-1652.3936575569678,0.001129150390625
-1652.3936575569678,0.0011444091796875
-1672.3936575569678,0.0011444091796875
-1672.3936575569678,0.00115966796875
-1692.3936575569678,0.00115966796875
-1692.3936575569678,0.0011749267578125
-1712.3936575569678,0.0011749267578125
-1712.3936575569678,0.001190185546875
-1732.3936575569678,0.001190185546875
-1732.3936575569678,0.0012054443359375
-1752.3936575569678,0.0012054443359375
-1752.3936575569678,0.001220703125
-1772.3936575569678,0.001220703125
-1772.3936575569678,0.0012359619140625
-1796.4196836808696,0.0012359619140625
-1796.4196836808696,0.001251220703125
-1817.4846135498956,0.001251220703125
-1817.4846135498956,0.0012664794921875
-1841.3998467137571,0.0012664794921875
-1841.3998467137571,0.00128173828125
-1861.3998467137571,0.00128173828125
-1861.3998467137571,0.0012969970703125
-1881.3998467137571,0.0012969970703125
-1881.3998467137571,0.001312255859375
-1904.884433700936,0.001312255859375
-1904.884433700936,0.0013275146484375
-1926.2313299893867,0.0013275146484375
-1926.2313299893867,0.0013427734375
-1946.2313299893867,0.0013427734375
-1946.2313299893867,0.0013580322265625
-1967.633035229519,0.0013580322265625
-1967.633035229519,0.001373291015625
-1988.6858715349808,0.001373291015625
-1988.6858715349808,0.0013885498046875
-2008.6858715349808,0.0013885498046875
-2008.6858715349808,0.00140380859375
-2031.8349093617871,0.00140380859375
-2031.8349093617871,0.0014190673828125
-2052.3036946437787,0.0014190673828125
-2052.3036946437787,0.001434326171875
-2073.5211934079416,0.001434326171875
-2073.5211934079416,0.0014495849609375
-2096.5344538819045,0.0014495849609375
-2096.5344538819045,0.00146484375
-2116.5344538819045,0.00146484375
-2116.5344538819045,0.0014801025390625
-2136.5344538819045,0.0014801025390625
-2136.5344538819045,0.001495361328125
-2158.2590334815904,0.001495361328125
-2158.2590334815904,0.0015106201171875
-2178.2590334815904,0.0015106201171875
-2178.2590334815904,0.00152587890625
-2198.2590334815904,0.00152587890625
-2198.2590334815904,0.0015411376953125
-2218.2590334815904,0.0015411376953125
-2218.2590334815904,0.001556396484375
-2241.750454721041,0.001556396484375
-2241.750454721041,0.0015716552734375
-2261.750454721041,0.0015716552734375
-2261.750454721041,0.0015869140625
-2281.750454721041,0.0015869140625
-2281.750454721041,0.0016021728515625
-2301.750454721041,0.0016021728515625
-2301.750454721041,0.001617431640625
-2326.4312978833914,0.001617431640625
-2326.4312978833914,0.0016326904296875
-2348.434383191634,0.0016326904296875
-2348.434383191634,0.00164794921875
-2371.3832146511413,0.00164794921875
-2371.3832146511413,0.0016632080078125
-2392.236366221914,0.0016632080078125
-2392.236366221914,0.001678466796875
-2412.236366221914,0.001678466796875
-2412.236366221914,0.0016937255859375
-2437.0196007972118,0.0016937255859375
-2437.0196007972118,0.001708984375
-2458.9697622787207,0.001708984375
-2458.9697622787207,0.0017242431640625
-2478.9697622787207,0.0017242431640625
-2478.9697622787207,0.001739501953125
-2498.9697622787207,0.001739501953125
-2498.9697622787207,0.0017547607421875
-2518.9697622787207,0.0017547607421875
-2518.9697622787207,0.00177001953125
-2538.9697622787207,0.00177001953125
-2538.9697622787207,0.0017852783203125
-2558.9697622787207,0.0017852783203125
-2558.9697622787207,0.001800537109375
-2578.9697622787207,0.001800537109375
-2578.9697622787207,0.0018157958984375
-2598.9697622787207,0.0018157958984375
-2598.9697622787207,0.0018310546875
-2622.386993620312,0.0018310546875
-2622.386993620312,0.0018463134765625
-2642.386993620312,0.0018463134765625
-2642.386993620312,0.001861572265625
-2662.386993620312,0.001861572265625
-2662.386993620312,0.0018768310546875
-2684.4362576445565,0.0018768310546875
-2684.4362576445565,0.00189208984375
-2706.0267630394083,0.00189208984375
-2706.0267630394083,0.0019073486328125
-2726.0267630394083,0.0019073486328125
-2726.0267630394083,0.001922607421875
-2746.0267630394083,0.001922607421875
-2746.0267630394083,0.0019378662109375
-2766.0267630394083,0.0019378662109375
-2766.0267630394083,0.001953125
-2786.0267630394083,0.001953125
-2786.0267630394083,0.0019683837890625
-2806.0267630394083,0.0019683837890625
-2806.0267630394083,0.001983642578125
-2827.414737715153,0.001983642578125
-2827.414737715153,0.0019989013671875
-2848.9483380888123,0.0019989013671875
-2848.9483380888123,0.00201416015625
-2868.9483380888123,0.00201416015625
-2868.9483380888123,0.0020294189453125
-2889.715451670345,0.0020294189453125
-2889.715451670345,0.002044677734375
-2913.6404064460658,0.002044677734375
-2913.6404064460658,0.0020599365234375
-2933.6404064460658,0.0020599365234375
-2933.6404064460658,0.0020751953125
-2953.6404064460658,0.0020751953125
-2953.6404064460658,0.0020904541015625
-2973.6404064460658,0.0020904541015625
-2973.6404064460658,0.002105712890625
-2996.296422529267,0.002105712890625
-2996.296422529267,0.0021209716796875
-3019.0294125233777,0.0021209716796875
-3019.0294125233777,0.00213623046875
-3039.0294125233777,0.00213623046875
-3039.0294125233777,0.0021514892578125
-3059.0294125233777,0.0021514892578125
-3059.0294125233777,0.002166748046875
-3079.0294125233777,0.002166748046875
-3079.0294125233777,0.0021820068359375
-3099.0294125233777,0.0021820068359375
-3099.0294125233777,0.002197265625
-3123.5555834311526,0.002197265625
-3123.5555834311526,0.0022125244140625
-3145.4843385564163,0.0022125244140625
-3145.4843385564163,0.002227783203125
-3165.4843385564163,0.002227783203125
-3165.4843385564163,0.0022430419921875
-3185.4843385564163,0.0022430419921875
-3185.4843385564163,0.00225830078125
-3208.2400345325004,0.00225830078125
-3208.2400345325004,0.0022735595703125
-3228.2400345325004,0.0022735595703125
-3228.2400345325004,0.002288818359375
-3250.7906383124646,0.002288818359375
-3250.7906383124646,0.0023040771484375
-3270.7906383124646,0.0023040771484375
-3270.7906383124646,0.0023193359375
-3290.7906383124646,0.0023193359375
-3290.7906383124646,0.0023345947265625
-3311.846833450254,0.0023345947265625
-3311.846833450254,0.002349853515625
-3331.846833450254,0.002349853515625
-3331.846833450254,0.0023651123046875
-3351.846833450254,0.0023651123046875
-3351.846833450254,0.00238037109375
-3371.846833450254,0.00238037109375
-3371.846833450254,0.0023956298828125
-3391.846833450254,0.0023956298828125
-3391.846833450254,0.002410888671875
-3411.846833450254,0.002410888671875
-3411.846833450254,0.0024261474609375
-3435.1726927037816,0.0024261474609375
-3435.1726927037816,0.00244140625
-3455.2919221809134,0.00244140625
-3455.2919221809134,0.0024566650390625
-3475.813188322354,0.0024566650390625
-3475.813188322354,0.002471923828125
-3497.632009558147,0.002471923828125
-3497.632009558147,0.0024871826171875
-3517.632009558147,0.0024871826171875
-3517.632009558147,0.00250244140625
-3538.8239069411065,0.00250244140625
-3538.8239069411065,0.0025177001953125
-3562.350927242078,0.0025177001953125
-3562.350927242078,0.002532958984375
-3582.350927242078,0.002532958984375
-3582.350927242078,0.0025482177734375
-3602.997153556207,0.0025482177734375
-3602.997153556207,0.0025634765625
-3622.997153556207,0.0025634765625
-3622.997153556207,0.0025787353515625
-3646.786619951017,0.0025787353515625
-3646.786619951017,0.002593994140625
-3668.452792353928,0.002593994140625
-3668.452792353928,0.0026092529296875
-3688.7430672114715,0.0026092529296875
-3688.7430672114715,0.00262451171875
-3708.7430672114715,0.00262451171875
-3708.7430672114715,0.0026397705078125
-3733.4766339266207,0.0026397705078125
-3733.4766339266207,0.002655029296875
-3755.3247290162835,0.002655029296875
-3755.3247290162835,0.0026702880859375
-3775.3247290162835,0.0026702880859375
-3775.3247290162835,0.002685546875
-3797.8339139733,0.002685546875
-3797.8339139733,0.0027008056640625
-3817.8339139733,0.0027008056640625
-3817.8339139733,0.002716064453125
-3837.8339139733,0.002716064453125
-3837.8339139733,0.0027313232421875
-3857.8339139733,0.0027313232421875
-3857.8339139733,0.00274658203125
-3878.1120294716675,0.00274658203125
-3878.1120294716675,0.0027618408203125
-3898.7605500931386,0.0027618408203125
-3898.7605500931386,0.002777099609375
-3919.625819568755,0.002777099609375
-3919.625819568755,0.0027923583984375
-3939.625819568755,0.0027923583984375
-3939.625819568755,0.0028076171875
-3959.625819568755,0.0028076171875
-3959.625819568755,0.0028228759765625
-3979.625819568755,0.0028228759765625
-3979.625819568755,0.002838134765625
-3999.625819568755,0.002838134765625
-3999.625819568755,0.0028533935546875
-4022.520817834884,0.0028533935546875
-4022.520817834884,0.00286865234375
-4047.1104563004337,0.00286865234375
-4047.1104563004337,0.0028839111328125
-4068.324712361209,0.0028839111328125
-4068.324712361209,0.002899169921875
-4088.324712361209,0.002899169921875
-4088.324712361209,0.0029144287109375
-4108.324712361209,0.0029144287109375
-4108.324712361209,0.0029296875
-4128.9724624634255,0.0029296875
-4128.9724624634255,0.0029449462890625
-4148.9724624634255,0.0029449462890625
-4148.9724624634255,0.002960205078125
-4170.928959124722,0.002960205078125
-4170.928959124722,0.0029754638671875
-4190.928959124722,0.0029754638671875
-4190.928959124722,0.00299072265625
-4210.928959124722,0.00299072265625
-4210.928959124722,0.0030059814453125
-4232.822342468426,0.0030059814453125
-4232.822342468426,0.003021240234375
-4252.822342468426,0.003021240234375
-4252.822342468426,0.0030364990234375
-4274.3027705466375,0.0030364990234375
-4274.3027705466375,0.0030517578125
-4294.3027705466375,0.0030517578125
-4294.3027705466375,0.0030670166015625
-4315.604842028115,0.0030670166015625
-4315.604842028115,0.003082275390625
-4335.604842028115,0.003082275390625
-4335.604842028115,0.0030975341796875
-4355.604842028115,0.0030975341796875
-4355.604842028115,0.00311279296875
-4375.604842028115,0.00311279296875
-4375.604842028115,0.0031280517578125
-4400.153040718287,0.0031280517578125
-4400.153040718287,0.003143310546875
-4424.796993235359,0.003143310546875
-4424.796993235359,0.0031585693359375
-4444.796993235359,0.0031585693359375
-4444.796993235359,0.003173828125
-4464.796993235359,0.003173828125
-4464.796993235359,0.0031890869140625
-4484.796993235359,0.0031890869140625
-4484.796993235359,0.003204345703125
-4506.8371419399045,0.003204345703125
-4506.8371419399045,0.0032196044921875
-4527.945500832284,0.0032196044921875
-4527.945500832284,0.00323486328125
-4549.576316374587,0.00323486328125
-4549.576316374587,0.0032501220703125
-4574.293764986796,0.0032501220703125
-4574.293764986796,0.003265380859375
-4597.899323296733,0.003265380859375
-4597.899323296733,0.0032806396484375
-4619.793756240979,0.0032806396484375
-4619.793756240979,0.0032958984375
-4640.101913162507,0.0032958984375
-4640.101913162507,0.0033111572265625
-4660.101913162507,0.0033111572265625
-4660.101913162507,0.003326416015625
-4680.101913162507,0.003326416015625
-4680.101913162507,0.0033416748046875
-4700.101913162507,0.0033416748046875
-4700.101913162507,0.00335693359375
-4724.718585903756,0.00335693359375
-4724.718585903756,0.0033721923828125
-4746.091531851562,0.0033721923828125
-4746.091531851562,0.003387451171875
-4768.011683503864,0.003387451171875
-4768.011683503864,0.0034027099609375
-4788.209320682799,0.0034027099609375
-4788.209320682799,0.00341796875
-4810.473107099533,0.00341796875
-4810.473107099533,0.0034332275390625
-4830.473107099533,0.0034332275390625
-4830.473107099533,0.003448486328125
-4853.565703218337,0.003448486328125
-4853.565703218337,0.0034637451171875
-4873.565703218337,0.0034637451171875
-4873.565703218337,0.00347900390625
-4893.565703218337,0.00347900390625
-4893.565703218337,0.0034942626953125
-4913.565703218337,0.0034942626953125
-4913.565703218337,0.003509521484375
-4933.565703218337,0.003509521484375
-4933.565703218337,0.0035247802734375
-4954.4571784709115,0.0035247802734375
-4954.4571784709115,0.0035400390625
-4974.4571784709115,0.0035400390625
-4974.4571784709115,0.0035552978515625
-4995.5453727568965,0.0035552978515625
-4995.5453727568965,0.003570556640625
-5000.0,0.003570556640625
-					</series>
-					<comment/>
-				</plot>
-			</result>
-		</query>
-		<query>
-			<formula>E[&lt;=5000; 10] (max:error_prob)</formula>
+			<formula>E[&lt;=1000000; 4] (max:error_prob)</formula>
 			<comment>Error Probability</comment>
-			<result outcome="success" type="quantity" value="0.976187 ± 0.011615 (95% CI)" timestamp="2024-03-06 23:51:04 +0100">
-				<details>0.976187 ± 0.011615 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="max: error_prob" yaxis="probability density">
-					<series title="density" type="b(0.012094)" color="0x0000ff" encoding="csv">0.9473684210526315,16.537037037037017
-0.9594624860022396,8.268518518518508
-0.9715565509518477,33.07407407407403
-0.9836506159014557,24.805555555555525
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.9761867003522173,0.0
-0.9761867003522173,33.07407407407403
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.012094, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.94737, 0.99574]
-Mean estimate of displayed sample: 0.97619 ± 0.011615 (95% CI)</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: error_prob" yaxis="probability">
-					<series title="probability" type="b(0.012094)" color="0x0000ff" encoding="csv">0.9473684210526315,0.2
-0.9594624860022396,0.1
-0.9715565509518477,0.4
-0.9836506159014557,0.3
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.9761867003522173,0.0
-0.9761867003522173,0.4
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.012094, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.94737, 0.99574]
-Mean estimate of displayed sample: 0.97619 ± 0.011615 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: error_prob" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.9473684210526315,0.0
-0.9594624860022396,0.2
-0.9715565509518477,0.3
-0.9836506159014557,0.7
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.9761867003522173,0.0
-0.9761867003522173,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.012094, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.94737, 0.99574]
-Mean estimate of displayed sample: 0.97619 ± 0.011615 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: error_prob" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.9473684210526315,0.30849710781876083
-0.9594624860022396,0.5560954623076415
-0.9715565509518477,0.6524528500599973
-0.9836506159014557,0.9332604888222655
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.9473684210526315,0.0
-0.9594624860022396,0.025210726326833372
-0.9715565509518477,0.06673951117773447
-0.9836506159014557,0.3475471499400027
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.9473684210526315,0.0
-0.9594624860022396,0.2
-0.9715565509518477,0.3
-0.9836506159014557,0.7
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.9761867003522173,0.0
-0.9761867003522173,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.012094, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.94737, 0.99574]
-Mean estimate of displayed sample: 0.97619 ± 0.011615 (95% CI)</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: error_prob" yaxis="count">
-					<series title="count" type="b(0.012094)" color="0x0000ff" encoding="csv">0.9473684210526315,2.0
-0.9594624860022396,1.0
-0.9715565509518477,4.0
-0.9836506159014557,3.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.9761867003522173,0.0
-0.9761867003522173,4.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=0.012094, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.94737, 0.99574]
-Mean estimate of displayed sample: 0.97619 ± 0.011615 (95% CI)</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (max:mean_abs_error)</formula>
+			<formula>E[&lt;=1000000; 4] (max:mean_abs_error)</formula>
 			<comment>Mean Absolute Error</comment>
-			<result outcome="success" type="quantity" value="4189.55 ± 1234.33 (95% CI)" timestamp="2024-03-06 23:54:27 +0100">
-				<details>4189.55 ± 1234.33 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="max: mean_abs_error" yaxis="probability density">
-					<series title="density" type="b(1172.552364)" color="0x0000ff" encoding="csv">2193.5777777777776,3.4113615072411285E-4
-3366.1301418439716,2.5585211304308465E-4
-4538.682505910166,0.0
-5711.23486997636,2.5585211304308465E-4
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">4189.553256135143,0.0
-4189.553256135143,3.4113615072411285E-4
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1172.6, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2194, 6884]
-Mean estimate of displayed sample: 4190 ± 1234 (95% CI)</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: mean_abs_error" yaxis="probability">
-					<series title="probability" type="b(1172.552364)" color="0x0000ff" encoding="csv">2193.5777777777776,0.4
-3366.1301418439716,0.3
-4538.682505910166,0.0
-5711.23486997636,0.3
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">4189.553256135143,0.0
-4189.553256135143,0.4
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1172.6, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2194, 6884]
-Mean estimate of displayed sample: 4190 ± 1234 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: mean_abs_error" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">2193.5777777777776,0.0
-3366.1301418439716,0.4
-4538.682505910166,0.7
-5711.23486997636,0.7
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">4189.553256135143,0.0
-4189.553256135143,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1172.6, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2194, 6884]
-Mean estimate of displayed sample: 4190 ± 1234 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: mean_abs_error" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">2193.5777777777776,0.30849710781876083
-3366.1301418439716,0.7376219233930549
-4538.682505910166,0.9332604888222655
-5711.23486997636,0.9332604888222655
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">2193.5777777777776,0.0
-3366.1301418439716,0.12155225811982719
-4538.682505910166,0.3475471499400027
-5711.23486997636,0.3475471499400027
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">2193.5777777777776,0.0
-3366.1301418439716,0.4
-4538.682505910166,0.7
-5711.23486997636,0.7
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">4189.553256135143,0.0
-4189.553256135143,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1172.6, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2194, 6884]
-Mean estimate of displayed sample: 4190 ± 1234 (95% CI)</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: mean_abs_error" yaxis="count">
-					<series title="count" type="b(1172.552364)" color="0x0000ff" encoding="csv">2193.5777777777776,4.0
-3366.1301418439716,3.0
-4538.682505910166,0.0
-5711.23486997636,3.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">4189.553256135143,0.0
-4189.553256135143,4.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1172.6, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2194, 6884]
-Mean estimate of displayed sample: 4190 ± 1234 (95% CI)</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (max:mean_squared_error)</formula>
+			<formula>E[&lt;=1000000; 4] (max:mean_squared_error)</formula>
 			<comment>Mean Squared Error</comment>
-			<result outcome="success" type="quantity" value="1.18776e+08 ± 2.84421e+07 (95% CI)" timestamp="2024-03-06 23:54:49 +0100">
-				<details>1.18776e+08 ± 2.84421e+07 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="max: mean_squared_error" yaxis="probability density">
-					<series title="density" type="b(32307958.116684)" color="0x0000ff" encoding="csv">6.953415134873949E7,1.2380850518480636E-8
-1.0184210946542367E8,9.285637888860476E-9
-1.3415006758210784E8,6.190425259240318E-9
-1.6645802569879204E8,3.095212629620159E-9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">1.1877604504071705E8,0.0
-1.1877604504071705E8,1.2380850518480636E-8
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3.2308e+07, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [6.953e+07, 1.988e+08]
-Mean estimate of displayed sample: 1.188e+08 ± 2.844e+07 (95% CI)</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: mean_squared_error" yaxis="probability">
-					<series title="probability" type="b(32307958.116684)" color="0x0000ff" encoding="csv">6.953415134873949E7,0.4
-1.0184210946542367E8,0.3
-1.3415006758210784E8,0.2
-1.6645802569879204E8,0.1
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">1.1877604504071705E8,0.0
-1.1877604504071705E8,0.4
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3.2308e+07, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [6.953e+07, 1.988e+08]
-Mean estimate of displayed sample: 1.188e+08 ± 2.844e+07 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: mean_squared_error" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">6.953415134873949E7,0.0
-1.0184210946542367E8,0.4
-1.3415006758210784E8,0.7
-1.6645802569879204E8,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">1.1877604504071705E8,0.0
-1.1877604504071705E8,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3.2308e+07, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [6.953e+07, 1.988e+08]
-Mean estimate of displayed sample: 1.188e+08 ± 2.844e+07 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: mean_squared_error" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">6.953415134873949E7,0.30849710781876083
-1.0184210946542367E8,0.7376219233930549
-1.3415006758210784E8,0.9332604888222655
-1.6645802569879204E8,0.9974714214555382
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">6.953415134873949E7,0.0
-1.0184210946542367E8,0.12155225811982719
-1.3415006758210784E8,0.3475471499400027
-1.6645802569879204E8,0.5549838829718046
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">6.953415134873949E7,0.0
-1.0184210946542367E8,0.4
-1.3415006758210784E8,0.7
-1.6645802569879204E8,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">1.1877604504071705E8,0.0
-1.1877604504071705E8,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3.2308e+07, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [6.953e+07, 1.988e+08]
-Mean estimate of displayed sample: 1.188e+08 ± 2.844e+07 (95% CI)</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: mean_squared_error" yaxis="count">
-					<series title="count" type="b(32307958.116684)" color="0x0000ff" encoding="csv">6.953415134873949E7,4.0
-1.0184210946542367E8,3.0
-1.3415006758210784E8,2.0
-1.6645802569879204E8,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">1.1877604504071705E8,0.0
-1.1877604504071705E8,4.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3.2308e+07, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [6.953e+07, 1.988e+08]
-Mean estimate of displayed sample: 1.188e+08 ± 2.844e+07 (95% CI)</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (max:mean_relative_error)</formula>
+			<formula>E[&lt;=1000000; 4] (max:mean_relative_error)</formula>
 			<comment>Mean Relative Error</comment>
-			<result outcome="success" type="quantity" value="9.79015 ± 13.2159 (95% CI)" timestamp="2024-03-06 23:55:31 +0100">
-				<details>9.79015 ± 13.2159 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="max: mean_relative_error" yaxis="probability density">
-					<series title="density" type="b(15.078947)" color="0x0000ff" encoding="csv">0.689499067568341,0.05968586513715347
-15.768446116955499,0.0
-30.847393166342655,0.0
-45.926340215729816,0.006631762793017052
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.790149832587682,0.0
-9.790149832587682,0.05968586513715347
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=15.079, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.689, 61]
-Mean estimate of displayed sample: 9.79 ± 13.2 (95% CI)</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: mean_relative_error" yaxis="probability">
-					<series title="probability" type="b(15.078947)" color="0x0000ff" encoding="csv">0.689499067568341,0.9
-15.768446116955499,0.0
-30.847393166342655,0.0
-45.926340215729816,0.1
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.790149832587682,0.0
-9.790149832587682,0.9
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=15.079, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.689, 61]
-Mean estimate of displayed sample: 9.79 ± 13.2 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: mean_relative_error" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.689499067568341,0.0
-15.768446116955499,0.9
-30.847393166342655,0.9
-45.926340215729816,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.790149832587682,0.0
-9.790149832587682,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=15.079, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.689, 61]
-Mean estimate of displayed sample: 9.79 ± 13.2 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: mean_relative_error" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.689499067568341,0.30849710781876083
-15.768446116955499,0.9974714214555382
-30.847393166342655,0.9974714214555382
-45.926340215729816,0.9974714214555382
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.689499067568341,0.0
-15.768446116955499,0.5549838829718046
-30.847393166342655,0.5549838829718046
-45.926340215729816,0.5549838829718046
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.689499067568341,0.0
-15.768446116955499,0.9
-30.847393166342655,0.9
-45.926340215729816,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.790149832587682,0.0
-9.790149832587682,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=15.079, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.689, 61]
-Mean estimate of displayed sample: 9.79 ± 13.2 (95% CI)</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: mean_relative_error" yaxis="count">
-					<series title="count" type="b(15.078947)" color="0x0000ff" encoding="csv">0.689499067568341,9.0
-15.768446116955499,0.0
-30.847393166342655,0.0
-45.926340215729816,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.790149832587682,0.0
-9.790149832587682,9.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=15.079, bucket count=4
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0.689, 61]
-Mean estimate of displayed sample: 9.79 ± 13.2 (95% CI)</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (max:worst_case_error)</formula>
+			<formula>E[&lt;=1000000; 4] (max:worst_case_error)</formula>
 			<comment/>
-			<result outcome="success" type="quantity" value="32312.9 ± 3467.87 (95% CI)" timestamp="2024-03-06 14:35:03 +0100">
-				<details>32312.9 ± 3467.87 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="max: worst_case_error" yaxis="probability density">
-					<series title="density" type="b(3378.250000)" color="0x0000ff" encoding="csv">25295.0,5.920224968548805E-5
-28673.25,5.920224968548805E-5
-32051.5,8.880337452823207E-5
-35429.75,5.920224968548805E-5
-38808.0,2.9601124842744026E-5
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">32312.9,0.0
-32312.9,8.880337452823207E-5
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3378.2, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2.53e+04, 3.881e+04]
-Mean estimate of displayed sample: 3.231e+04 ± 3468 (95% CI)</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: worst_case_error" yaxis="probability">
-					<series title="probability" type="b(3378.250000)" color="0x0000ff" encoding="csv">25295.0,0.2
-28673.25,0.2
-32051.5,0.3
-35429.75,0.2
-38808.0,0.1
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">32312.9,0.0
-32312.9,0.3
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3378.2, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2.53e+04, 3.881e+04]
-Mean estimate of displayed sample: 3.231e+04 ± 3468 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: worst_case_error" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">25295.0,0.0
-28673.25,0.2
-32051.5,0.4
-35429.75,0.7
-38808.0,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">32312.9,0.0
-32312.9,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3378.2, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2.53e+04, 3.881e+04]
-Mean estimate of displayed sample: 3.231e+04 ± 3468 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: worst_case_error" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">25295.0,0.30849710781876083
-28673.25,0.5560954623076415
-32051.5,0.7376219233930549
-35429.75,0.9332604888222655
-38808.0,0.9974714214555382
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">25295.0,0.0
-28673.25,0.025210726326833372
-32051.5,0.12155225811982719
-35429.75,0.3475471499400027
-38808.0,0.5549838829718046
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">25295.0,0.0
-28673.25,0.2
-32051.5,0.4
-35429.75,0.7
-38808.0,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">32312.9,0.0
-32312.9,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3378.2, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2.53e+04, 3.881e+04]
-Mean estimate of displayed sample: 3.231e+04 ± 3468 (95% CI)</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: worst_case_error" yaxis="count">
-					<series title="count" type="b(3378.250000)" color="0x0000ff" encoding="csv">25295.0,2.0
-28673.25,2.0
-32051.5,3.0
-35429.75,2.0
-38808.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">32312.9,0.0
-32312.9,3.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=3378.2, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [2.53e+04, 3.881e+04]
-Mean estimate of displayed sample: 3.231e+04 ± 3468 (95% CI)</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (max:worst_case_relative_error)</formula>
+			<formula>E[&lt;=1000000; 4] (max:worst_case_relative_error)</formula>
 			<comment/>
-			<result outcome="success" type="quantity" value="582.714 ± 519.597 (95% CI)" timestamp="2024-03-06 12:14:06 +0100">
-				<details>582.714 ± 519.597 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="max: worst_case_relative_error" yaxis="probability density">
-					<series title="density" type="b(381.561295)" color="0x0000ff" encoding="csv">9.754820936639119,0.0015724865394646833
-391.31611570247935,0.0
-772.8774104683196,2.6208108991078054E-4
-1154.43870523416,0.0
-1536.0,7.862432697323417E-4
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">582.7144971843779,0.0
-582.7144971843779,0.001572486539464683
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=381.56, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [9.75, 1.54e+03]
-Mean estimate of displayed sample: 583 ± 520 (95% CI)</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: worst_case_relative_error" yaxis="probability">
-					<series title="probability" type="b(381.561295)" color="0x0000ff" encoding="csv">9.754820936639119,0.6
-391.31611570247935,0.0
-772.8774104683196,0.1
-1154.43870523416,0.0
-1536.0,0.3
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">582.7144971843779,0.0
-582.7144971843779,0.6
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=381.56, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [9.75, 1.54e+03]
-Mean estimate of displayed sample: 583 ± 520 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: worst_case_relative_error" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">9.754820936639119,0.0
-391.31611570247935,0.6
-772.8774104683196,0.6
-1154.43870523416,0.7
-1536.0,0.7
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">582.7144971843779,0.0
-582.7144971843779,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=381.56, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [9.75, 1.54e+03]
-Mean estimate of displayed sample: 583 ± 520 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: worst_case_relative_error" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">9.754820936639119,0.30849710781876083
-391.31611570247935,0.8784477418801728
-772.8774104683196,0.8784477418801728
-1154.43870523416,0.9332604888222655
-1536.0,0.9332604888222655
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">9.754820936639119,0.0
-391.31611570247935,0.26237807660694507
-772.8774104683196,0.26237807660694507
-1154.43870523416,0.3475471499400027
-1536.0,0.3475471499400027
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">9.754820936639119,0.0
-391.31611570247935,0.6
-772.8774104683196,0.6
-1154.43870523416,0.7
-1536.0,0.7
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">582.7144971843779,0.0
-582.7144971843779,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=381.56, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [9.75, 1.54e+03]
-Mean estimate of displayed sample: 583 ± 520 (95% CI)</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: worst_case_relative_error" yaxis="count">
-					<series title="count" type="b(381.561295)" color="0x0000ff" encoding="csv">9.754820936639119,6.0
-391.31611570247935,0.0
-772.8774104683196,1.0
-1154.43870523416,0.0
-1536.0,3.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">582.7144971843779,0.0
-582.7144971843779,6.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=381.56, bucket count=5
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [9.75, 1.54e+03]
-Mean estimate of displayed sample: 583 ± 520 (95% CI)</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (max:hamming_distance)</formula>
+			<formula>E[&lt;=1000000; 4] (max:hamming_distance)</formula>
 			<comment/>
-			<result outcome="success" type="quantity" value="9 ± 0.337222 (95% CI)" timestamp="2024-03-06 12:13:50 +0100">
-				<details>9 ± 0.337222 (95% CI)</details>
-				<plot title="Probability Density Distribution" xaxis="max: hamming_distance" yaxis="probability density">
-					<series title="density" type="b(1.000000)" color="0x0000ff" encoding="csv">8.0,0.1
-9.0,0.8
-10.0,0.1
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.0,0.0
-9.0,0.8
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [8, 10]
-Mean estimate of displayed sample: 9 ± 0.3372 (95% CI)</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: hamming_distance" yaxis="probability">
-					<series title="probability" type="b(1.000000)" color="0x0000ff" encoding="csv">8.0,0.1
-9.0,0.8
-10.0,0.1
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.0,0.0
-9.0,0.8
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [8, 10]
-Mean estimate of displayed sample: 9 ± 0.3372 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: hamming_distance" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">8.0,0.0
-9.0,0.1
-10.0,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.0,0.0
-9.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [8, 10]
-Mean estimate of displayed sample: 9 ± 0.3372 (95% CI)</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: hamming_distance" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">8.0,0.30849710781876083
-9.0,0.44501611702819543
-10.0,0.9974714214555382
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">8.0,0.0
-9.0,0.0025285785444617848
-10.0,0.5549838829718046
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">8.0,0.0
-9.0,0.1
-10.0,0.9
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.0,0.0
-9.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [8, 10]
-Mean estimate of displayed sample: 9 ± 0.3372 (95% CI)</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: hamming_distance" yaxis="count">
-					<series title="count" type="b(1.000000)" color="0x0000ff" encoding="csv">8.0,1.0
-9.0,8.0
-10.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">9.0,0.0
-9.0,8.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=3
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [8, 10]
-Mean estimate of displayed sample: 9 ± 0.3372 (95% CI)</comment>
-				</plot>
-			</result>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (min:hamming_distance)</formula>
-			<comment/>
-			<result outcome="success" type="quantity" value="≈ 0" timestamp="2024-03-06 23:55:53 +0100">
-				<details>≈ 0</details>
-				<plot title="Probability Density Distribution" xaxis="min: hamming_distance" yaxis="probability density">
-					<series title="density" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="min: hamming_distance" yaxis="probability">
-					<series title="probability" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="min: hamming_distance" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="min: hamming_distance" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.0,0.30849710781876083
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.0,0.0
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="min: hamming_distance" yaxis="count">
-					<series title="count" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,10.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,10.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
-Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-			</result>
+			<formula>E[&lt;=1000000; 4] (max:bit_flips)</formula>
+			<comment>most bit flips in one calculation</comment>
 		</query>
 		<query>
-			<formula>E[&lt;=5000; 10] (max:bit_flips)</formula>
-			<comment/>
+			<formula>E[&lt;=1000000; 4] (max:avg_flips_per_res)</formula>
+			<comment>Average bit flips</comment>
+		</query>
+		<query>
+			<formula>E[&lt;=1000000; 4] (max:bit_flips_sum)</formula>
+			<comment>Total number of bit flips through all calculations</comment>
 		</query>
 	</queries>
 </nta>

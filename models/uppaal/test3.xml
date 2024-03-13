@@ -628,32 +628,27 @@ bool inCovered()
 }
 
 void f(int i){
-    int j;
-    int imax = fint(exp2(NPI));
+    int j, k;
+    int min = 0;
+    int max = (NPI/2) - 1;
 
-//    rnd = random(100);
-//    rnd = random_arcsine(-10,10);
-//    rnd = random_beta(0.1,5);
-//    rnd = random_gamma(0.5,5);
-//    rnd = random_normal(10,1);
-//    rnd = random_poisson(1.0);
-//    rnd = random_weibull(0.5,5);
-//    rnd = random_tri(0,10,100);
-
-    j=fint(random(NPI));                   // pro (NPI) je out 0...NPI-1
- //   j=fint(random_normal(NPI/2.0,0.5));    // pro (NPI/2.0, 0.5) je out NPI/2 +- 0.5
- //   j=fint(random_poisson(1.0));           // pro (1.0) je out 1.0 +- 
-//    j=fint(random_arcsine(0.0, NPI-1));    // pro (0.0, NPI-1) je out mezi 0...NPI-1 (aka random())
-  //  j=fint(random_tri(0.0, 0.5, NPI-1));    // pro (0.0, 0.5, NPI-1) je out mezi 0...NPI-1 (aka random()), se stredem u 0.5
-  //  j = fint(random_weibull(10, 3.0));    // pro (10.0, 3.0) je out mezi 0...3 (aka random()), se stredem vys (pro 10)
-  //  j = fint(random_gamma(1.0,0.5));    // pro (1.0, 0.5) je out mezi 0...5 (aka random()), se stredem niz (kolem 1.0)
-    if(j &lt; 0) j=0;
-    if(j &gt; (NPI-1)) j=NPI-1;
+    //changing bits in the first number (bits &lt;0,7&gt;)
+    j=fint(random(NPI/2));
+    if(j &lt; min) j=min;
+    if(j &gt; max) j=max;
     bits[j] ^= 1;
 
-   if(inCoverSet[input]) { inSame = -1*input; nsame++; }
-   else inSame = input;
-   inCoverSet[bin2dec()] = true;
+    //changing bits in the second number (bits &lt;8,15&gt;)
+    k = fint(random(NPI/2));
+    if(k &lt; min) k=min;
+    if(k &gt; max) k=max;
+    k += 8; //shift to the correct bit range
+    bits[k] ^= 1;
+
+    //check if this bit combination has already been used
+    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+    else inSame = input;
+    inCoverSet[bin2dec()] = true;
     covered();
 
     rCover = 100.0*bitsCovered / NTV; 
