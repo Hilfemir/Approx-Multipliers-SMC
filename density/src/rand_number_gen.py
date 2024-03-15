@@ -18,12 +18,19 @@ for i in range(10000):
 
 	#AKS Primality test - A
 	#num = random.triangular(-50, 450, 70)
+	#num = int(num)
+
+	#if num < 0:
+	#	num = 0
+
+	#if num > 255:
+	#	num = int(random.uniform(0,150))
 
 	#AKS Primality test - B
 	#alpha = 2.0
 	#beta = 2.0
 	#num = random.betavariate(alpha, beta)
-	#num = int(num * 400)
+	#num = int(num * 255)
 
 	#Ellipse Midpoint - A
 	#alpha = 0.5
@@ -32,15 +39,16 @@ for i in range(10000):
 	#num = int(num * 40)
 
 	#Ellipse Midpoint - B
-	#mu = 9.0
-	#sigma = 15.0
-	#num = random.gauss(mu, sigma)
+	#num = random.uniform(-10,255)
+	#num = int(num)
+	#if num < 0:
+	#	num = int(random.uniform(2,15))
 
 	#Circle Point by Point - both A and B
-	num = random.uniform(2, 255)
+	#num = random.uniform(2, 255)
 
 	#Integer Square Root - both A and B
-	#num = random.triangular(-10, 150, 10)
+	#num = random.triangular(-10, 255, 10)
 	#num = int(num)
 
 	#ElGamal Signature Scheme - A
@@ -53,6 +61,10 @@ for i in range(10000):
 	#num = random.weibullvariate(alpha, beta)
 	#num = int(num * 200)
 
+	#test
+	num = random.triangular(0,4,0)
+	num = int(num)
+
 	numbers.append(num)
 
 
@@ -61,6 +73,6 @@ sns.kdeplot(numbers)
 plt.xlabel('Value')
 plt.ylabel('Density')
 plt.grid(False)
-plt.show()
-#plt.savefig("./rand_generated_numbers/elgamal_b.png")
+outname = "test"
+plt.savefig(f"../out/rand_generated_numbers/{outname}_randgen_num.png")
 plt.show()

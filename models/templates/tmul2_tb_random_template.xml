@@ -44,6 +44,7 @@ bool inCovered()
   return forall (i : int[0,NTV-1]) inCoverSet[i];    
 }
 
+/*
 void f(int i){
     int j, k;
     int min = 0;
@@ -73,6 +74,66 @@ void f(int i){
     k += NPI/2; //shift to the correct bit range
 
     bits[k] ^= 1; //flip the selected bit, so 0 -&gt; 1, 1 -&gt; 0
+
+    //check if this bit combination has already been used
+    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
+    else inSame = input;
+    inCoverSet[bin2dec()] = true;
+    covered();
+
+    rCover = 100.0*bitsCovered / NTV; 
+
+    inCoverage = 0.0;
+}
+*/
+
+void dec_to_bin(int number, bool &amp;number_binary[NPI/2]) {
+    //init all bits to 0
+    int j = 0;
+    int index;
+    for(i:int[0,(NPI/2 - 1)]) {
+        number_binary[i] = 0;
+    }
+
+    if(number == 0) { 
+        return; 
+    }
+
+    while(number &gt; 0) {
+        index = NPI/2 - 1 - j;
+        if(index &lt; 0) index = 0;
+        number_binary[index] = number % 2;
+        number /= 2;
+        j++;
+    }
+}
+
+int check_limits(int number, int min, int max) {
+    if(number &lt; min) number = min;
+    if(number &gt; max) number = max;
+    return number;
+}
+
+void f(int i){
+    int j, k;
+    bool j_binary[NPI/2];
+    bool k_binary[NPI/2];
+
+    int imax = fint(exp2(NPI));
+
+    j = fint(random_tri(0,0,imax));
+    k = fint(random(imax));
+
+    j = check_limits(j, 0, imax);
+    k = check_limits(k, 0, imax);
+
+    dec_to_bin(j, j_binary);
+    dec_to_bin(k, k_binary);
+
+    for(i:int[0,NPI/2 - 1]) {
+        bits[i] = j_binary[i];
+        bits[i+NPI/2] = k_binary[i];
+    }
 
     //check if this bit combination has already been used
     if(inCoverSet[input]) { inSame = -1*input; nsame++; }
