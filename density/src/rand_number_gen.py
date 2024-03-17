@@ -10,11 +10,17 @@ for i in range(10000):
 	#alpha = 1.0
 	#beta = 0.8
 	#num = random.gammavariate(alpha, beta)
-	#num = int(num * 150)
+	#num = int(num * 7)
 
 	#Sieve of Pritchard - B
-	#num = random.uniform(0, 2000)
+	#num = random.uniform(0, 256)
 	#num = int(num)
+
+	#if 100 < num < 175:
+	#	num = int(random.uniform(0,75))
+
+	#if 175 <= num <= 200:
+	#	num = int(random.uniform(200,255))
 
 	#AKS Primality test - A
 	#num = random.triangular(-50, 450, 70)
@@ -52,27 +58,39 @@ for i in range(10000):
 	#num = int(num)
 
 	#ElGamal Signature Scheme - A
-	#num = random.triangular(-20, 600, 20)
+	#num = random.triangular(0, 350, 0)
 	#num = int(num)
+
+	#if num > 255:
+	#	num = int(random.uniform(0,50))
 
 	#ElGamal Signature Scheme - B
 	#alpha = 1.7
 	#beta = 1.7
 	#num = random.weibullvariate(alpha, beta)
-	#num = int(num * 200)
+	#num = int(num * 60)
 
-	#test
-	num = random.triangular(0,4,0)
+	#if num > 255:
+	#	num = int(random.uniform(0,25))
+
+	#Bresenham - A
+	#num = 2
+
+	#Bresenham - B
+	num = random.gauss(50, 30)
 	num = int(num)
+
+	if num < 0:
+		num = int(random.uniform(100,255))
 
 	numbers.append(num)
 
 
 plt.figure(figsize=(10, 6))
 sns.kdeplot(numbers)
-plt.xlabel('Value')
-plt.ylabel('Density')
+plt.xlabel('Hodnota vstupu')
+plt.ylabel('Pravděpodobnost výskytu')
 plt.grid(False)
-outname = "test"
+outname = "bresenham_b"
 plt.savefig(f"../out/rand_generated_numbers/{outname}_randgen_num.png")
 plt.show()

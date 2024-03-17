@@ -1,3 +1,6 @@
+from importlib.metadata import distribution
+from math import dist
+from os import replace
 import re
 import argparse
 
@@ -525,6 +528,85 @@ class Parser(object):
 
 	####################################################################
 
+	def generate_tmul2_tb_random(self, distribution: str) ->; str:
+		"""loads up the tmul2_tb_random UPPAAL template and updates it with the data obtained from
+		user's input arguments.
+		distribution opts: ['uni_ini', 'same_triang', 'beta_uni', 'triang_beta', 'gamma_2norm', 'triang_weibull', 'same_uni', 'const_norm']
+		"""
+		if distribution == "uni_uni":
+			comment = "    //Both inputs uniform distribution\n"
+			replacement =  "    input_a = fint(random(0,imax));\n\n"
+
+			replacement += "    input_b = fint(random(0,imax));\n"
+
+		elif distribution == "same_triang":
+			comment = "    //Both inputs same number - triangular dist. (eg. isqrt algo)\n"
+			replacement =  "    input_a = fint(random_tri(-10,10,imax));\n\n"
+
+			replacement += "    input_b = input_a;\n"
+
+		elif distribution == "beta_uni":
+			comment =  "    //Betavariate dist. and (slightly deformed) uniform dist. (eg. ellipse midpoint algo)\n"
+			replacement =  "    input_a = fint(random_beta(0.5, 5.0));\n"
+			replacement += "    input_a = input_a * 40;\n\n"
+
+			replacement += "    input_b = fint(random(-10,imax));\n"
+			replacement += "    if(input_b &lt; 0) { input_b = fint(random(2,15)); }\n"
+
+		elif distribution == "triang_beta":
+			comment = "    //Triangular dist. and betavariate dist. (eg. AKS primality test)\n"
+			replacement =  "    input_a = fint(random_tri(-50,70,450));\n"
+			replacement += "    if(input_a &gt; imax-1) { input_a = fint(random(0,150)); }\n\n"
+
+			replacement += "    input_b = fint(random_beta(2.0,2.0));\n"
+			replacement += "    input_b = input_b * 255;\n"
+
+		elif distribution == "gamma_2norm":
+			comment = "    //Gammavariate and two normal distributions (eg. Sieve of Pritchard algo.)\n"
+			replacement =  "    input_a = fint(random_gamma(1.0,0.8));\n"
+			replacement += "    input_a = input_a * 7;\n\n"
+
+			replacement += "    input_b = fint(random(0,imax));\n"
+			replacement += "    if(input_b &gt; 100 and input_b &lt; 175) { input_b = fint(random(0,75)); }\n"
+			replacement += "    if(input_b &gt;= 175 and input_b &lt; 200) { input_b = fint(random(200,imax)); }\n"
+
+		elif distribution == "triang_weibull":
+			comment = "    //Triangular and weibullvariate distribution (eg. ElGamal Signature algo.)\n"
+			replacement =  "    input_a = fint(random_tri(0,0,350));\n"
+			replacement += "    if(input_a &gt; 255) { input_a = fint(random(0,50)); }\n\n"
+
+			replacement += "    input_b = fint(random_weibull(1.7,1.7));\n"
+			replacement += "    input_b = input_b * 60;"
+			replacement += "    if(input_b &gt; 255) { input_b = fint(random(0,25)); }\n"
+
+		elif distribution == "same_uni":
+			comment = "    //Both inputs same number, uniform distribution (eg. Circle Point by point algo.)\n"
+			replacement =  "    input_a = fint(random(2,imax));\n\n"
+
+			replacement += "    input_b = input_a;\n"
+
+		elif distribution == "const_norm":
+			comment = "    //Constant 2 and normal distribution (eg. Bresenham line algorithm)\n"
+			replacement =  "    input_a = 2;\n\n"
+			replacement += "    input_b = fint(random_normal(50, 30));\n"
+			replacement += "    if(input_b &lt; 0) { input_b = fint(random(100,imax)); }\n"
+			
+		with open("./templates/tmul2_tb_random_template.xml") as f:
+			original = f.readlines()
+
+		tmul2_tb_random = original
+
+		for i, line in enumerate(original):
+			line = line.strip()
+
+			if line == "//Distribution":
+				tmul2_tb_random[i] = comment
+				tmul2_tb_random.insert(i+1, replacement)
+
+		return "".join(tmul2_tb_random)
+
+	####################################################################
+
 	def append_template(self, path: str):
 		"""Loads up a template for part of the xml file that requires no
 		changing. Appends it to the out_files list.
@@ -537,7 +619,7 @@ class Parser(object):
 
 	####################################################################
 		
-	def generate_parts(self):
+	def generate_parts(self, distribution: str):
 		"""Takes all the templates one by one and prepares them for the final
 		file generation.
 		"""
@@ -554,7 +636,7 @@ class Parser(object):
 		self.append_template("./templates/tmul2_tb_nondet_template.xml")
 
 		#tmul2_tb_random file
-		self.append_template("./templates/tmul2_tb_random_template.xml")
+		self.out_files.append(self.generate_tmul2_tb_random(distribution))
 
 		#syncPrimary file
 		self.append_template("./templates/syncPrimary_template.xml")
@@ -573,17 +655,29 @@ class Parser(object):
 
 
 def main():
+	################################################################
+	#parse input arguments
 	argparser = argparse.ArgumentParser(
 	                    prog='parse.py',
 	                    description='Generate .xml UPPAAL files from verilog templates.')
 	
 	argparser.add_argument('filepath')
-	argparser.add_argument('--noout', action="store_true", default=False)
+	argparser.add_argument('--noout', action="store_true", default=False, help="Don't save the output plot.")
+	argparser.add_argument(
+		'--distribution', '-d', 
+		default="uni_uni",
+		help="Distributions of numbers from the random number generator.",
+		choices=['uni_ini', 'same_triang', 'beta_uni', 'triang_beta', 'gamma_2norm', 'triang_weibull', 'same_uni', 'const_norm']
+		)
 	args = argparser.parse_args()
 
 	path = args.filepath
 	out_path = f"./out/{path.split('/')[-1][:-2]}.xml"
 
+	distribution = args.distribution
+
+	################################################################
+	#parse the input verilog file
 	parser = Parser()
 
 	with open(path) as f:
@@ -609,7 +703,7 @@ def main():
 	parser.update_signals()
 
 	#generate parts of the output file
-	parser.generate_parts()
+	parser.generate_parts(distribution=distribution)
 
 	#write output to xml file
 	if not args.noout:

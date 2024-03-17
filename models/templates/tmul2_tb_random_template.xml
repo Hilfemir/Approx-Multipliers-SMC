@@ -87,10 +87,9 @@ void f(int i){
 }
 */
 
-void dec_to_bin(int number, bool &amp;number_binary[NPI/2]) {
+void dec_to_bin(int[0,MAX_INT] number, bool &amp;number_binary[NPI/2]) {
     //init all bits to 0
     int j = 0;
-    int index;
     for(i:int[0,(NPI/2 - 1)]) {
         number_binary[i] = 0;
     }
@@ -100,39 +99,38 @@ void dec_to_bin(int number, bool &amp;number_binary[NPI/2]) {
     }
 
     while(number &gt; 0) {
-        index = NPI/2 - 1 - j;
-        if(index &lt; 0) index = 0;
-        number_binary[index] = number % 2;
+        number_binary[j] = number % 2;
         number /= 2;
         j++;
     }
 }
 
-int check_limits(int number, int min, int max) {
+int[0, MAX_INT] check_limits(int[-MAX_INT, MAX_INT] number, int[0, MAX_INT] min, int[0, MAX_INT] max) {
     if(number &lt; min) number = min;
     if(number &gt; max) number = max;
     return number;
 }
 
 void f(int i){
-    int j, k;
-    bool j_binary[NPI/2];
-    bool k_binary[NPI/2];
+    bool a_binary[NPI/2];
+    bool b_binary[NPI/2];
 
-    int imax = fint(exp2(NPI));
+    int[0, MAX_INT] imax = fint(exp2(NPI/2));
 
-    j = fint(random_tri(0,0,imax));
-    k = fint(random(imax));
+    input_a = 0;
+    input_b = 0;
 
-    j = check_limits(j, 0, imax);
-    k = check_limits(k, 0, imax);
+    //Distribution
 
-    dec_to_bin(j, j_binary);
-    dec_to_bin(k, k_binary);
+    input_a = check_limits(input_a, 0, imax);
+    input_b = check_limits(input_b, 0, imax);
+
+    dec_to_bin(input_a, a_binary);
+    dec_to_bin(input_b, b_binary);
 
     for(i:int[0,NPI/2 - 1]) {
-        bits[i] = j_binary[i];
-        bits[i+NPI/2] = k_binary[i];
+        bits[i] = a_binary[i];
+        bits[i+NPI/2] = b_binary[i];
     }
 
     //check if this bit combination has already been used
