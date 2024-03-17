@@ -528,7 +528,7 @@ class Parser(object):
 
 	####################################################################
 
-	def generate_tmul2_tb_random(self, distribution: str) ->; str:
+	def generate_tmul2_tb_random(self, distribution: str) -> str:
 		"""loads up the tmul2_tb_random UPPAAL template and updates it with the data obtained from
 		user's input arguments.
 		distribution opts: ['uni_ini', 'same_triang', 'beta_uni', 'triang_beta', 'gamma_2norm', 'triang_weibull', 'same_uni', 'const_norm']
