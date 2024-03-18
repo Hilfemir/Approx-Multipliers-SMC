@@ -546,7 +546,7 @@ class Parser(object):
 			replacement += "    input_b = input_a;\n"
 
 		elif distribution == "beta_uni":
-			comment =  "    //Betavariate dist. and (slightly deformed) uniform dist. (eg. ellipse midpoint algo)\n"
+			comment =  "    //Betavariate dist. and (slightly deformed) uniform dist. (eg. ellipse midpoint algo.)\n"
 			replacement =  "    input_a = fint(random_beta(0.5, 5.0));\n"
 			replacement += "    input_a = input_a * 40;\n\n"
 
