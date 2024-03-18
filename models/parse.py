@@ -671,10 +671,14 @@ def main():
 		)
 	args = argparser.parse_args()
 
-	path = args.filepath
-	out_path = f"./out/{path.split('/')[-1][:-2]}.xml"
-
 	distribution = args.distribution
+	
+	path = args.filepath
+	spath = path.split('/')
+	size = spath[-3]
+	metric = spath[-2]
+	name = spath[-1][:-2]
+	out_path = f"./out/{distribution}/{size}/{metric}/{name}.xml"
 
 	################################################################
 	#parse the input verilog file
