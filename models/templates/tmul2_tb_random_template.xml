@@ -44,48 +44,39 @@ bool inCovered()
   return forall (i : int[0,NTV-1]) inCoverSet[i];    
 }
 
-/*
-void f(int i){
-    int j, k;
-    int min = 0;
-    int max = (NPI/2) - 1;
+int[0, MAX_INT] combine_inputs(bool &amp;in1_binary[NPI/2], bool &amp;in2_binary[NPI/2]) {
+    //Concatenate both binary representations of inputs and then convert that to dec
+    bool both_binary[NPI];
+    int[0, MAX_INT] ret = 0;
 
-    //flipping bits in the first number (bits &lt;0,NPI/2-1&gt;)
-    //eg. &lt;0,7&gt; for an 8x8bit mult.
-
-    //generate which bit should change
-    j=fint(random(NPI/2));
-
-    //overflow and underflow corrections
-    if(j &lt; min) j=min;
-    if(j &gt; max) j=max;
-
-    bits[j] ^= 1; //flip the selected bit, so 0 -&gt; 1, 1 -&gt; 0
-
-    //flipping bits in the second number (bits &lt;NPI/2,NPI-1&gt;)
-    //eg. &lt;8,15&gt; for an 8x8bit mult.
+    //concatenate both inputs
+    for(i:int[0,(NPI/2) - 1]) {
+        both_binary[i] = in1_binary[i];
+        both_binary[i+NPI/2] = in2_binary[i];
+    }
     
-    //generate which bit should change
-    k = fint(random(NPI/2));
+    //convert that result to decimal number
+    for(i:int[0,NPI-1]) {
+        ret += both_binary[i] * TBL_PWR2[i];
+    }
 
-    //overflow and underflow corrections
-    if(k &lt; min) k=min;
-    if(k &gt; max) k=max;
-    k += NPI/2; //shift to the correct bit range
-
-    bits[k] ^= 1; //flip the selected bit, so 0 -&gt; 1, 1 -&gt; 0
-
-    //check if this bit combination has already been used
-    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
-    else inSame = input;
-    inCoverSet[bin2dec()] = true;
-    covered();
-
-    rCover = 100.0*bitsCovered / NTV; 
-
-    inCoverage = 0.0;
+    return ret;
 }
-*/
+
+void unique_input_insert(int[0, MAX_INT] input) {
+    for(i:int[0,MAX_INT-1]) {
+        if(unique_inputs[i] == -1) {
+            unique_inputs[i] = input;
+            return;
+        }
+    }
+}
+
+bool input_covered(int[0, MAX_INT] input) {
+    //if the input is already in the unique_inputs array return True
+    //else return False
+    return exists (i : int[0,MAX_INT-1]) input == unique_inputs[i];
+}
 
 void dec_to_bin(int[0,MAX_INT] number, bool &amp;number_binary[NPI/2]) {
     //init all bits to 0
@@ -120,6 +111,9 @@ void f(int i){
     input_a = 0;
     input_b = 0;
 
+    current_delay = 0.0; //reset delay counter
+    if(res_count &gt; 0) { delay_avg = delay_sum / res_count; }
+
     //Distribution
 
     input_a = check_limits(input_a, 0, imax);
@@ -134,6 +128,14 @@ void f(int i){
     }
 
     //check if this bit combination has already been used
+    comb_input = combine_inputs(a_binary, b_binary);
+    if(not input_covered(comb_input)) {
+        unique_input_insert(comb_input);
+        unique_count++;
+
+        coverage_percentage = (1.0*unique_count / MAX_INT) * 100;
+    }
+
     if(inCoverSet[input]) { inSame = -1*input; nsame++; }
     else inSame = input;
     inCoverSet[bin2dec()] = true;
@@ -146,6 +148,11 @@ void f(int i){
 
 void inits(){
     int i;
+
+    //set all elements of unique_inputs array to -1
+    //eventually they shall all be replaced by different input combos
+    for(i:int[0,MAX_INT-1]) { unique_inputs[i] = -1; }
+
     for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
     for(i:int[0,NPI-1]){
         if(exists(j:int[0,NPI-1]) PIxy[j]==i){ 

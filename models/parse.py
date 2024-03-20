@@ -535,9 +535,9 @@ class Parser(object):
 		"""
 		if distribution == "uni_uni":
 			comment = "    //Both inputs uniform distribution\n"
-			replacement =  "    input_a = fint(random(0,imax));\n\n"
+			replacement =  "    input_a = fint(random(imax));\n\n"
 
-			replacement += "    input_b = fint(random(0,imax));\n"
+			replacement += "    input_b = fint(random(imax));\n"
 
 		elif distribution == "same_triang":
 			comment = "    //Both inputs same number - triangular dist. (eg. isqrt algo)\n"
@@ -550,13 +550,14 @@ class Parser(object):
 			replacement =  "    input_a = fint(random_beta(0.5, 5.0));\n"
 			replacement += "    input_a = input_a * 40;\n\n"
 
-			replacement += "    input_b = fint(random(-10,imax));\n"
-			replacement += "    if(input_b &lt; 0) { input_b = fint(random(2,15)); }\n"
+			replacement += "    input_b = fint(random(imax+10));\n"
+			replacement += "    if(input_b &gt; imax) { input_b = fint(random(15)); }\n"
+			replacement += "    if(input_b &lt; 2) { input_b = input_b+2; }\n"
 
 		elif distribution == "triang_beta":
 			comment = "    //Triangular dist. and betavariate dist. (eg. AKS primality test)\n"
 			replacement =  "    input_a = fint(random_tri(-50,70,450));\n"
-			replacement += "    if(input_a &gt; imax-1) { input_a = fint(random(0,150)); }\n\n"
+			replacement += "    if(input_a &gt; imax-1) { input_a = fint(random(150)); }\n\n"
 
 			replacement += "    input_b = fint(random_beta(2.0,2.0));\n"
 			replacement += "    input_b = input_b * 255;\n"
@@ -567,21 +568,21 @@ class Parser(object):
 			replacement += "    input_a = input_a * 7;\n\n"
 
 			replacement += "    input_b = fint(random(0,imax));\n"
-			replacement += "    if(input_b &gt; 100 and input_b &lt; 175) { input_b = fint(random(0,75)); }\n"
-			replacement += "    if(input_b &gt;= 175 and input_b &lt; 200) { input_b = fint(random(200,imax)); }\n"
+			replacement += "    if(input_b &gt; 100 and input_b &lt; 175) { input_b = fint(random(75)); }\n"
+			replacement += "    if(input_b &gt;= 175 and input_b &lt; 200) { input_b = fint(random(55)) + 200; }\n"
 
 		elif distribution == "triang_weibull":
 			comment = "    //Triangular and weibullvariate distribution (eg. ElGamal Signature algo.)\n"
 			replacement =  "    input_a = fint(random_tri(0,0,350));\n"
-			replacement += "    if(input_a &gt; 255) { input_a = fint(random(0,50)); }\n\n"
+			replacement += "    if(input_a &gt; 255) { input_a = fint(random(50)); }\n\n"
 
 			replacement += "    input_b = fint(random_weibull(1.7,1.7));\n"
 			replacement += "    input_b = input_b * 60;"
-			replacement += "    if(input_b &gt; 255) { input_b = fint(random(0,25)); }\n"
+			replacement += "    if(input_b &gt; 255) { input_b = fint(random(25)); }\n"
 
 		elif distribution == "same_uni":
 			comment = "    //Both inputs same number, uniform distribution (eg. Circle Point by point algo.)\n"
-			replacement =  "    input_a = fint(random(2,imax));\n\n"
+			replacement =  "    input_a = fint(random(imax));\n\n"
 
 			replacement += "    input_b = input_a;\n"
 
@@ -589,7 +590,7 @@ class Parser(object):
 			comment = "    //Constant 2 and normal distribution (eg. Bresenham line algorithm)\n"
 			replacement =  "    input_a = 2;\n\n"
 			replacement += "    input_b = fint(random_normal(50, 30));\n"
-			replacement += "    if(input_b &lt; 0) { input_b = fint(random(100,imax)); }\n"
+			replacement += "    if(input_b &lt; 0) { input_b = fint(random(155)) + 100; }\n"
 			
 		with open("./templates/tmul2_tb_random_template.xml") as f:
 			original = f.readlines()

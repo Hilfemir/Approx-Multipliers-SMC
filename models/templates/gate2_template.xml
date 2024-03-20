@@ -56,7 +56,15 @@ void outGen(tOp op){
 
     if(id==2){ 
         if(diffctrl&lt;2) diffctrl++;
-    }  
+    }
+
+    //delay between input and output
+    current_delay = current_delay + duration(tbl_op[id]);
+    if(current_delay &gt; worst_delay) {
+        worst_delay = current_delay;
+    }
+
+    delay_sum = delay_sum + duration(tbl_op[id]); 
 }
 </declaration>
 		<location id="id25" x="-170" y="0">

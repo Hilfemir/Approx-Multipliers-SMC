@@ -4,9 +4,15 @@
 	<declaration>/* Feel free to cite and/or read details to the model using:
   STRNADEL Josef. Statistical Model Checking of Approximate Circuits: Challenges and Opportunities. In: Proceedings of the 2020 Design, Automation &amp; Test in Europe Conference &amp; Exhibition (DATE). Grenoble: IEEE Computer Society, 2020, pp. 1574-1577. ISBN 978-3-9819263-4-7. Available from: https://ieeexplore.ieee.org/document/9116207 and https://www.fit.vut.cz/research/publication/12055/
  */
+const int MAX_INT = 16;
 
 int dif_count = 0;
 int res_count = 0;
+int unique_count = 0;
+
+int[0, MAX_INT] comb_input;
+int[-1,MAX_INT] unique_inputs[MAX_INT];
+double coverage_percentage = 0.0;
 
 int out_sum_all_acc;
 int out_sum_all_approx;
@@ -22,6 +28,10 @@ double mean_squared_error = 0.0;
 double mean_relative_error = 0.0;
 double worst_case_error = 0.0;
 double worst_case_relative_error = 0.0;
+double worst_delay = 0.0;
+double current_delay = 0.0;
+double delay_sum = 0.0;
+double delay_avg = 0.0;
 
 double rnd;
 
@@ -245,6 +255,7 @@ void diff(){
         res_acc += bits[i+NPI]*TBL_PWR2[i];
         if(POy[i]&gt;=0) res_approx += bits[i+NPI+NPO]*TBL_PWR2[i];    
     }
+    
     out_sum_all_acc += res_acc;
     out_sum_all_approx += res_approx;
 
@@ -664,54 +675,44 @@ int bin2dec()
     return result;
 }
 
-
 bool inCovered()
 {
   return forall (i : int[0,NTV-1]) inCoverSet[i];    
 }
 
-/*
-void f(int i){
-    int j, k;
-    int min = 0;
-    int max = (NPI/2) - 1;
+int[0, MAX_INT] combine_inputs(bool &amp;in1_binary[NPI/2], bool &amp;in2_binary[NPI/2]) {
+    //Concatenate both binary representations of inputs and then convert that to dec
+    bool both_binary[NPI];
+    int[0, MAX_INT] ret = 0;
 
-    //flipping bits in the first number (bits &lt;0,NPI/2-1&gt;)
-    //eg. &lt;0,7&gt; for an 8x8bit mult.
-
-    //generate which bit should change
-    j=fint(random(NPI/2));
-
-    //overflow and underflow corrections
-    if(j &lt; min) j=min;
-    if(j &gt; max) j=max;
-
-    bits[j] ^= 1; //flip the selected bit, so 0 -&gt; 1, 1 -&gt; 0
-
-    //flipping bits in the second number (bits &lt;NPI/2,NPI-1&gt;)
-    //eg. &lt;8,15&gt; for an 8x8bit mult.
+    //concatenate both inputs
+    for(i:int[0,(NPI/2) - 1]) {
+        both_binary[i] = in1_binary[i];
+        both_binary[i+NPI/2] = in2_binary[i];
+    }
     
-    //generate which bit should change
-    k = fint(random(NPI/2));
+    //convert that result to decimal number
+    for(i:int[0,NPI-1]) {
+        ret += both_binary[i] * TBL_PWR2[i];
+    }
 
-    //overflow and underflow corrections
-    if(k &lt; min) k=min;
-    if(k &gt; max) k=max;
-    k += NPI/2; //shift to the correct bit range
-
-    bits[k] ^= 1; //flip the selected bit, so 0 -&gt; 1, 1 -&gt; 0
-
-    //check if this bit combination has already been used
-    if(inCoverSet[input]) { inSame = -1*input; nsame++; }
-    else inSame = input;
-    inCoverSet[bin2dec()] = true;
-    covered();
-
-    rCover = 100.0*bitsCovered / NTV; 
-
-    inCoverage = 0.0;
+    return ret;
 }
-*/
+
+void unique_input_insert(int[0, MAX_INT] input) {
+    for(i:int[0,MAX_INT-1]) {
+        if(unique_inputs[i] == -1) {
+            unique_inputs[i] = input;
+            return;
+        }
+    }
+}
+
+bool input_covered(int[0, MAX_INT] input) {
+    //if the input is already in the unique_inputs array return True
+    //else return False
+    return exists (i : int[0,MAX_INT-1]) input == unique_inputs[i];
+}
 
 void dec_to_bin(int number, bool &amp;number_binary[NPI/2]) {
     //init all bits to 0
@@ -747,6 +748,9 @@ void f(int i){
 
     int imax = fint(exp2(NPI/2));
 
+    current_delay = 0.0; //reset delay counter
+    if(res_count &gt; 0) { delay_avg = delay_sum / res_count; }
+
     j = fint(random_tri(0,0,imax));
     k = fint(random(imax));
 
@@ -759,6 +763,14 @@ void f(int i){
     for(i:int[0,NPI/2 - 1]) {
         bits[i] = j_binary[i];
         bits[i+NPI/2] = k_binary[i];
+    }
+
+    comb_input = combine_inputs(j_binary, k_binary);
+    if(not input_covered(comb_input)) {
+        unique_input_insert(comb_input);
+        unique_count++;
+
+        coverage_percentage = (1.0*unique_count / MAX_INT) * 100;
     }
 
     //check if this bit combination has already been used
@@ -774,6 +786,11 @@ void f(int i){
 
 void inits(){
     int i;
+    
+    //set all elements of unique_inputs array to -1
+    //eventually they shall all be replaced by different input combos
+    for(i:int[0,MAX_INT-1]) { unique_inputs[i] = -1; }
+
     for(i:int[0,MAX_INNER_NODES-1]){ nodes[i].flag=false; }
     for(i:int[0,NPI-1]){
         if(exists(j:int[0,NPI-1]) PIxy[j]==i){ 
@@ -978,7 +995,15 @@ void outGen(tOp op){
 
     if(id==2){ 
         if(diffctrl&lt;2) diffctrl++;
-    }  
+    }
+
+    //delay between input and output
+    current_delay = current_delay + duration(tbl_op[id]);
+    if(current_delay &gt; worst_delay) {
+        worst_delay = current_delay;
+    }
+
+    delay_sum = delay_sum + duration(tbl_op[id]);
 }</declaration>
 		<location id="id52" x="-170" y="0">
 		</location>
@@ -1019,7 +1044,6 @@ void outGen(tOp op){
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-
 synPri = syncPrimary();
 mul2A = tmul2any(PIxy[0],PIxy[1],PIxy[2],PIxy[3],    POx[0],POx[1],POx[2],POx[3],    tbl_acc_any,     DLY_MUL2);
 
@@ -23473,6 +23497,322 @@ Mean estimate of displayed sample: 129.1 ± 3.5215 (95% CI)</comment>
 Runs: 1000 in total, 1000 (100%) displayed, 0 (0%) remaining
 Span of displayed sample: [31, 238]
 Mean estimate of displayed sample: 129.1 ± 3.5215 (95% CI)</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>E[&lt;=5000; 10] (max:worst_delay)</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="≈ 10" timestamp="2024-03-20 12:08:17 +0100">
+				<details>≈ 10</details>
+				<plot title="Probability Density Distribution" xaxis="max: worst_delay" yaxis="probability density">
+					<series title="density" type="b(0.000000)" color="0x0000ff" encoding="csv">10.0,4.503599627370496E15
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">10.0,0.0
+10.0,4.503599627370496E15
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [10, 10]
+Mean estimate of displayed sample: ≈ 10</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="max: worst_delay" yaxis="probability">
+					<series title="probability" type="b(0.000000)" color="0x0000ff" encoding="csv">10.0,1.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">10.0,0.0
+10.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [10, 10]
+Mean estimate of displayed sample: ≈ 10</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="max: worst_delay" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">10.0,0.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">10.0,0.0
+10.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [10, 10]
+Mean estimate of displayed sample: ≈ 10</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: worst_delay" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">10.0,0.30849710781876083
+					</series>
+					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">10.0,0.0
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">10.0,0.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">10.0,0.0
+10.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [10, 10]
+Mean estimate of displayed sample: ≈ 10</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="max: worst_delay" yaxis="count">
+					<series title="count" type="b(0.000000)" color="0x0000ff" encoding="csv">10.0,10.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">10.0,0.0
+10.0,10.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=2.2204e-16, bucket count=1
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [10, 10]
+Mean estimate of displayed sample: ≈ 10</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>E[&lt;=5000; 10] (max:delay_sum)</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="1401 ± 415.926 (95% CI)" timestamp="2024-03-20 12:08:34 +0100">
+				<details>1401 ± 415.926 (95% CI)</details>
+				<plot title="Probability Density Distribution" xaxis="max: delay_sum" yaxis="probability density">
+					<series title="density" type="b(460.000000)" color="0x0000ff" encoding="csv">520.0,4.347826086956522E-4
+980.0,0.0010869565217391304
+1440.0,2.173913043478261E-4
+1900.0,2.173913043478261E-4
+2360.0,2.173913043478261E-4
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">1401.0,0.0
+1401.0,0.0010869565217391304
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=460, bucket count=5
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [520, 2360]
+Mean estimate of displayed sample: 1401 ± 415.9 (95% CI)</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="max: delay_sum" yaxis="probability">
+					<series title="probability" type="b(460.000000)" color="0x0000ff" encoding="csv">520.0,0.2
+980.0,0.5
+1440.0,0.1
+1900.0,0.1
+2360.0,0.1
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">1401.0,0.0
+1401.0,0.5
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=460, bucket count=5
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [520, 2360]
+Mean estimate of displayed sample: 1401 ± 415.9 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="max: delay_sum" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">520.0,0.0
+980.0,0.2
+1440.0,0.7
+1900.0,0.8
+2360.0,0.9
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">1401.0,0.0
+1401.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=460, bucket count=5
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [520, 2360]
+Mean estimate of displayed sample: 1401 ± 415.9 (95% CI)</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: delay_sum" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">520.0,0.30849710781876083
+980.0,0.5560954623076415
+1440.0,0.9332604888222655
+1900.0,0.9747892736731666
+2360.0,0.9974714214555382
+					</series>
+					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">520.0,0.0
+980.0,0.025210726326833372
+1440.0,0.3475471499400027
+1900.0,0.44390453769235844
+2360.0,0.5549838829718046
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">520.0,0.0
+980.0,0.2
+1440.0,0.7
+1900.0,0.8
+2360.0,0.9
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">1401.0,0.0
+1401.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=460, bucket count=5
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [520, 2360]
+Mean estimate of displayed sample: 1401 ± 415.9 (95% CI)</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="max: delay_sum" yaxis="count">
+					<series title="count" type="b(460.000000)" color="0x0000ff" encoding="csv">520.0,2.0
+980.0,5.0
+1440.0,1.0
+1900.0,1.0
+2360.0,1.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">1401.0,0.0
+1401.0,5.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=460, bucket count=5
+Runs: 10 in total, 10 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [520, 2360]
+Mean estimate of displayed sample: 1401 ± 415.9 (95% CI)</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>simulate[&lt;=50;1] {current_delay}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-03-20 12:09:26 +0100">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="current_delay" type="l" color="0xff0000" encoding="csv">0.0,0.0
+2.0,0.0
+2.0,8.0
+4.0,8.0
+4.0,10.0
+4.101054063998163,10.0
+4.101054063998163,0.0
+6.101054063998163,0.0
+6.101054063998163,8.0
+8.101054063998163,8.0
+8.101054063998163,10.0
+8.744189387420192,10.0
+8.744189387420192,0.0
+10.744189387420192,0.0
+10.744189387420192,8.0
+12.744189387420192,8.0
+12.744189387420192,10.0
+13.593774649081752,10.0
+13.593774649081752,0.0
+15.593774649081752,0.0
+15.593774649081752,8.0
+17.59377464908175,8.0
+17.59377464908175,10.0
+17.797315021511167,10.0
+17.797315021511167,0.0
+19.797315021511167,0.0
+19.797315021511167,8.0
+21.797315021511167,8.0
+21.797315021511167,10.0
+22.77799619268626,10.0
+22.77799619268626,0.0
+24.77799619268626,0.0
+24.77799619268626,8.0
+26.77799619268626,8.0
+26.77799619268626,10.0
+27.351471825502813,10.0
+27.351471825502813,0.0
+29.351471825502813,0.0
+29.351471825502813,8.0
+31.351471825502813,8.0
+31.351471825502813,10.0
+31.580796604277566,10.0
+31.580796604277566,0.0
+33.580796604277566,0.0
+33.580796604277566,8.0
+35.580796604277566,8.0
+35.580796604277566,10.0
+35.7646266205702,10.0
+35.7646266205702,0.0
+37.7646266205702,0.0
+37.7646266205702,8.0
+39.7646266205702,8.0
+39.7646266205702,10.0
+39.810965491691604,10.0
+39.810965491691604,0.0
+41.810965491691604,0.0
+41.810965491691604,8.0
+43.810965491691604,8.0
+43.810965491691604,10.0
+44.110988192260265,10.0
+44.110988192260265,0.0
+46.110988192260265,0.0
+46.110988192260265,8.0
+48.110988192260265,8.0
+48.110988192260265,10.0
+48.222136257914826,10.0
+48.222136257914826,0.0
+50.0,0.0
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>simulate[&lt;=5000;1] {delay_avg}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-03-20 12:15:16 +0100">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="delay_avg" type="l" color="0xff0000" encoding="csv">0.0,0.0
+4.864089968847111,0.0
+4.864089968847111,10.0
+5000.0,10.0
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>simulate[&lt;=100;1] {unique_count}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-03-20 18:57:57 +0100">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="unique_count" type="l" color="0xff0000" encoding="csv">0.0,0.0
+0.0,1.0
+8.79530774219893,1.0
+8.79530774219893,2.0
+13.026029250351712,2.0
+13.026029250351712,3.0
+21.958411811152473,3.0
+21.958411811152473,4.0
+26.003163351444528,4.0
+26.003163351444528,5.0
+34.460126887774095,5.0
+34.460126887774095,6.0
+47.803681953344494,6.0
+47.803681953344494,7.0
+52.73031649924815,7.0
+52.73031649924815,8.0
+56.809087068308145,8.0
+56.809087068308145,9.0
+60.98247906449251,9.0
+60.98247906449251,10.0
+100.0,10.0
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>simulate[&lt;=100;1] {coverage_percentage}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-03-20 19:10:18 +0100">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="coverage_percentage" type="l" color="0xff0000" encoding="csv">0.0,0.0
+0.0,6.25
+4.712937899632379,6.25
+4.712937899632379,12.5
+8.985033511416987,12.5
+8.985033511416987,18.75
+13.287143745226786,18.75
+13.287143745226786,25.0
+17.645930995233357,25.0
+17.645930995233357,31.25
+22.269162411801517,31.25
+22.269162411801517,37.5
+27.24373934813775,37.5
+27.24373934813775,43.75
+31.58542274660431,43.75
+31.58542274660431,50.0
+44.43939946242608,50.0
+44.43939946242608,56.25
+81.18109069322236,56.25
+81.18109069322236,62.5
+98.55497636343352,62.5
+98.55497636343352,68.75
+100.0,68.75
+					</series>
+					<comment/>
 				</plot>
 			</result>
 		</query>

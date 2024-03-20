@@ -4,8 +4,15 @@
 <declaration>/* Feel free to cite and/or read details to the model using:
   STRNADEL Josef. Statistical Model Checking of Approximate Circuits: Challenges and Opportunities. In: Proceedings of the 2020 Design, Automation &amp; Test in Europe Conference &amp; Exhibition (DATE). Grenoble: IEEE Computer Society, 2020, pp. 1574-1577. ISBN 978-3-9819263-4-7. Available from: https://ieeexplore.ieee.org/document/9116207 and https://www.fit.vut.cz/research/publication/12055/
  */
+const int MAX_INT = 65536;
+
 double dif_count = 0;
 double res_count = 0;
+int[0, MAX_INT] unique_count = 0;
+
+int[0, MAX_INT] comb_input;
+int[-1,MAX_INT] unique_inputs[MAX_INT];
+double coverage_percentage = 0.0;
 
 double out_sum_all_acc;
 double out_sum_all_approx;
@@ -21,6 +28,10 @@ double mean_squared_error = 0.0;
 double mean_relative_error = 0.0;
 double worst_case_error = 0.0;
 double worst_case_relative_error = 0.0;
+double worst_delay = 0.0;
+double current_delay = 0.0;
+double delay_sum = 0.0;
+double delay_avg = 0.0;
 
 double rnd;
 
@@ -34,7 +45,8 @@ double bit_flips_sum = 0;
 const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
 
-const int MAX_INT = 65536;
+int input_a;
+int input_b;
 
 const tOp OP_NOT = 0;
 const tOp OP_DLY = 1;
@@ -81,7 +93,7 @@ int diffctrl=0;
 int[-MAX_INT, MAX_INT] err_magn_v;    
 double err_magn_r;
 
-int bitsCovered;
+int[0, MAX_INT] bitsCovered;
 double inCoverage;
 
 bool allCovered=false;
