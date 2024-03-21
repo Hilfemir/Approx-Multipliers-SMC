@@ -654,6 +654,16 @@ class Parser(object):
 		#queries
 		self.append_template("./templates/queries_template.xml")
 
+	####################################################################
+		
+	def increase_sig_numbers(self, line: str) -> str:
+		matches = re.findall(r'sig_[0-9]+', line)
+		increased_matches = [f"sig_{int(sig.split("_")[1])+100}" for sig in matches]
+		ret_line = line
+		for i, sig in enumerate(increased_matches):
+			ret_line = re.sub(matches[i], sig, ret_line)
+
+		return ret_line
 
 def main():
 	################################################################
@@ -685,25 +695,29 @@ def main():
 	#parse the input verilog file
 	parser = Parser()
 
+	#increase all sig ids by 100 - in case of collisions with input/output bit indexes
+	updated_file = []
 	with open(path) as f:
 		for line in f:
-			#input/output declarations
-			parser.io_decs(line)
+			updated_file.append(parser.increase_sig_numbers(line))
+
+	for line in updated_file:
+		#input/output declarations
+		parser.io_decs(line)
 
 	parser.PIxy_mapping()
 	parser.POy_mapping()
 
-	with open(path) as f:
-		for line in f:
-			#signal assignments
-			try:
-				parser.signal_assignments(line)
-			except Exception as e:
-				print(e)
-				return
-
-			#output assignments
-			parser.output_assignments(line)
+	for line in updated_file:
+		#signal assignments
+		try:
+			parser.signal_assignments(line)
+		except Exception as e:
+			print(e)
+			return
+		
+		#output assignments
+		parser.output_assignments(line)
 
 	parser.update_signals()
 

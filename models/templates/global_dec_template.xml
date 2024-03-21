@@ -101,7 +101,7 @@ bool allCovered=false;
 const int NIB_MUL2 = 4;              
 const int NOB_MUL2 = 4;        
 const int NTV_MUL2 = TBL_PWR2[NIB_MUL2]; 
-const int DLY_MUL2 = 20;                 
+const int DLY_MUL2 = 500;                 
 
 /* ===------------------------  ------------------------==== */
 int getMasked(int w, int offset, int[0,MAX_INT] data){ 
