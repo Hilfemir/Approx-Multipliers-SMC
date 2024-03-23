@@ -751,7 +751,7 @@ void f(int i){
     current_delay = 0.0; //reset delay counter
     if(res_count &gt; 0) { delay_avg = delay_sum / res_count; }
 
-    j = fint(random_tri(0,0,imax));
+    j = fint(random(imax));
     k = fint(random(imax));
 
     j = check_limits(j, 0, imax);
@@ -23815,6 +23815,10 @@ Mean estimate of displayed sample: 1401 ± 415.9 (95% CI)</comment>
 					<comment/>
 				</plot>
 			</result>
+		</query>
+		<query>
+			<formula>simulate[&lt;=10000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error, mean_relative_error, mean_squared_error}</formula>
+			<comment/>
 		</query>
 	</queries>
 </nta>
