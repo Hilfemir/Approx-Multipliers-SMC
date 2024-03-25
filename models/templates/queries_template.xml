@@ -1,66 +1,17 @@
 	<queries>
 		<query>
-			<formula>simulate[&lt;=2000000;1] {dif_count, res_count}</formula>
-			<comment>Number of different outputs vs all outputs</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=5000;1] {res_acc, res_approx}</formula>
+			<formula>simulate[&lt;=20000;1] {res_acc, res_approx}</formula>
 			<comment>Accurate results vs approximate results</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=2000000; 1] (max:worst_case_error)</formula>
-			<comment>Worst case error</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=2000000; 1] (max:worst_case_relative_error)</formula>
-			<comment>Worst case relative error</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=2000000; 1] (max:hamming_distance)</formula>
-			<comment>Worst case hamming distance</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=2000000; 1] (max:bit_flips)</formula>
-			<comment>most bit flips in one calculation</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=2000000; 1] (max:avg_flips_per_res)</formula>
-			<comment>Average bit flips</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=2000000; 1] (max:bit_flips_sum)</formula>
-			<comment>Total number of bit flips through all calculations</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=2000000;1] {error_prob}</formula>
-			<comment>Error probability</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=2000000;1] {mean_abs_error}</formula>
-			<comment>Mean absolute error</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=2000000;1] {mean_squared_error}</formula>
-			<comment>Mean squared error</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=2000000;1] {mean_relative_error}</formula>
-			<comment>Mean relative error</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=50000; 5] (max:worst_delay)</formula>
-			<comment>Longest delay between input and output</comment>
 		</query>
 		<query>
 			<formula>simulate[&lt;=1000;1] {current_delay}</formula>
 			<comment>Jitter of delay for each result</comment>
 		</query>
 		<query>
-			<formula>simulate[&lt;=5000;1] {delay_avg}</formula>
-			<comment>Average delay per one result</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=2000000;1] {coverage_percentage}</formula>
+			<formula>simulate[&lt;=5000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
+mean_relative_error, mean_squared_error, avg_flips_per_res, worst_case_error, 
+worst_case_relative_error, max_hamming_distance, max_bit_flips, worst_delay
+}</formula>
 			<comment/>
 		</query>
 	</queries>

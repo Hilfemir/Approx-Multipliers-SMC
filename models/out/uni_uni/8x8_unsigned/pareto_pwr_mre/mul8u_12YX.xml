@@ -22,6 +22,7 @@ double out_sum_all_diff_squared;
 double out_sum_relative;
 
 int hamming_distance = 0;
+int max_hamming_distance = 0;
 double error_prob = 0.0;
 double mean_abs_error = 0.0;
 double mean_squared_error = 0.0;
@@ -38,9 +39,10 @@ double rnd;
 broadcast chan change[1000];
 int outcnt=0;
 
-double bit_flips = 0;
-double avg_flips_per_res = 0;
-double bit_flips_sum = 0;
+double bit_flips = 0.0;
+double avg_flips_per_res = 0.0;
+double bit_flips_sum = 0.0;
+double max_bit_flips = 0.0;
 
 const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
@@ -101,7 +103,7 @@ bool allCovered=false;
 const int NIB_MUL2 = 16;
 const int NOB_MUL2 = 16;
 const int NTV_MUL2 = TBL_PWR2[NIB_MUL2]; 
-const int DLY_MUL2 = 20;                 
+const int DLY_MUL2 = 500;                 
 
 /* ===------------------------  ------------------------==== */
 int getMasked(int w, int offset, int[0,MAX_INT] data){ 
@@ -199,6 +201,10 @@ bool outEq(){
         dif_count = dif_count + 1;
     }
 
+    if (hamming_distance &gt; max_hamming_distance) {
+        max_hamming_distance = hamming_distance;
+    }
+
     res_count = res_count + 1;
 
     return same;
@@ -286,6 +292,10 @@ void diff(){
 
     err_magn_v = res_acc - res_approx;
     if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
+
+    if(max_bit_flips &lt; bit_flips) {
+        max_bit_flips = bit_flips;
+    }
 
     bit_flips = 0;
 
@@ -1098,318 +1108,318 @@ mul2Atb = tmul2_tb_random(DLY_MUL2, COVERAGE_RATIO);
 ediff = eval_diff(5);
 
 //gates
-g16 = gate2(0, PIxy[8], PIxy[0], POy[0], change[8], change[0], change[16]);
-g17 = gate2(1, PIxy[9], PIxy[0], 17, change[9], change[0], change[17]);
-g18 = gate2(2, PIxy[10], PIxy[0], 18, change[10], change[0], change[18]);
-g19 = gate2(3, PIxy[11], PIxy[0], 19, change[11], change[0], change[19]);
-g20 = gate2(4, PIxy[12], PIxy[0], 20, change[12], change[0], change[20]);
-g21 = gate2(5, PIxy[13], PIxy[0], 21, change[13], change[0], change[21]);
-g22 = gate2(6, PIxy[14], PIxy[0], 22, change[14], change[0], change[22]);
-g23 = gate2(7, PIxy[15], PIxy[0], 23, change[15], change[0], change[23]);
-g24 = gate2(8, PIxy[8], PIxy[1], 24, change[8], change[1], change[24]);
-g25 = gate2(9, PIxy[9], PIxy[1], 25, change[9], change[1], change[25]);
-g26 = gate2(10, PIxy[10], PIxy[1], 26, change[10], change[1], change[26]);
-g27 = gate2(11, PIxy[11], PIxy[1], 27, change[11], change[1], change[27]);
-g28 = gate2(12, PIxy[12], PIxy[1], 28, change[12], change[1], change[28]);
-g29 = gate2(13, PIxy[13], PIxy[1], 29, change[13], change[1], change[29]);
-g30 = gate2(14, PIxy[14], PIxy[1], 30, change[14], change[1], change[30]);
-g31 = gate2(15, PIxy[15], PIxy[1], 31, change[15], change[1], change[31]);
-g32 = gate2(16, 17, 24, POy[1], change[17], change[24], change[32]);
-g34 = gate2(17, 18, 25, 34, change[18], change[25], change[34]);
-g35 = gate2(18, 18, 25, 35, change[18], change[25], change[35]);
-g36 = gate2(19, 19, 26, 36, change[19], change[26], change[36]);
-g37 = gate2(20, 19, 26, 37, change[19], change[26], change[37]);
-g38 = gate2(21, 20, 27, 38, change[20], change[27], change[38]);
-g39 = gate2(22, 20, 27, 39, change[20], change[27], change[39]);
-g40 = gate2(23, 21, 28, 40, change[21], change[28], change[40]);
-g41 = gate2(24, 21, 28, 41, change[21], change[28], change[41]);
-g42 = gate2(25, 22, 29, 42, change[22], change[29], change[42]);
-g43 = gate2(26, 22, 29, 43, change[22], change[29], change[43]);
-g44 = gate2(27, 23, 30, 44, change[23], change[30], change[44]);
-g45 = gate2(28, 23, 31, 45, change[23], change[31], change[45]);
-g46 = gate2(29, PIxy[8], PIxy[2], 46, change[8], change[2], change[46]);
-g47 = gate2(30, PIxy[9], PIxy[2], 47, change[9], change[2], change[47]);
-g48 = gate2(31, PIxy[10], PIxy[2], 48, change[10], change[2], change[48]);
-g49 = gate2(32, PIxy[11], PIxy[2], 49, change[11], change[2], change[49]);
-g50 = gate2(33, PIxy[12], PIxy[2], 50, change[12], change[2], change[50]);
-g51 = gate2(34, PIxy[13], PIxy[2], 51, change[13], change[2], change[51]);
-g52 = gate2(35, PIxy[14], PIxy[2], 52, change[14], change[2], change[52]);
-g53 = gate2(36, PIxy[15], PIxy[2], 53, change[15], change[2], change[53]);
-g54 = gate2(37, 34, 46, POy[2], change[34], change[46], change[54]);
-g59 = gate2(38, 36, 47, 59, change[36], change[47], change[59]);
-g60 = gate2(39, 36, 47, 60, change[36], change[47], change[60]);
-g61 = gate2(40, 59, 35, 61, change[59], change[35], change[61]);
-g62 = gate2(41, 59, 35, 62, change[59], change[35], change[62]);
-g63 = gate2(42, 60, 61, 63, change[60], change[61], change[63]);
-g64 = gate2(43, 38, 48, 64, change[38], change[48], change[64]);
-g65 = gate2(44, 38, 48, 65, change[38], change[48], change[65]);
-g66 = gate2(45, 64, 37, 66, change[64], change[37], change[66]);
-g67 = gate2(46, 64, 37, 67, change[64], change[37], change[67]);
-g68 = gate2(47, 65, 66, 68, change[65], change[66], change[68]);
-g69 = gate2(48, 40, 49, 69, change[40], change[49], change[69]);
-g70 = gate2(49, 40, 49, 70, change[40], change[49], change[70]);
-g71 = gate2(50, 69, 39, 71, change[69], change[39], change[71]);
-g72 = gate2(51, 69, 39, 72, change[69], change[39], change[72]);
-g73 = gate2(52, 70, 71, 73, change[70], change[71], change[73]);
-g74 = gate2(53, 42, 50, 74, change[42], change[50], change[74]);
-g75 = gate2(54, 42, 50, 75, change[42], change[50], change[75]);
-g76 = gate2(55, 74, 41, 76, change[74], change[41], change[76]);
-g77 = gate2(56, 74, 41, 77, change[74], change[41], change[77]);
-g78 = gate2(57, 75, 76, 78, change[75], change[76], change[78]);
-g79 = gate2(58, 44, 51, 79, change[44], change[51], change[79]);
-g80 = gate2(59, 44, 51, 80, change[44], change[51], change[80]);
-g81 = gate2(60, 79, 43, 81, change[79], change[43], change[81]);
-g82 = gate2(61, 79, 43, 82, change[79], change[43], change[82]);
-g83 = gate2(62, 80, 81, 83, change[80], change[81], change[83]);
-g84 = gate2(63, 31, 52, 84, change[31], change[52], change[84]);
-g85 = gate2(64, 31, 52, 85, change[31], change[52], change[85]);
-g86 = gate2(65, PIxy[14], 45, 86, change[14], change[45], change[86]);
-g87 = gate2(66, 84, 86, 87, change[84], change[86], change[87]);
-g88 = gate2(67, 85, 86, 88, change[85], change[86], change[88]);
-g89 = gate2(68, PIxy[8], PIxy[3], 89, change[8], change[3], change[89]);
-g90 = gate2(69, PIxy[9], PIxy[3], 90, change[9], change[3], change[90]);
-g91 = gate2(70, PIxy[10], PIxy[3], 91, change[10], change[3], change[91]);
-g92 = gate2(71, PIxy[11], PIxy[3], 92, change[11], change[3], change[92]);
-g93 = gate2(72, PIxy[12], PIxy[3], 93, change[12], change[3], change[93]);
-g94 = gate2(73, PIxy[13], PIxy[3], 94, change[13], change[3], change[94]);
-g95 = gate2(74, PIxy[14], PIxy[3], 95, change[14], change[3], change[95]);
-g96 = gate2(75, PIxy[15], PIxy[3], 96, change[15], change[3], change[96]);
-g97 = gate2(76, 62, 89, POy[3], change[62], change[89], change[97]);
-g98 = gate2(77, 62, 89, 98, change[62], change[89], change[98]);
-g102 = gate2(78, 67, 90, 102, change[67], change[90], change[102]);
-g103 = gate2(79, 67, 90, 103, change[67], change[90], change[103]);
-g104 = gate2(80, 102, 63, 104, change[102], change[63], change[104]);
-g105 = gate2(81, 102, 63, 105, change[102], change[63], change[105]);
-g106 = gate2(82, 103, 104, 106, change[103], change[104], change[106]);
-g107 = gate2(83, 72, 91, 107, change[72], change[91], change[107]);
-g108 = gate2(84, 72, 91, 108, change[72], change[91], change[108]);
-g109 = gate2(85, 107, 68, 109, change[107], change[68], change[109]);
-g110 = gate2(86, 107, 68, 110, change[107], change[68], change[110]);
-g111 = gate2(87, 108, 109, 111, change[108], change[109], change[111]);
-g112 = gate2(88, 77, 92, 112, change[77], change[92], change[112]);
-g113 = gate2(89, 77, 92, 113, change[77], change[92], change[113]);
-g114 = gate2(90, 112, 73, 114, change[112], change[73], change[114]);
-g115 = gate2(91, 112, 73, 115, change[112], change[73], change[115]);
-g116 = gate2(92, 113, 114, 116, change[113], change[114], change[116]);
-g117 = gate2(93, 82, 93, 117, change[82], change[93], change[117]);
-g118 = gate2(94, 82, 93, 118, change[82], change[93], change[118]);
-g119 = gate2(95, 117, 78, 119, change[117], change[78], change[119]);
-g120 = gate2(96, 117, 78, 120, change[117], change[78], change[120]);
-g121 = gate2(97, 118, 119, 121, change[118], change[119], change[121]);
-g122 = gate2(98, 87, 94, 122, change[87], change[94], change[122]);
-g123 = gate2(99, 87, 94, 123, change[87], change[94], change[123]);
-g124 = gate2(100, 122, 83, 124, change[122], change[83], change[124]);
-g125 = gate2(101, 122, 83, 125, change[122], change[83], change[125]);
-g126 = gate2(102, 123, 124, 126, change[123], change[124], change[126]);
-g127 = gate2(103, 53, 95, 127, change[53], change[95], change[127]);
-g128 = gate2(104, 53, 95, 128, change[53], change[95], change[128]);
-g129 = gate2(105, 127, 88, 129, change[127], change[88], change[129]);
-g130 = gate2(106, 127, 88, 130, change[127], change[88], change[130]);
-g131 = gate2(107, 128, 129, 131, change[128], change[129], change[131]);
-g132 = gate2(108, PIxy[8], PIxy[4], 132, change[8], change[4], change[132]);
-g133 = gate2(109, PIxy[9], PIxy[4], 133, change[9], change[4], change[133]);
-g134 = gate2(110, PIxy[10], PIxy[4], 134, change[10], change[4], change[134]);
-g135 = gate2(111, PIxy[11], PIxy[4], 135, change[11], change[4], change[135]);
-g136 = gate2(112, PIxy[12], PIxy[4], 136, change[12], change[4], change[136]);
-g137 = gate2(113, PIxy[13], PIxy[4], 137, change[13], change[4], change[137]);
-g138 = gate2(114, PIxy[14], PIxy[4], 138, change[14], change[4], change[138]);
-g139 = gate2(115, PIxy[15], PIxy[4], 139, change[15], change[4], change[139]);
-g140 = gate2(116, 105, 132, 140, change[105], change[132], change[140]);
-g141 = gate2(117, 105, 132, 141, change[105], change[132], change[141]);
-g142 = gate2(118, 140, 98, 142, change[140], change[98], change[142]);
-g143 = gate2(119, 140, 98, POy[4], change[140], change[98], change[143]);
-g144 = gate2(120, 141, 142, 144, change[141], change[142], change[144]);
-g145 = gate2(121, 110, 133, 145, change[110], change[133], change[145]);
-g146 = gate2(122, 110, 133, 146, change[110], change[133], change[146]);
-g147 = gate2(123, 145, 106, 147, change[145], change[106], change[147]);
-g148 = gate2(124, 145, 106, 148, change[145], change[106], change[148]);
-g149 = gate2(125, 146, 147, 149, change[146], change[147], change[149]);
-g150 = gate2(126, 115, 134, 150, change[115], change[134], change[150]);
-g151 = gate2(127, 115, 134, 151, change[115], change[134], change[151]);
-g152 = gate2(128, 150, 111, 152, change[150], change[111], change[152]);
-g153 = gate2(129, 150, 111, 153, change[150], change[111], change[153]);
-g154 = gate2(130, 151, 152, 154, change[151], change[152], change[154]);
-g155 = gate2(131, 120, 135, 155, change[120], change[135], change[155]);
-g156 = gate2(132, 120, 135, 156, change[120], change[135], change[156]);
-g157 = gate2(133, 155, 116, 157, change[155], change[116], change[157]);
-g158 = gate2(134, 155, 116, 158, change[155], change[116], change[158]);
-g159 = gate2(135, 156, 157, 159, change[156], change[157], change[159]);
-g160 = gate2(136, 125, 136, 160, change[125], change[136], change[160]);
-g161 = gate2(137, 125, 136, 161, change[125], change[136], change[161]);
-g162 = gate2(138, 160, 121, 162, change[160], change[121], change[162]);
-g163 = gate2(139, 160, 121, 163, change[160], change[121], change[163]);
-g164 = gate2(140, 161, 162, 164, change[161], change[162], change[164]);
-g165 = gate2(141, 130, 137, 165, change[130], change[137], change[165]);
-g166 = gate2(142, 130, 137, 166, change[130], change[137], change[166]);
-g167 = gate2(143, 165, 126, 167, change[165], change[126], change[167]);
-g168 = gate2(144, 165, 126, 168, change[165], change[126], change[168]);
-g169 = gate2(145, 166, 167, 169, change[166], change[167], change[169]);
-g170 = gate2(146, 96, 138, 170, change[96], change[138], change[170]);
-g171 = gate2(147, 96, 138, 171, change[96], change[138], change[171]);
-g172 = gate2(148, 170, 131, 172, change[170], change[131], change[172]);
-g173 = gate2(149, 170, 131, 173, change[170], change[131], change[173]);
-g174 = gate2(150, 171, 172, 174, change[171], change[172], change[174]);
-g175 = gate2(151, PIxy[8], PIxy[5], 175, change[8], change[5], change[175]);
-g176 = gate2(152, PIxy[9], PIxy[5], 176, change[9], change[5], change[176]);
-g177 = gate2(153, PIxy[10], PIxy[5], 177, change[10], change[5], change[177]);
-g178 = gate2(154, PIxy[11], PIxy[5], 178, change[11], change[5], change[178]);
-g179 = gate2(155, PIxy[12], PIxy[5], 179, change[12], change[5], change[179]);
-g180 = gate2(156, PIxy[13], PIxy[5], 180, change[13], change[5], change[180]);
-g181 = gate2(157, PIxy[14], PIxy[5], 181, change[14], change[5], change[181]);
-g182 = gate2(158, PIxy[15], PIxy[5], 182, change[15], change[5], change[182]);
-g183 = gate2(159, 148, 175, 183, change[148], change[175], change[183]);
-g184 = gate2(160, 148, 175, 184, change[148], change[175], change[184]);
-g185 = gate2(161, 183, 144, 185, change[183], change[144], change[185]);
-g186 = gate2(162, 183, 144, POy[5], change[183], change[144], change[186]);
-g187 = gate2(163, 184, 185, 187, change[184], change[185], change[187]);
-g188 = gate2(164, 153, 176, 188, change[153], change[176], change[188]);
-g189 = gate2(165, 153, 176, 189, change[153], change[176], change[189]);
-g190 = gate2(166, 188, 149, 190, change[188], change[149], change[190]);
-g191 = gate2(167, 188, 149, 191, change[188], change[149], change[191]);
-g192 = gate2(168, 189, 190, 192, change[189], change[190], change[192]);
-g193 = gate2(169, 158, 177, 193, change[158], change[177], change[193]);
-g194 = gate2(170, 158, 177, 194, change[158], change[177], change[194]);
-g195 = gate2(171, 193, 154, 195, change[193], change[154], change[195]);
-g196 = gate2(172, 193, 154, 196, change[193], change[154], change[196]);
-g197 = gate2(173, 194, 195, 197, change[194], change[195], change[197]);
-g198 = gate2(174, 163, 178, 198, change[163], change[178], change[198]);
-g199 = gate2(175, 163, 178, 199, change[163], change[178], change[199]);
-g200 = gate2(176, 198, 159, 200, change[198], change[159], change[200]);
-g201 = gate2(177, 198, 159, 201, change[198], change[159], change[201]);
-g202 = gate2(178, 199, 200, 202, change[199], change[200], change[202]);
-g203 = gate2(179, 168, 179, 203, change[168], change[179], change[203]);
-g204 = gate2(180, 168, 179, 204, change[168], change[179], change[204]);
-g205 = gate2(181, 203, 164, 205, change[203], change[164], change[205]);
-g206 = gate2(182, 203, 164, 206, change[203], change[164], change[206]);
-g207 = gate2(183, 204, 205, 207, change[204], change[205], change[207]);
-g208 = gate2(184, 173, 180, 208, change[173], change[180], change[208]);
-g209 = gate2(185, 173, 180, 209, change[173], change[180], change[209]);
-g210 = gate2(186, 208, 169, 210, change[208], change[169], change[210]);
-g211 = gate2(187, 208, 169, 211, change[208], change[169], change[211]);
-g212 = gate2(188, 209, 210, 212, change[209], change[210], change[212]);
-g213 = gate2(189, 139, 181, 213, change[139], change[181], change[213]);
-g214 = gate2(190, 139, 181, 214, change[139], change[181], change[214]);
-g215 = gate2(191, 213, 174, 215, change[213], change[174], change[215]);
-g216 = gate2(192, 213, 174, 216, change[213], change[174], change[216]);
-g217 = gate2(193, 214, 215, 217, change[214], change[215], change[217]);
-g218 = gate2(194, PIxy[8], PIxy[6], 218, change[8], change[6], change[218]);
-g219 = gate2(195, PIxy[9], PIxy[6], 219, change[9], change[6], change[219]);
-g220 = gate2(196, PIxy[10], PIxy[6], 220, change[10], change[6], change[220]);
-g221 = gate2(197, PIxy[11], PIxy[6], 221, change[11], change[6], change[221]);
-g222 = gate2(198, PIxy[12], PIxy[6], 222, change[12], change[6], change[222]);
-g223 = gate2(199, PIxy[13], PIxy[6], 223, change[13], change[6], change[223]);
-g224 = gate2(200, PIxy[14], PIxy[6], 224, change[14], change[6], change[224]);
-g225 = gate2(201, PIxy[15], PIxy[6], 225, change[15], change[6], change[225]);
-g226 = gate2(202, 191, 218, 226, change[191], change[218], change[226]);
-g227 = gate2(203, 191, 218, 227, change[191], change[218], change[227]);
-g228 = gate2(204, 226, 187, 228, change[226], change[187], change[228]);
-g229 = gate2(205, 226, 187, POy[6], change[226], change[187], change[229]);
-g230 = gate2(206, 227, 228, 230, change[227], change[228], change[230]);
-g231 = gate2(207, 196, 219, 231, change[196], change[219], change[231]);
-g232 = gate2(208, 196, 219, 232, change[196], change[219], change[232]);
-g233 = gate2(209, 231, 192, 233, change[231], change[192], change[233]);
-g234 = gate2(210, 231, 192, 234, change[231], change[192], change[234]);
-g235 = gate2(211, 232, 233, 235, change[232], change[233], change[235]);
-g236 = gate2(212, 201, 220, 236, change[201], change[220], change[236]);
-g237 = gate2(213, 201, 220, 237, change[201], change[220], change[237]);
-g238 = gate2(214, 236, 197, 238, change[236], change[197], change[238]);
-g239 = gate2(215, 236, 197, 239, change[236], change[197], change[239]);
-g240 = gate2(216, 237, 238, 240, change[237], change[238], change[240]);
-g241 = gate2(217, 206, 221, 241, change[206], change[221], change[241]);
-g242 = gate2(218, 206, 221, 242, change[206], change[221], change[242]);
-g243 = gate2(219, 241, 202, 243, change[241], change[202], change[243]);
-g244 = gate2(220, 241, 202, 244, change[241], change[202], change[244]);
-g245 = gate2(221, 242, 243, 245, change[242], change[243], change[245]);
-g246 = gate2(222, 211, 222, 246, change[211], change[222], change[246]);
-g247 = gate2(223, 211, 222, 247, change[211], change[222], change[247]);
-g248 = gate2(224, 246, 207, 248, change[246], change[207], change[248]);
-g249 = gate2(225, 246, 207, 249, change[246], change[207], change[249]);
-g250 = gate2(226, 247, 248, 250, change[247], change[248], change[250]);
-g251 = gate2(227, 216, 223, 251, change[216], change[223], change[251]);
-g252 = gate2(228, 216, 223, 252, change[216], change[223], change[252]);
-g253 = gate2(229, 251, 212, 253, change[251], change[212], change[253]);
-g254 = gate2(230, 251, 212, 254, change[251], change[212], change[254]);
-g255 = gate2(231, 252, 253, 255, change[252], change[253], change[255]);
-g256 = gate2(232, 182, 224, 256, change[182], change[224], change[256]);
-g257 = gate2(233, 182, 224, 257, change[182], change[224], change[257]);
-g258 = gate2(234, 256, 217, 258, change[256], change[217], change[258]);
-g259 = gate2(235, 256, 217, 259, change[256], change[217], change[259]);
-g260 = gate2(236, 257, 258, 260, change[257], change[258], change[260]);
-g261 = gate2(237, PIxy[8], PIxy[7], 261, change[8], change[7], change[261]);
-g262 = gate2(238, PIxy[9], PIxy[7], 262, change[9], change[7], change[262]);
-g263 = gate2(239, PIxy[10], PIxy[7], 263, change[10], change[7], change[263]);
-g264 = gate2(240, PIxy[11], PIxy[7], 264, change[11], change[7], change[264]);
-g265 = gate2(241, PIxy[12], PIxy[7], 265, change[12], change[7], change[265]);
-g266 = gate2(242, PIxy[13], PIxy[7], 266, change[13], change[7], change[266]);
-g267 = gate2(243, PIxy[14], PIxy[7], 267, change[14], change[7], change[267]);
-g268 = gate2(244, PIxy[15], PIxy[7], 268, change[15], change[7], change[268]);
-g269 = gate2(245, 234, 261, 269, change[234], change[261], change[269]);
-g270 = gate2(246, 234, 261, 270, change[234], change[261], change[270]);
-g271 = gate2(247, 269, 230, 271, change[269], change[230], change[271]);
-g272 = gate2(248, 269, 230, POy[7], change[269], change[230], change[272]);
-g273 = gate2(249, 270, 271, 273, change[270], change[271], change[273]);
-g274 = gate2(250, 239, 262, 274, change[239], change[262], change[274]);
-g275 = gate2(251, 239, 262, 275, change[239], change[262], change[275]);
-g276 = gate2(252, 274, 235, 276, change[274], change[235], change[276]);
-g277 = gate2(253, 274, 235, 277, change[274], change[235], change[277]);
-g278 = gate2(254, 275, 276, 278, change[275], change[276], change[278]);
-g279 = gate2(255, 244, 263, 279, change[244], change[263], change[279]);
-g280 = gate2(256, 244, 263, 280, change[244], change[263], change[280]);
-g281 = gate2(257, 279, 240, 281, change[279], change[240], change[281]);
-g282 = gate2(258, 279, 240, 282, change[279], change[240], change[282]);
-g283 = gate2(259, 280, 281, 283, change[280], change[281], change[283]);
-g284 = gate2(260, 249, 264, 284, change[249], change[264], change[284]);
-g285 = gate2(261, 249, 264, 285, change[249], change[264], change[285]);
-g286 = gate2(262, 284, 245, 286, change[284], change[245], change[286]);
-g287 = gate2(263, 284, 245, 287, change[284], change[245], change[287]);
-g288 = gate2(264, 285, 286, 288, change[285], change[286], change[288]);
-g289 = gate2(265, 254, 265, 289, change[254], change[265], change[289]);
-g290 = gate2(266, 254, 265, 290, change[254], change[265], change[290]);
-g291 = gate2(267, 289, 250, 291, change[289], change[250], change[291]);
-g292 = gate2(268, 289, 250, 292, change[289], change[250], change[292]);
-g293 = gate2(269, 290, 291, 293, change[290], change[291], change[293]);
-g294 = gate2(270, 259, 266, 294, change[259], change[266], change[294]);
-g295 = gate2(271, 259, 266, 295, change[259], change[266], change[295]);
-g296 = gate2(272, 294, 255, 296, change[294], change[255], change[296]);
-g297 = gate2(273, 294, 255, 297, change[294], change[255], change[297]);
-g298 = gate2(274, 295, 296, 298, change[295], change[296], change[298]);
-g299 = gate2(275, 225, 267, 299, change[225], change[267], change[299]);
-g300 = gate2(276, 225, 267, 300, change[225], change[267], change[300]);
-g301 = gate2(277, 299, 260, 301, change[299], change[260], change[301]);
-g302 = gate2(278, 299, 260, 302, change[299], change[260], change[302]);
-g303 = gate2(279, 300, 301, 303, change[300], change[301], change[303]);
-g304 = gate2(280, 277, 273, POy[8], change[277], change[273], change[304]);
-g305 = gate2(281, 277, 273, 305, change[277], change[273], change[305]);
-g306 = gate2(282, 282, 278, 306, change[282], change[278], change[306]);
-g307 = gate2(283, 282, 278, 307, change[282], change[278], change[307]);
-g308 = gate2(284, 306, 305, 308, change[306], change[305], change[308]);
-g309 = gate2(285, 306, 305, POy[9], change[306], change[305], change[309]);
-g310 = gate2(286, 307, 308, 310, change[307], change[308], change[310]);
-g311 = gate2(287, 287, 283, 311, change[287], change[283], change[311]);
-g312 = gate2(288, 287, 283, 312, change[287], change[283], change[312]);
-g313 = gate2(289, 311, 310, 313, change[311], change[310], change[313]);
-g314 = gate2(290, 311, 310, POy[10], change[311], change[310], change[314]);
-g315 = gate2(291, 312, 313, 315, change[312], change[313], change[315]);
-g316 = gate2(292, 292, 288, 316, change[292], change[288], change[316]);
-g317 = gate2(293, 292, 288, 317, change[292], change[288], change[317]);
-g318 = gate2(294, 316, 315, 318, change[316], change[315], change[318]);
-g319 = gate2(295, 316, 315, POy[11], change[316], change[315], change[319]);
-g320 = gate2(296, 317, 318, 320, change[317], change[318], change[320]);
-g321 = gate2(297, 297, 293, 321, change[297], change[293], change[321]);
-g322 = gate2(298, 297, 293, 322, change[297], change[293], change[322]);
-g323 = gate2(299, 321, 320, 323, change[321], change[320], change[323]);
-g324 = gate2(300, 321, 320, POy[12], change[321], change[320], change[324]);
-g325 = gate2(301, 322, 323, 325, change[322], change[323], change[325]);
-g326 = gate2(302, 302, 298, 326, change[302], change[298], change[326]);
-g327 = gate2(303, 302, 298, 327, change[302], change[298], change[327]);
-g328 = gate2(304, 326, 325, 328, change[326], change[325], change[328]);
-g329 = gate2(305, 326, 325, POy[13], change[326], change[325], change[329]);
-g330 = gate2(306, 327, 328, 330, change[327], change[328], change[330]);
-g331 = gate2(307, 268, 303, 331, change[268], change[303], change[331]);
-g332 = gate2(308, PIxy[7], 303, 332, change[7], change[303], change[332]);
-g333 = gate2(309, 331, 330, 333, change[331], change[330], change[333]);
-g334 = gate2(310, 331, 330, POy[14], change[331], change[330], change[334]);
-g335 = gate2(311, 332, 333, POy[15], change[332], change[333], change[335]);
+g116 = gate2(0, PIxy[8], PIxy[0], POy[0], change[8], change[0], change[116]);
+g117 = gate2(1, PIxy[9], PIxy[0], 117, change[9], change[0], change[117]);
+g118 = gate2(2, PIxy[10], PIxy[0], 118, change[10], change[0], change[118]);
+g119 = gate2(3, PIxy[11], PIxy[0], 119, change[11], change[0], change[119]);
+g120 = gate2(4, PIxy[12], PIxy[0], 120, change[12], change[0], change[120]);
+g121 = gate2(5, PIxy[13], PIxy[0], 121, change[13], change[0], change[121]);
+g122 = gate2(6, PIxy[14], PIxy[0], 122, change[14], change[0], change[122]);
+g123 = gate2(7, PIxy[15], PIxy[0], 123, change[15], change[0], change[123]);
+g124 = gate2(8, PIxy[8], PIxy[1], 124, change[8], change[1], change[124]);
+g125 = gate2(9, PIxy[9], PIxy[1], 125, change[9], change[1], change[125]);
+g126 = gate2(10, PIxy[10], PIxy[1], 126, change[10], change[1], change[126]);
+g127 = gate2(11, PIxy[11], PIxy[1], 127, change[11], change[1], change[127]);
+g128 = gate2(12, PIxy[12], PIxy[1], 128, change[12], change[1], change[128]);
+g129 = gate2(13, PIxy[13], PIxy[1], 129, change[13], change[1], change[129]);
+g130 = gate2(14, PIxy[14], PIxy[1], 130, change[14], change[1], change[130]);
+g131 = gate2(15, PIxy[15], PIxy[1], 131, change[15], change[1], change[131]);
+g132 = gate2(16, 117, 124, POy[1], change[117], change[124], change[132]);
+g134 = gate2(17, 118, 125, 134, change[118], change[125], change[134]);
+g135 = gate2(18, 118, 125, 135, change[118], change[125], change[135]);
+g136 = gate2(19, 119, 126, 136, change[119], change[126], change[136]);
+g137 = gate2(20, 119, 126, 137, change[119], change[126], change[137]);
+g138 = gate2(21, 120, 127, 138, change[120], change[127], change[138]);
+g139 = gate2(22, 120, 127, 139, change[120], change[127], change[139]);
+g140 = gate2(23, 121, 128, 140, change[121], change[128], change[140]);
+g141 = gate2(24, 121, 128, 141, change[121], change[128], change[141]);
+g142 = gate2(25, 122, 129, 142, change[122], change[129], change[142]);
+g143 = gate2(26, 122, 129, 143, change[122], change[129], change[143]);
+g144 = gate2(27, 123, 130, 144, change[123], change[130], change[144]);
+g145 = gate2(28, 123, 131, 145, change[123], change[131], change[145]);
+g146 = gate2(29, PIxy[8], PIxy[2], 146, change[8], change[2], change[146]);
+g147 = gate2(30, PIxy[9], PIxy[2], 147, change[9], change[2], change[147]);
+g148 = gate2(31, PIxy[10], PIxy[2], 148, change[10], change[2], change[148]);
+g149 = gate2(32, PIxy[11], PIxy[2], 149, change[11], change[2], change[149]);
+g150 = gate2(33, PIxy[12], PIxy[2], 150, change[12], change[2], change[150]);
+g151 = gate2(34, PIxy[13], PIxy[2], 151, change[13], change[2], change[151]);
+g152 = gate2(35, PIxy[14], PIxy[2], 152, change[14], change[2], change[152]);
+g153 = gate2(36, PIxy[15], PIxy[2], 153, change[15], change[2], change[153]);
+g154 = gate2(37, 134, 146, POy[2], change[134], change[146], change[154]);
+g159 = gate2(38, 136, 147, 159, change[136], change[147], change[159]);
+g160 = gate2(39, 136, 147, 160, change[136], change[147], change[160]);
+g161 = gate2(40, 159, 135, 161, change[159], change[135], change[161]);
+g162 = gate2(41, 159, 135, 162, change[159], change[135], change[162]);
+g163 = gate2(42, 160, 161, 163, change[160], change[161], change[163]);
+g164 = gate2(43, 138, 148, 164, change[138], change[148], change[164]);
+g165 = gate2(44, 138, 148, 165, change[138], change[148], change[165]);
+g166 = gate2(45, 164, 137, 166, change[164], change[137], change[166]);
+g167 = gate2(46, 164, 137, 167, change[164], change[137], change[167]);
+g168 = gate2(47, 165, 166, 168, change[165], change[166], change[168]);
+g169 = gate2(48, 140, 149, 169, change[140], change[149], change[169]);
+g170 = gate2(49, 140, 149, 170, change[140], change[149], change[170]);
+g171 = gate2(50, 169, 139, 171, change[169], change[139], change[171]);
+g172 = gate2(51, 169, 139, 172, change[169], change[139], change[172]);
+g173 = gate2(52, 170, 171, 173, change[170], change[171], change[173]);
+g174 = gate2(53, 142, 150, 174, change[142], change[150], change[174]);
+g175 = gate2(54, 142, 150, 175, change[142], change[150], change[175]);
+g176 = gate2(55, 174, 141, 176, change[174], change[141], change[176]);
+g177 = gate2(56, 174, 141, 177, change[174], change[141], change[177]);
+g178 = gate2(57, 175, 176, 178, change[175], change[176], change[178]);
+g179 = gate2(58, 144, 151, 179, change[144], change[151], change[179]);
+g180 = gate2(59, 144, 151, 180, change[144], change[151], change[180]);
+g181 = gate2(60, 179, 143, 181, change[179], change[143], change[181]);
+g182 = gate2(61, 179, 143, 182, change[179], change[143], change[182]);
+g183 = gate2(62, 180, 181, 183, change[180], change[181], change[183]);
+g184 = gate2(63, 131, 152, 184, change[131], change[152], change[184]);
+g185 = gate2(64, 131, 152, 185, change[131], change[152], change[185]);
+g186 = gate2(65, PIxy[14], 145, 186, change[14], change[145], change[186]);
+g187 = gate2(66, 184, 186, 187, change[184], change[186], change[187]);
+g188 = gate2(67, 185, 186, 188, change[185], change[186], change[188]);
+g189 = gate2(68, PIxy[8], PIxy[3], 189, change[8], change[3], change[189]);
+g190 = gate2(69, PIxy[9], PIxy[3], 190, change[9], change[3], change[190]);
+g191 = gate2(70, PIxy[10], PIxy[3], 191, change[10], change[3], change[191]);
+g192 = gate2(71, PIxy[11], PIxy[3], 192, change[11], change[3], change[192]);
+g193 = gate2(72, PIxy[12], PIxy[3], 193, change[12], change[3], change[193]);
+g194 = gate2(73, PIxy[13], PIxy[3], 194, change[13], change[3], change[194]);
+g195 = gate2(74, PIxy[14], PIxy[3], 195, change[14], change[3], change[195]);
+g196 = gate2(75, PIxy[15], PIxy[3], 196, change[15], change[3], change[196]);
+g197 = gate2(76, 162, 189, POy[3], change[162], change[189], change[197]);
+g198 = gate2(77, 162, 189, 198, change[162], change[189], change[198]);
+g202 = gate2(78, 167, 190, 202, change[167], change[190], change[202]);
+g203 = gate2(79, 167, 190, 203, change[167], change[190], change[203]);
+g204 = gate2(80, 202, 163, 204, change[202], change[163], change[204]);
+g205 = gate2(81, 202, 163, 205, change[202], change[163], change[205]);
+g206 = gate2(82, 203, 204, 206, change[203], change[204], change[206]);
+g207 = gate2(83, 172, 191, 207, change[172], change[191], change[207]);
+g208 = gate2(84, 172, 191, 208, change[172], change[191], change[208]);
+g209 = gate2(85, 207, 168, 209, change[207], change[168], change[209]);
+g210 = gate2(86, 207, 168, 210, change[207], change[168], change[210]);
+g211 = gate2(87, 208, 209, 211, change[208], change[209], change[211]);
+g212 = gate2(88, 177, 192, 212, change[177], change[192], change[212]);
+g213 = gate2(89, 177, 192, 213, change[177], change[192], change[213]);
+g214 = gate2(90, 212, 173, 214, change[212], change[173], change[214]);
+g215 = gate2(91, 212, 173, 215, change[212], change[173], change[215]);
+g216 = gate2(92, 213, 214, 216, change[213], change[214], change[216]);
+g217 = gate2(93, 182, 193, 217, change[182], change[193], change[217]);
+g218 = gate2(94, 182, 193, 218, change[182], change[193], change[218]);
+g219 = gate2(95, 217, 178, 219, change[217], change[178], change[219]);
+g220 = gate2(96, 217, 178, 220, change[217], change[178], change[220]);
+g221 = gate2(97, 218, 219, 221, change[218], change[219], change[221]);
+g222 = gate2(98, 187, 194, 222, change[187], change[194], change[222]);
+g223 = gate2(99, 187, 194, 223, change[187], change[194], change[223]);
+g224 = gate2(100, 222, 183, 224, change[222], change[183], change[224]);
+g225 = gate2(101, 222, 183, 225, change[222], change[183], change[225]);
+g226 = gate2(102, 223, 224, 226, change[223], change[224], change[226]);
+g227 = gate2(103, 153, 195, 227, change[153], change[195], change[227]);
+g228 = gate2(104, 153, 195, 228, change[153], change[195], change[228]);
+g229 = gate2(105, 227, 188, 229, change[227], change[188], change[229]);
+g230 = gate2(106, 227, 188, 230, change[227], change[188], change[230]);
+g231 = gate2(107, 228, 229, 231, change[228], change[229], change[231]);
+g232 = gate2(108, PIxy[8], PIxy[4], 232, change[8], change[4], change[232]);
+g233 = gate2(109, PIxy[9], PIxy[4], 233, change[9], change[4], change[233]);
+g234 = gate2(110, PIxy[10], PIxy[4], 234, change[10], change[4], change[234]);
+g235 = gate2(111, PIxy[11], PIxy[4], 235, change[11], change[4], change[235]);
+g236 = gate2(112, PIxy[12], PIxy[4], 236, change[12], change[4], change[236]);
+g237 = gate2(113, PIxy[13], PIxy[4], 237, change[13], change[4], change[237]);
+g238 = gate2(114, PIxy[14], PIxy[4], 238, change[14], change[4], change[238]);
+g239 = gate2(115, PIxy[15], PIxy[4], 239, change[15], change[4], change[239]);
+g240 = gate2(116, 205, 232, 240, change[205], change[232], change[240]);
+g241 = gate2(117, 205, 232, 241, change[205], change[232], change[241]);
+g242 = gate2(118, 240, 198, 242, change[240], change[198], change[242]);
+g243 = gate2(119, 240, 198, POy[4], change[240], change[198], change[243]);
+g244 = gate2(120, 241, 242, 244, change[241], change[242], change[244]);
+g245 = gate2(121, 210, 233, 245, change[210], change[233], change[245]);
+g246 = gate2(122, 210, 233, 246, change[210], change[233], change[246]);
+g247 = gate2(123, 245, 206, 247, change[245], change[206], change[247]);
+g248 = gate2(124, 245, 206, 248, change[245], change[206], change[248]);
+g249 = gate2(125, 246, 247, 249, change[246], change[247], change[249]);
+g250 = gate2(126, 215, 234, 250, change[215], change[234], change[250]);
+g251 = gate2(127, 215, 234, 251, change[215], change[234], change[251]);
+g252 = gate2(128, 250, 211, 252, change[250], change[211], change[252]);
+g253 = gate2(129, 250, 211, 253, change[250], change[211], change[253]);
+g254 = gate2(130, 251, 252, 254, change[251], change[252], change[254]);
+g255 = gate2(131, 220, 235, 255, change[220], change[235], change[255]);
+g256 = gate2(132, 220, 235, 256, change[220], change[235], change[256]);
+g257 = gate2(133, 255, 216, 257, change[255], change[216], change[257]);
+g258 = gate2(134, 255, 216, 258, change[255], change[216], change[258]);
+g259 = gate2(135, 256, 257, 259, change[256], change[257], change[259]);
+g260 = gate2(136, 225, 236, 260, change[225], change[236], change[260]);
+g261 = gate2(137, 225, 236, 261, change[225], change[236], change[261]);
+g262 = gate2(138, 260, 221, 262, change[260], change[221], change[262]);
+g263 = gate2(139, 260, 221, 263, change[260], change[221], change[263]);
+g264 = gate2(140, 261, 262, 264, change[261], change[262], change[264]);
+g265 = gate2(141, 230, 237, 265, change[230], change[237], change[265]);
+g266 = gate2(142, 230, 237, 266, change[230], change[237], change[266]);
+g267 = gate2(143, 265, 226, 267, change[265], change[226], change[267]);
+g268 = gate2(144, 265, 226, 268, change[265], change[226], change[268]);
+g269 = gate2(145, 266, 267, 269, change[266], change[267], change[269]);
+g270 = gate2(146, 196, 238, 270, change[196], change[238], change[270]);
+g271 = gate2(147, 196, 238, 271, change[196], change[238], change[271]);
+g272 = gate2(148, 270, 231, 272, change[270], change[231], change[272]);
+g273 = gate2(149, 270, 231, 273, change[270], change[231], change[273]);
+g274 = gate2(150, 271, 272, 274, change[271], change[272], change[274]);
+g275 = gate2(151, PIxy[8], PIxy[5], 275, change[8], change[5], change[275]);
+g276 = gate2(152, PIxy[9], PIxy[5], 276, change[9], change[5], change[276]);
+g277 = gate2(153, PIxy[10], PIxy[5], 277, change[10], change[5], change[277]);
+g278 = gate2(154, PIxy[11], PIxy[5], 278, change[11], change[5], change[278]);
+g279 = gate2(155, PIxy[12], PIxy[5], 279, change[12], change[5], change[279]);
+g280 = gate2(156, PIxy[13], PIxy[5], 280, change[13], change[5], change[280]);
+g281 = gate2(157, PIxy[14], PIxy[5], 281, change[14], change[5], change[281]);
+g282 = gate2(158, PIxy[15], PIxy[5], 282, change[15], change[5], change[282]);
+g283 = gate2(159, 248, 275, 283, change[248], change[275], change[283]);
+g284 = gate2(160, 248, 275, 284, change[248], change[275], change[284]);
+g285 = gate2(161, 283, 244, 285, change[283], change[244], change[285]);
+g286 = gate2(162, 283, 244, POy[5], change[283], change[244], change[286]);
+g287 = gate2(163, 284, 285, 287, change[284], change[285], change[287]);
+g288 = gate2(164, 253, 276, 288, change[253], change[276], change[288]);
+g289 = gate2(165, 253, 276, 289, change[253], change[276], change[289]);
+g290 = gate2(166, 288, 249, 290, change[288], change[249], change[290]);
+g291 = gate2(167, 288, 249, 291, change[288], change[249], change[291]);
+g292 = gate2(168, 289, 290, 292, change[289], change[290], change[292]);
+g293 = gate2(169, 258, 277, 293, change[258], change[277], change[293]);
+g294 = gate2(170, 258, 277, 294, change[258], change[277], change[294]);
+g295 = gate2(171, 293, 254, 295, change[293], change[254], change[295]);
+g296 = gate2(172, 293, 254, 296, change[293], change[254], change[296]);
+g297 = gate2(173, 294, 295, 297, change[294], change[295], change[297]);
+g298 = gate2(174, 263, 278, 298, change[263], change[278], change[298]);
+g299 = gate2(175, 263, 278, 299, change[263], change[278], change[299]);
+g300 = gate2(176, 298, 259, 300, change[298], change[259], change[300]);
+g301 = gate2(177, 298, 259, 301, change[298], change[259], change[301]);
+g302 = gate2(178, 299, 300, 302, change[299], change[300], change[302]);
+g303 = gate2(179, 268, 279, 303, change[268], change[279], change[303]);
+g304 = gate2(180, 268, 279, 304, change[268], change[279], change[304]);
+g305 = gate2(181, 303, 264, 305, change[303], change[264], change[305]);
+g306 = gate2(182, 303, 264, 306, change[303], change[264], change[306]);
+g307 = gate2(183, 304, 305, 307, change[304], change[305], change[307]);
+g308 = gate2(184, 273, 280, 308, change[273], change[280], change[308]);
+g309 = gate2(185, 273, 280, 309, change[273], change[280], change[309]);
+g310 = gate2(186, 308, 269, 310, change[308], change[269], change[310]);
+g311 = gate2(187, 308, 269, 311, change[308], change[269], change[311]);
+g312 = gate2(188, 309, 310, 312, change[309], change[310], change[312]);
+g313 = gate2(189, 239, 281, 313, change[239], change[281], change[313]);
+g314 = gate2(190, 239, 281, 314, change[239], change[281], change[314]);
+g315 = gate2(191, 313, 274, 315, change[313], change[274], change[315]);
+g316 = gate2(192, 313, 274, 316, change[313], change[274], change[316]);
+g317 = gate2(193, 314, 315, 317, change[314], change[315], change[317]);
+g318 = gate2(194, PIxy[8], PIxy[6], 318, change[8], change[6], change[318]);
+g319 = gate2(195, PIxy[9], PIxy[6], 319, change[9], change[6], change[319]);
+g320 = gate2(196, PIxy[10], PIxy[6], 320, change[10], change[6], change[320]);
+g321 = gate2(197, PIxy[11], PIxy[6], 321, change[11], change[6], change[321]);
+g322 = gate2(198, PIxy[12], PIxy[6], 322, change[12], change[6], change[322]);
+g323 = gate2(199, PIxy[13], PIxy[6], 323, change[13], change[6], change[323]);
+g324 = gate2(200, PIxy[14], PIxy[6], 324, change[14], change[6], change[324]);
+g325 = gate2(201, PIxy[15], PIxy[6], 325, change[15], change[6], change[325]);
+g326 = gate2(202, 291, 318, 326, change[291], change[318], change[326]);
+g327 = gate2(203, 291, 318, 327, change[291], change[318], change[327]);
+g328 = gate2(204, 326, 287, 328, change[326], change[287], change[328]);
+g329 = gate2(205, 326, 287, POy[6], change[326], change[287], change[329]);
+g330 = gate2(206, 327, 328, 330, change[327], change[328], change[330]);
+g331 = gate2(207, 296, 319, 331, change[296], change[319], change[331]);
+g332 = gate2(208, 296, 319, 332, change[296], change[319], change[332]);
+g333 = gate2(209, 331, 292, 333, change[331], change[292], change[333]);
+g334 = gate2(210, 331, 292, 334, change[331], change[292], change[334]);
+g335 = gate2(211, 332, 333, 335, change[332], change[333], change[335]);
+g336 = gate2(212, 301, 320, 336, change[301], change[320], change[336]);
+g337 = gate2(213, 301, 320, 337, change[301], change[320], change[337]);
+g338 = gate2(214, 336, 297, 338, change[336], change[297], change[338]);
+g339 = gate2(215, 336, 297, 339, change[336], change[297], change[339]);
+g340 = gate2(216, 337, 338, 340, change[337], change[338], change[340]);
+g341 = gate2(217, 306, 321, 341, change[306], change[321], change[341]);
+g342 = gate2(218, 306, 321, 342, change[306], change[321], change[342]);
+g343 = gate2(219, 341, 302, 343, change[341], change[302], change[343]);
+g344 = gate2(220, 341, 302, 344, change[341], change[302], change[344]);
+g345 = gate2(221, 342, 343, 345, change[342], change[343], change[345]);
+g346 = gate2(222, 311, 322, 346, change[311], change[322], change[346]);
+g347 = gate2(223, 311, 322, 347, change[311], change[322], change[347]);
+g348 = gate2(224, 346, 307, 348, change[346], change[307], change[348]);
+g349 = gate2(225, 346, 307, 349, change[346], change[307], change[349]);
+g350 = gate2(226, 347, 348, 350, change[347], change[348], change[350]);
+g351 = gate2(227, 316, 323, 351, change[316], change[323], change[351]);
+g352 = gate2(228, 316, 323, 352, change[316], change[323], change[352]);
+g353 = gate2(229, 351, 312, 353, change[351], change[312], change[353]);
+g354 = gate2(230, 351, 312, 354, change[351], change[312], change[354]);
+g355 = gate2(231, 352, 353, 355, change[352], change[353], change[355]);
+g356 = gate2(232, 282, 324, 356, change[282], change[324], change[356]);
+g357 = gate2(233, 282, 324, 357, change[282], change[324], change[357]);
+g358 = gate2(234, 356, 317, 358, change[356], change[317], change[358]);
+g359 = gate2(235, 356, 317, 359, change[356], change[317], change[359]);
+g360 = gate2(236, 357, 358, 360, change[357], change[358], change[360]);
+g361 = gate2(237, PIxy[8], PIxy[7], 361, change[8], change[7], change[361]);
+g362 = gate2(238, PIxy[9], PIxy[7], 362, change[9], change[7], change[362]);
+g363 = gate2(239, PIxy[10], PIxy[7], 363, change[10], change[7], change[363]);
+g364 = gate2(240, PIxy[11], PIxy[7], 364, change[11], change[7], change[364]);
+g365 = gate2(241, PIxy[12], PIxy[7], 365, change[12], change[7], change[365]);
+g366 = gate2(242, PIxy[13], PIxy[7], 366, change[13], change[7], change[366]);
+g367 = gate2(243, PIxy[14], PIxy[7], 367, change[14], change[7], change[367]);
+g368 = gate2(244, PIxy[15], PIxy[7], 368, change[15], change[7], change[368]);
+g369 = gate2(245, 334, 361, 369, change[334], change[361], change[369]);
+g370 = gate2(246, 334, 361, 370, change[334], change[361], change[370]);
+g371 = gate2(247, 369, 330, 371, change[369], change[330], change[371]);
+g372 = gate2(248, 369, 330, POy[7], change[369], change[330], change[372]);
+g373 = gate2(249, 370, 371, 373, change[370], change[371], change[373]);
+g374 = gate2(250, 339, 362, 374, change[339], change[362], change[374]);
+g375 = gate2(251, 339, 362, 375, change[339], change[362], change[375]);
+g376 = gate2(252, 374, 335, 376, change[374], change[335], change[376]);
+g377 = gate2(253, 374, 335, 377, change[374], change[335], change[377]);
+g378 = gate2(254, 375, 376, 378, change[375], change[376], change[378]);
+g379 = gate2(255, 344, 363, 379, change[344], change[363], change[379]);
+g380 = gate2(256, 344, 363, 380, change[344], change[363], change[380]);
+g381 = gate2(257, 379, 340, 381, change[379], change[340], change[381]);
+g382 = gate2(258, 379, 340, 382, change[379], change[340], change[382]);
+g383 = gate2(259, 380, 381, 383, change[380], change[381], change[383]);
+g384 = gate2(260, 349, 364, 384, change[349], change[364], change[384]);
+g385 = gate2(261, 349, 364, 385, change[349], change[364], change[385]);
+g386 = gate2(262, 384, 345, 386, change[384], change[345], change[386]);
+g387 = gate2(263, 384, 345, 387, change[384], change[345], change[387]);
+g388 = gate2(264, 385, 386, 388, change[385], change[386], change[388]);
+g389 = gate2(265, 354, 365, 389, change[354], change[365], change[389]);
+g390 = gate2(266, 354, 365, 390, change[354], change[365], change[390]);
+g391 = gate2(267, 389, 350, 391, change[389], change[350], change[391]);
+g392 = gate2(268, 389, 350, 392, change[389], change[350], change[392]);
+g393 = gate2(269, 390, 391, 393, change[390], change[391], change[393]);
+g394 = gate2(270, 359, 366, 394, change[359], change[366], change[394]);
+g395 = gate2(271, 359, 366, 395, change[359], change[366], change[395]);
+g396 = gate2(272, 394, 355, 396, change[394], change[355], change[396]);
+g397 = gate2(273, 394, 355, 397, change[394], change[355], change[397]);
+g398 = gate2(274, 395, 396, 398, change[395], change[396], change[398]);
+g399 = gate2(275, 325, 367, 399, change[325], change[367], change[399]);
+g400 = gate2(276, 325, 367, 400, change[325], change[367], change[400]);
+g401 = gate2(277, 399, 360, 401, change[399], change[360], change[401]);
+g402 = gate2(278, 399, 360, 402, change[399], change[360], change[402]);
+g403 = gate2(279, 400, 401, 403, change[400], change[401], change[403]);
+g404 = gate2(280, 377, 373, POy[8], change[377], change[373], change[404]);
+g405 = gate2(281, 377, 373, 405, change[377], change[373], change[405]);
+g406 = gate2(282, 382, 378, 406, change[382], change[378], change[406]);
+g407 = gate2(283, 382, 378, 407, change[382], change[378], change[407]);
+g408 = gate2(284, 406, 405, 408, change[406], change[405], change[408]);
+g409 = gate2(285, 406, 405, POy[9], change[406], change[405], change[409]);
+g410 = gate2(286, 407, 408, 410, change[407], change[408], change[410]);
+g411 = gate2(287, 387, 383, 411, change[387], change[383], change[411]);
+g412 = gate2(288, 387, 383, 412, change[387], change[383], change[412]);
+g413 = gate2(289, 411, 410, 413, change[411], change[410], change[413]);
+g414 = gate2(290, 411, 410, POy[10], change[411], change[410], change[414]);
+g415 = gate2(291, 412, 413, 415, change[412], change[413], change[415]);
+g416 = gate2(292, 392, 388, 416, change[392], change[388], change[416]);
+g417 = gate2(293, 392, 388, 417, change[392], change[388], change[417]);
+g418 = gate2(294, 416, 415, 418, change[416], change[415], change[418]);
+g419 = gate2(295, 416, 415, POy[11], change[416], change[415], change[419]);
+g420 = gate2(296, 417, 418, 420, change[417], change[418], change[420]);
+g421 = gate2(297, 397, 393, 421, change[397], change[393], change[421]);
+g422 = gate2(298, 397, 393, 422, change[397], change[393], change[422]);
+g423 = gate2(299, 421, 420, 423, change[421], change[420], change[423]);
+g424 = gate2(300, 421, 420, POy[12], change[421], change[420], change[424]);
+g425 = gate2(301, 422, 423, 425, change[422], change[423], change[425]);
+g426 = gate2(302, 402, 398, 426, change[402], change[398], change[426]);
+g427 = gate2(303, 402, 398, 427, change[402], change[398], change[427]);
+g428 = gate2(304, 426, 425, 428, change[426], change[425], change[428]);
+g429 = gate2(305, 426, 425, POy[13], change[426], change[425], change[429]);
+g430 = gate2(306, 427, 428, 430, change[427], change[428], change[430]);
+g431 = gate2(307, 368, 403, 431, change[368], change[403], change[431]);
+g432 = gate2(308, PIxy[7], 403, 432, change[7], change[403], change[432]);
+g433 = gate2(309, 431, 430, 433, change[431], change[430], change[433]);
+g434 = gate2(310, 431, 430, POy[14], change[431], change[430], change[434]);
+g435 = gate2(311, 432, 433, POy[15], change[432], change[433], change[435]);
 
 // List one or more processes to be composed into a system.
 system
@@ -1417,98 +1427,6 @@ synPri,
 mul2A, 
 mul2Atb,
 ediff,
-g16,
-g17,
-g18,
-g19,
-g20,
-g21,
-g22,
-g23,
-g24,
-g25,
-g26,
-g27,
-g28,
-g29,
-g30,
-g31,
-g32,
-g34,
-g35,
-g36,
-g37,
-g38,
-g39,
-g40,
-g41,
-g42,
-g43,
-g44,
-g45,
-g46,
-g47,
-g48,
-g49,
-g50,
-g51,
-g52,
-g53,
-g54,
-g59,
-g60,
-g61,
-g62,
-g63,
-g64,
-g65,
-g66,
-g67,
-g68,
-g69,
-g70,
-g71,
-g72,
-g73,
-g74,
-g75,
-g76,
-g77,
-g78,
-g79,
-g80,
-g81,
-g82,
-g83,
-g84,
-g85,
-g86,
-g87,
-g88,
-g89,
-g90,
-g91,
-g92,
-g93,
-g94,
-g95,
-g96,
-g97,
-g98,
-g102,
-g103,
-g104,
-g105,
-g106,
-g107,
-g108,
-g109,
-g110,
-g111,
-g112,
-g113,
-g114,
-g115,
 g116,
 g117,
 g118,
@@ -1526,7 +1444,6 @@ g129,
 g130,
 g131,
 g132,
-g133,
 g134,
 g135,
 g136,
@@ -1548,10 +1465,6 @@ g151,
 g152,
 g153,
 g154,
-g155,
-g156,
-g157,
-g158,
 g159,
 g160,
 g161,
@@ -1592,9 +1505,6 @@ g195,
 g196,
 g197,
 g198,
-g199,
-g200,
-g201,
 g202,
 g203,
 g204,
@@ -1728,72 +1638,123 @@ g331,
 g332,
 g333,
 g334,
-g335;
+g335,
+g336,
+g337,
+g338,
+g339,
+g340,
+g341,
+g342,
+g343,
+g344,
+g345,
+g346,
+g347,
+g348,
+g349,
+g350,
+g351,
+g352,
+g353,
+g354,
+g355,
+g356,
+g357,
+g358,
+g359,
+g360,
+g361,
+g362,
+g363,
+g364,
+g365,
+g366,
+g367,
+g368,
+g369,
+g370,
+g371,
+g372,
+g373,
+g374,
+g375,
+g376,
+g377,
+g378,
+g379,
+g380,
+g381,
+g382,
+g383,
+g384,
+g385,
+g386,
+g387,
+g388,
+g389,
+g390,
+g391,
+g392,
+g393,
+g394,
+g395,
+g396,
+g397,
+g398,
+g399,
+g400,
+g401,
+g402,
+g403,
+g404,
+g405,
+g406,
+g407,
+g408,
+g409,
+g410,
+g411,
+g412,
+g413,
+g414,
+g415,
+g416,
+g417,
+g418,
+g419,
+g420,
+g421,
+g422,
+g423,
+g424,
+g425,
+g426,
+g427,
+g428,
+g429,
+g430,
+g431,
+g432,
+g433,
+g434,
+g435;
 </system>
 
 	<queries>
 		<query>
-			<formula>simulate[&lt;=500000;1] {dif_count, res_count}</formula>
-			<comment>Number of different outputs vs all outputs</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=5000;1] {res_acc, res_approx}</formula>
+			<formula>simulate[&lt;=20000;1] {res_acc, res_approx}</formula>
 			<comment>Accurate results vs approximate results</comment>
 		</query>
 		<query>
-			<formula>E[&lt;=500000; 1] (max:worst_case_error)</formula>
-			<comment>Worst case error</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=500000; 1] (max:worst_case_relative_error)</formula>
-			<comment>Worst case relative error</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=500000; 1] (max:hamming_distance)</formula>
-			<comment>Worst case hamming distance</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=500000; 1] (max:bit_flips)</formula>
-			<comment>most bit flips in one calculation</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=500000; 1] (max:avg_flips_per_res)</formula>
-			<comment>Average bit flips</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=500000; 1] (max:bit_flips_sum)</formula>
-			<comment>Total number of bit flips through all calculations</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=500000;1] {error_prob}</formula>
-			<comment>Error probability</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=500000;1] {mean_abs_error}</formula>
-			<comment>Mean absolute error</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=500000;1] {mean_squared_error}</formula>
-			<comment>Mean squared error</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=500000;1] {mean_relative_error}</formula>
-			<comment>Mean relative error</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=50000; 5] (max:worst_delay)</formula>
-			<comment>Longest delay between input and output</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=5000;1] {current_delay}</formula>
+			<formula>simulate[&lt;=1000;1] {current_delay}</formula>
 			<comment>Jitter of delay for each result</comment>
 		</query>
 		<query>
-			<formula>simulate[&lt;=5000;1] {delay_avg}</formula>
-			<comment>Average delay per one result</comment>
-		</query>
-		<query>
-			<formula>simulate[&lt;=500000;1] {coverage_percentage}</formula>
+			<formula>simulate[&lt;=5000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
+mean_relative_error, mean_squared_error, avg_flips_per_res, worst_case_error, 
+worst_case_relative_error, max_hamming_distance, max_bit_flips, worst_delay
+}</formula>
 			<comment/>
 		</query>
 	</queries>

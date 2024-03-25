@@ -22,6 +22,7 @@ double out_sum_all_diff_squared;
 double out_sum_relative;
 
 int hamming_distance = 0;
+int max_hamming_distance = 0;
 double error_prob = 0.0;
 double mean_abs_error = 0.0;
 double mean_squared_error = 0.0;
@@ -184,6 +185,7 @@ int approxCircDepth=0;
 bool outEq(){
     bool same=true;
     int i;
+    hamming_distance = 0;
     for(i=0; i&lt;NPO; i++){
         if((POx[i]&gt;=0) &amp;&amp; (POy[i]&gt;=0)){
             if(bits[POx[i]] != bits[POy[i]]){
@@ -191,6 +193,10 @@ bool outEq(){
                 same = false;
             }
         }
+    }
+
+    if (hamming_distance &gt; max_hamming_distance){
+        max_hamming_distance = hamming_distance;
     }
     
     if (same == false) {
@@ -23818,6 +23824,10 @@ Mean estimate of displayed sample: 1401 ± 415.9 (95% CI)</comment>
 		</query>
 		<query>
 			<formula>simulate[&lt;=10000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error, mean_relative_error, mean_squared_error}</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate[&lt;=1000;1] {hamming_distance, max_hamming_distance}</formula>
 			<comment/>
 		</query>
 	</queries>

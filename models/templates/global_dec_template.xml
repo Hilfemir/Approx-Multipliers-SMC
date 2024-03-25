@@ -22,6 +22,7 @@ double out_sum_all_diff_squared;
 double out_sum_relative;
 
 int hamming_distance = 0;
+int max_hamming_distance = 0;
 double error_prob = 0.0;
 double mean_abs_error = 0.0;
 double mean_squared_error = 0.0;
@@ -38,9 +39,10 @@ double rnd;
 broadcast chan change[1000];
 int outcnt=0;
 
-double bit_flips = 0;
-double avg_flips_per_res = 0;
-double bit_flips_sum = 0;
+double bit_flips = 0.0;
+double avg_flips_per_res = 0.0;
+double bit_flips_sum = 0.0;
+double max_bit_flips = 0.0;
 
 const int NOPS = 9;
 typedef int[0,NOPS-1] tOp;
@@ -199,6 +201,10 @@ bool outEq(){
         dif_count = dif_count + 1;
     }
 
+    if (hamming_distance &gt; max_hamming_distance) {
+        max_hamming_distance = hamming_distance;
+    }
+
     res_count = res_count + 1;
 
     return same;
@@ -286,6 +292,10 @@ void diff(){
 
     err_magn_v = res_acc - res_approx;
     if(res_acc!=0) err_magn_r = 1-((1.0*res_approx)/(1.0*res_acc));
+
+    if(max_bit_flips &lt; bit_flips) {
+        max_bit_flips = bit_flips;
+    }
 
     bit_flips = 0;
 

@@ -19,14 +19,22 @@ class Result(object):
 		return (self.dist, self.mult_id, self.metric, self.value)
 
 
-def process_file(file_path) -> list[tuple]:
+def process_file(file_path: PathLike[str]) -> list[tuple]:
 	"""Open csv file and collect all necessary data.
 	Returns list of Result objects represented as tuples.
 	"""
 	#collect info about the multiplier and distribution
 	parts = file_path.parts
-	dist = parts[-3]
-	mult_id = parts[-2]
+	try:
+		dist = parts[-3]
+		mult_id = parts[-2]
+	except IndexError:
+		dist = "unknown"
+		mult_id = "unknown"
+
+	if not mult_id.startswith('mul'):
+		dist = "unknown"
+		mult_id = "unknown"
 
 	#collect lines from the csv file
 	data = []
@@ -46,9 +54,10 @@ def process_file(file_path) -> list[tuple]:
 		'mean_squared_error' : None,
 		'worst_case_error' : None,
 		'worst_case_relative_error' : None,
-		'hamming_distance' : None,
+		'max_hamming_distance' : None,
 		'worst_delay' : None,
-		'bit_flips' : None
+		'max_bit_flips' : None,
+		'avg_flips_per_res' : None
 	}
 
 	#iterate through the csv lines and collect data for each error metric
@@ -83,6 +92,18 @@ def determine_outpath(out: str) -> PathLike[str]:
 
 	return Path(out)
 
+
+def determine_inpath(args_dir: str, args_file: str) -> tuple[str, PathLike[str]]:
+	"""Returns either 'dir' or 'file' indicating whether the Path is to a directory or only a single file.
+	  Also returns a Path object of the input file/dir.
+	"""
+	if args_file is None:
+		return "dir", Path(f'./{args_dir}')
+	
+	else:
+		return "file", Path(args_file)
+
+
 def main():
 	parser = argparse.ArgumentParser(
 	                    prog='process_results.py',
@@ -94,14 +115,21 @@ def main():
 		help='Directory containing csv files or subdirectories which contain csv files.',
 		default='sim_results',
 		required=False
-		)
+	)
+	
+	parser.add_argument(
+		'--file', '-f',
+		help="Path to csv file, use this if you only wish to process one specific file. Precedes the --dir option.",
+		default=None,
+		required=False
+	)
 	
 	parser.add_argument(
 		'--out', '-o',
 		help="Name of the output pkl file.",
 		default='data.pkl',
 		required=False
-		)
+	)
 	
 	parser.add_argument(
 		'--overwrite', '-w',
@@ -109,22 +137,48 @@ def main():
 		action='store_true',
 		default=False,
 		required=False
-		)
+	)
+
+	parser.add_argument(
+		'--print', '-p',
+		help="Print the final dataframe.",
+		action='store_true',
+		default=False,
+		required=False
+	)
+
+	parser.add_argument(
+		'--noout',
+		help="Don't export the dataframe into a pickle file.",
+		action='store_true',
+		default=False,
+		required=False
+	)
 	
 	args = parser.parse_args()
 
 	results = []
-	rootdir = Path(f'./{args.dir}')
 	outpath = determine_outpath(args.out)
+	intype, inpath = determine_inpath(args.dir, args.file)
 
-	#find all csv files in dir and all its subdirectories
-	file_list = [f for f in rootdir.glob('**/*') if f.is_file() and f.name.endswith(".csv")]
-	for file_path in file_list:
-		part_results = process_file(file_path)
-		results.extend(part_results)
+	if intype == "dir":
+		#find all csv files in dir and all its subdirectories
+		file_list = [f for f in inpath.glob('**/*') if f.is_file() and f.name.endswith(".csv")]
+		for file_path in file_list:
+			part_results = process_file(file_path)
+			results.extend(part_results)
 
+	elif intype == "file":
+		results.extend(process_file(inpath))
+
+	#export results
 	df = pd.DataFrame(results, columns=["distribution", "multiplier", "metric", "value"])
-	df.to_pickle(outpath)
+
+	if not args.noout:
+		df.to_pickle(outpath)
+
+	if args.print:
+		print(df.to_string())
 	
 
 if __name__ == "__main__":

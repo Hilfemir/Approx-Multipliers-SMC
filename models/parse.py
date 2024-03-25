@@ -265,7 +265,13 @@ class Parser(object):
 
 		elif match := re.match(out_pat5, line):
 			id = match.group(2)
-			prev_signal = next(x for x in self.signals if x.id == id)
+			try:
+				prev_signal = next(x for x in self.signals if x.id == id)
+			except:
+				print(id)
+				#for sig in self.signals:
+				#	print(sig)
+				#exit(1)
 
 			#multiple signals mapped to the same output
 			if prev_signal.out.startswith("PO"):
@@ -657,11 +663,17 @@ class Parser(object):
 	####################################################################
 		
 	def increase_sig_numbers(self, line: str) -> str:
-		matches = re.findall(r'sig_[0-9]+', line)
+		matches = re.findall(r'(?: |;|=)(sig_[0-9]+)(?: |;|=)', line)
 		increased_matches = [f"sig_{int(sig.split('_')[1])+100}" for sig in matches]
 		ret_line = line
+
 		for i, sig in enumerate(increased_matches):
-			ret_line = re.sub(matches[i], sig, ret_line)
+			orig_pat = f'(?: |;|=)({matches[i]})(?: |;|=)'
+			repl_pat = f' {sig} '
+			ret_line, subn = re.subn(orig_pat, repl_pat, ret_line)
+
+		if re.search(r'sig_[0-9]+\s*$', ret_line.strip()):
+			ret_line = f"{ret_line.strip()};\n"
 
 		return ret_line
 
@@ -710,12 +722,8 @@ def main():
 
 	for line in updated_file:
 		#signal assignments
-		try:
-			parser.signal_assignments(line)
-		except Exception as e:
-			print(e)
-			return
-		
+		parser.signal_assignments(line)
+
 		#output assignments
 		parser.output_assignments(line)
 
@@ -729,6 +737,8 @@ def main():
 		output = "\n".join(parser.out_files)
 		with open(out_path, "w") as f:
 			f.write(output)
+
+	print('Done!')
 
 if __name__ == "__main__":
     main()
