@@ -1,4 +1,5 @@
 import csv
+from os import PathLike
 from pathlib import Path
 import pandas as pd
 import re
@@ -24,8 +25,8 @@ def process_file(file_path) -> list[tuple]:
 	"""
 	#collect info about the multiplier and distribution
 	parts = file_path.parts
-	dist = parts[0]
-	mult_id = parts[1]
+	dist = parts[-3]
+	mult_id = parts[-2]
 
 	#collect lines from the csv file
 	data = []
@@ -70,16 +71,43 @@ def process_file(file_path) -> list[tuple]:
 	return ret
 	
 
+def determine_outpath(out: str) -> PathLike[str]:
+	"""Take the 'out' argument of the script and process it into Path object.
+	Returns a PathLike object representing path of the output file.
+	"""
+	if not out.endswith(".pkl"):
+		out += ".pkl"
+
+	if not out.startswith("./pickles/"):
+		out = f"./pickles/{out}"
+
+	return Path(out)
+
 def main():
 	parser = argparse.ArgumentParser(
 	                    prog='process_results.py',
-	                    description='Processes results from csv files, stores them in data.pkl'
+	                    description='Processes results from csv files, stores them in a pickle file (default ./data.pkl)'
 						)
 	
 	parser.add_argument(
 		'--dir', '-d', 
 		help='Directory containing csv files or subdirectories which contain csv files.',
-		default='',
+		default='sim_results',
+		required=False
+		)
+	
+	parser.add_argument(
+		'--out', '-o',
+		help="Name of the output pkl file.",
+		default='data.pkl',
+		required=False
+		)
+	
+	parser.add_argument(
+		'--overwrite', '-w',
+		help="Overwrite current output file, if exists.",
+		action='store_true',
+		default=False,
 		required=False
 		)
 	
@@ -87,6 +115,7 @@ def main():
 
 	results = []
 	rootdir = Path(f'./{args.dir}')
+	outpath = determine_outpath(args.out)
 
 	#find all csv files in dir and all its subdirectories
 	file_list = [f for f in rootdir.glob('**/*') if f.is_file() and f.name.endswith(".csv")]
@@ -95,7 +124,7 @@ def main():
 		results.extend(part_results)
 
 	df = pd.DataFrame(results, columns=["distribution", "multiplier", "metric", "value"])
-	print(df.to_string())
+	df.to_pickle(outpath)
 	
 
 if __name__ == "__main__":

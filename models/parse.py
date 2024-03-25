@@ -658,7 +658,7 @@ class Parser(object):
 		
 	def increase_sig_numbers(self, line: str) -> str:
 		matches = re.findall(r'sig_[0-9]+', line)
-		increased_matches = [f"sig_{int(sig.split("_")[1])+100}" for sig in matches]
+		increased_matches = [f"sig_{int(sig.split('_')[1])+100}" for sig in matches]
 		ret_line = line
 		for i, sig in enumerate(increased_matches):
 			ret_line = re.sub(matches[i], sig, ret_line)
