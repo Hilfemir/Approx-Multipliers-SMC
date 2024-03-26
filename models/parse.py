@@ -201,7 +201,7 @@ class Parser(object):
 		line = line.strip()
 
 		#eg. assign sig_118 = !(sig_115 & B[3]);
-		negated_gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*!\((.*?)\s(.*?)\s(.*?)\);'
+		negated_gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(?:!|~)\((.*?)\s(.*?)\s(.*?)\);'
 
 		#eg. assign sig_118 = sig_115 & B[3];
 		gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
