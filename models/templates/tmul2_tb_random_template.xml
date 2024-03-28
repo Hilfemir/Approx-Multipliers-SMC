@@ -116,8 +116,8 @@ void f(int i){
 
     //Distribution
 
-    input_a = check_limits(input_a, 0, imax);
-    input_b = check_limits(input_b, 0, imax);
+    input_a = check_limits(input_a, 0, imax-1);
+    input_b = check_limits(input_b, 0, imax-1);
 
     dec_to_bin(input_a, a_binary);
     dec_to_bin(input_b, b_binary);

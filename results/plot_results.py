@@ -30,6 +30,7 @@ def transform_barplot(df: pd.DataFrame, multiplier: str, metric: str) -> pd.Data
 	"""Transform the input dataframe to make it ready for a bar plot and return it.
 	"""
 	df = df[(df["multiplier"] == multiplier) & (df["metric"] == metric)]
+	df = df[['distribution', 'value']]
 	return df
 
 def main():
@@ -83,6 +84,7 @@ def main():
 
 	elif args.type == "bar":
 		df = transform_barplot(df, args.multiplier, args.metric)
+		df.plot.bar(x='distribution', y='value', rot=0)
 
 	print(df.to_string())
 	plt.show()

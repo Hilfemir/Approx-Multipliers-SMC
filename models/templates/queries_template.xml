@@ -1,5 +1,9 @@
 	<queries>
 		<query>
+			<formula>simulate[&lt;=20000;1] {input_a, input_b}</formula>
+			<comment>Input numbers</comment>
+		</query>
+		<query>
 			<formula>simulate[&lt;=20000;1] {res_acc, res_approx}</formula>
 			<comment>Accurate results vs approximate results</comment>
 		</query>
@@ -8,7 +12,7 @@
 			<comment>Jitter of delay for each result</comment>
 		</query>
 		<query>
-			<formula>simulate[&lt;=5000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
+			<formula>simulate[&lt;=10000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
 mean_relative_error, mean_squared_error, avg_flips_per_res, worst_case_error, 
 worst_case_relative_error, max_hamming_distance, max_bit_flips, worst_delay
 }</formula>

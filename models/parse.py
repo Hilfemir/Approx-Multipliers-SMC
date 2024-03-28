@@ -553,8 +553,7 @@ class Parser(object):
 
 		elif distribution == "beta_uni":
 			comment =  "    //Betavariate dist. and (slightly deformed) uniform dist. (eg. ellipse midpoint algo.)\n"
-			replacement =  "    input_a = fint(random_beta(0.5, 5.0));\n"
-			replacement += "    input_a = input_a * 40;\n\n"
+			replacement =  "    input_a = fint(random_beta(0.5, 5.0) * 40);\n\n"
 
 			replacement += "    input_b = fint(random(imax+10));\n"
 			replacement += "    if(input_b &gt; imax) { input_b = fint(random(15)); }\n"
@@ -570,10 +569,9 @@ class Parser(object):
 
 		elif distribution == "gamma_2norm":
 			comment = "    //Gammavariate and two normal distributions (eg. Sieve of Pritchard algo.)\n"
-			replacement =  "    input_a = fint(random_gamma(1.0,0.8));\n"
-			replacement += "    input_a = input_a * 7;\n\n"
+			replacement =  "    input_a = fint(random_gamma(1.0,0.8) * 7);\n\n"
 
-			replacement += "    input_b = fint(random(0,imax));\n"
+			replacement += "    input_b = fint(random(imax));\n"
 			replacement += "    if(input_b &gt; 100 and input_b &lt; 175) { input_b = fint(random(75)); }\n"
 			replacement += "    if(input_b &gt;= 175 and input_b &lt; 200) { input_b = fint(random(55)) + 200; }\n"
 
@@ -582,8 +580,7 @@ class Parser(object):
 			replacement =  "    input_a = fint(random_tri(0,0,350));\n"
 			replacement += "    if(input_a &gt; 255) { input_a = fint(random(50)); }\n\n"
 
-			replacement += "    input_b = fint(random_weibull(1.7,1.7));\n"
-			replacement += "    input_b = input_b * 60;"
+			replacement += "    input_b = fint(random_weibull(1.7,1.7) * 60);\n"
 			replacement += "    if(input_b &gt; 255) { input_b = fint(random(25)); }\n"
 
 		elif distribution == "same_uni":
