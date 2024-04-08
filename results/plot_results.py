@@ -31,13 +31,16 @@ def transform_barplot(df: pd.DataFrame, multiplier: str, metric: str) -> pd.Data
 	"""
 	df = df[(df["multiplier"] == multiplier) & (df["metric"] == metric)]
 	df = df[['distribution', 'value']]
+
+	df.rename(columns={'value' : metric}, inplace=True)
+
 	return df
 
 def main():
 	parser = argparse.ArgumentParser(
 	                    prog='plot_results.py',
 	                    description='Plot data from a dataframe stored in a pickle file.'
-						)
+	)
 	
 	parser.add_argument(
 		'--file', '-f',
@@ -73,6 +76,13 @@ def main():
 		required=False
 	)
 
+	parser.add_argument(
+		'--print', '-p',
+		help="Print the dataframe.",
+		action="store_true",
+		default=False
+	)
+
 	args = parser.parse_args()
 	input_file = determine_inpath(args.file)
 
@@ -84,9 +94,11 @@ def main():
 
 	elif args.type == "bar":
 		df = transform_barplot(df, args.multiplier, args.metric)
-		df.plot.bar(x='distribution', y='value', rot=0)
+		df.plot.bar(x='distribution', y=args.metric, rot=0)
 
-	print(df.to_string())
+	if args.print:
+		print(df.to_string())
+
 	plt.show()
 
 if __name__ == "__main__":
