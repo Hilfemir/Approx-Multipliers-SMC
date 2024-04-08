@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
-<declaration>/* Feel free to cite and/or read details to the model using:
+	<declaration>/* Feel free to cite and/or read details to the model using:
   STRNADEL Josef. Statistical Model Checking of Approximate Circuits: Challenges and Opportunities. In: Proceedings of the 2020 Design, Automation &amp; Test in Europe Conference &amp; Exhibition (DATE). Grenoble: IEEE Computer Society, 2020, pp. 1574-1577. ISBN 978-3-9819263-4-7. Available from: https://ieeexplore.ieee.org/document/9116207 and https://www.fit.vut.cz/research/publication/12055/
  */
 const int MAX_INT = 65536;
@@ -302,10 +302,10 @@ void diff(){
     calc_metrics();
 }
 </declaration>
-<template>
-<name>tmul2any</name>
-<parameter>const int &amp;PIxy[NPI], const int &amp;POx[NPO], bool &amp;ttbl[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY], const int  dly</parameter>
-<declaration>
+	<template>
+		<name>tmul2any</name>
+		<parameter>const int &amp;PIxy[NPI], const int &amp;POx[NPO], bool &amp;ttbl[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY], const int  dly</parameter>
+		<declaration>
 clock x;
 
 int getIdx(int i){
@@ -343,22 +343,22 @@ int getOut(){
 }
 
 void f(){
-    if(POx[15]>=0) bits[POx[15]]=ttbl[bin2dec()][16];
-    if(POx[14]>=0) bits[POx[14]]=ttbl[bin2dec()][17];
-    if(POx[13]>=0) bits[POx[13]]=ttbl[bin2dec()][18];
-    if(POx[12]>=0) bits[POx[12]]=ttbl[bin2dec()][19];
-    if(POx[11]>=0) bits[POx[11]]=ttbl[bin2dec()][20];
-    if(POx[10]>=0) bits[POx[10]]=ttbl[bin2dec()][21];
-    if(POx[9]>=0) bits[POx[9]]=ttbl[bin2dec()][22];
-    if(POx[8]>=0) bits[POx[8]]=ttbl[bin2dec()][23];
-    if(POx[7]>=0) bits[POx[7]]=ttbl[bin2dec()][24];
-    if(POx[6]>=0) bits[POx[6]]=ttbl[bin2dec()][25];
-    if(POx[5]>=0) bits[POx[5]]=ttbl[bin2dec()][26];
-    if(POx[4]>=0) bits[POx[4]]=ttbl[bin2dec()][27];
-    if(POx[3]>=0) bits[POx[3]]=ttbl[bin2dec()][28];
-    if(POx[2]>=0) bits[POx[2]]=ttbl[bin2dec()][29];
-    if(POx[1]>=0) bits[POx[1]]=ttbl[bin2dec()][30];
-    if(POx[0]>=0) bits[POx[0]]=ttbl[bin2dec()][31];
+    if(POx[15]&gt;=0) bits[POx[15]]=ttbl[bin2dec()][16];
+    if(POx[14]&gt;=0) bits[POx[14]]=ttbl[bin2dec()][17];
+    if(POx[13]&gt;=0) bits[POx[13]]=ttbl[bin2dec()][18];
+    if(POx[12]&gt;=0) bits[POx[12]]=ttbl[bin2dec()][19];
+    if(POx[11]&gt;=0) bits[POx[11]]=ttbl[bin2dec()][20];
+    if(POx[10]&gt;=0) bits[POx[10]]=ttbl[bin2dec()][21];
+    if(POx[9]&gt;=0) bits[POx[9]]=ttbl[bin2dec()][22];
+    if(POx[8]&gt;=0) bits[POx[8]]=ttbl[bin2dec()][23];
+    if(POx[7]&gt;=0) bits[POx[7]]=ttbl[bin2dec()][24];
+    if(POx[6]&gt;=0) bits[POx[6]]=ttbl[bin2dec()][25];
+    if(POx[5]&gt;=0) bits[POx[5]]=ttbl[bin2dec()][26];
+    if(POx[4]&gt;=0) bits[POx[4]]=ttbl[bin2dec()][27];
+    if(POx[3]&gt;=0) bits[POx[3]]=ttbl[bin2dec()][28];
+    if(POx[2]&gt;=0) bits[POx[2]]=ttbl[bin2dec()][29];
+    if(POx[1]&gt;=0) bits[POx[1]]=ttbl[bin2dec()][30];
+    if(POx[0]&gt;=0) bits[POx[0]]=ttbl[bin2dec()][31];
 
     diffctrl++;
 }
@@ -368,39 +368,39 @@ void inits(){
 }
 
 </declaration>
-<location id="id0" x="-170" y="0">
-</location>
-<location id="id1" x="0" y="0">
-	<label kind="invariant" x="-25" y="17">x&lt;=dly</label>
-</location>
-<location id="id2" x="-374" y="0">
-	<committed/>
-</location>
-<init ref="id2"/>
-<transition>
-	<source ref="id2"/>
-	<target ref="id0"/>
-	<label kind="assignment" x="-297" y="0">inits()</label>
-</transition>
-<transition>
-	<source ref="id1"/>
-	<target ref="id0"/>
-	<label kind="guard" x="-152" y="-136">x==dly</label>
-	<label kind="assignment" x="17" y="-59">f()</label>
-	<nail x="0" y="-102"/>
-	<nail x="-170" y="-102"/>
-</transition>
-<transition>
-	<source ref="id0"/>
-	<target ref="id1"/>
-	<label kind="synchronisation" x="-110" y="-25">update?</label>
-	<label kind="assignment" x="-93" y="0">x=0</label>
-</transition>
-</template>
-<template>
-<name>tmul2_tb_exhaust</name>
-<parameter>const int &amp;PIxy[NPI], const int dly, const double covratio</parameter>
-<declaration>
+		<location id="id0" x="-170" y="0">
+		</location>
+		<location id="id1" x="0" y="0">
+			<label kind="invariant" x="-25" y="17">x&lt;=dly</label>
+		</location>
+		<location id="id2" x="-374" y="0">
+			<committed/>
+		</location>
+		<init ref="id2"/>
+		<transition id="id3">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-297" y="0">inits()</label>
+		</transition>
+		<transition id="id4">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-152" y="-136">x==dly</label>
+			<label kind="assignment" x="17" y="-59">f()</label>
+			<nail x="0" y="-102"/>
+			<nail x="-170" y="-102"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-110" y="-25">update?</label>
+			<label kind="assignment" x="-93" y="0">x=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>tmul2_tb_exhaust</name>
+		<parameter>const int &amp;PIxy[NPI], const int dly, const double covratio</parameter>
+		<declaration>
 clock x;
 clock tcover;
 int input=0;
@@ -488,60 +488,60 @@ void inits(){
     }
 }
 </declaration>
-		<location id="id3" x="-136" y="0">
+		<location id="id6" x="-136" y="0">
 			<name x="-153" y="8">apply</name>
 			<committed/>
 		</location>
-		<location id="id4" x="-374" y="0">
+		<location id="id7" x="-374" y="0">
 			<name x="-382" y="8">get</name>
 			<committed/>
 		</location>
-		<location id="id5" x="34" y="0">
+		<location id="id8" x="34" y="0">
 			<name x="17" y="8">done</name>
 			<label kind="invariant" x="0" y="-34">tcover'==0</label>
 		</location>
-		<location id="id6" x="-246" y="-102">
+		<location id="id9" x="-246" y="-102">
 			<name x="-255" y="-136">wait</name>
 		</location>
-		<location id="id7" x="-510" y="0">
+		<location id="id10" x="-510" y="0">
 			<urgent/>
 		</location>
-		<init ref="id7"/>
-		<transition>
-			<source ref="id7"/>
-			<target ref="id4"/>
+		<init ref="id10"/>
+		<transition id="id11">
+			<source ref="id10"/>
+			<target ref="id7"/>
 			<label kind="assignment" x="-459" y="0">inits()</label>
 		</transition>
-		<transition>
-			<source ref="id3"/>
-			<target ref="id6"/>
+		<transition id="id12">
+			<source ref="id6"/>
+			<target ref="id9"/>
 			<label kind="guard" x="-221" y="-93">!inCovered()</label>
 			<nail x="-136" y="-102"/>
 		</transition>
-		<transition>
-			<source ref="id3"/>
-			<target ref="id5"/>
+		<transition id="id13">
+			<source ref="id6"/>
+			<target ref="id8"/>
 			<label kind="guard" x="-93" y="-25">inCovered()</label>
 			<label kind="assignment" x="-110" y="0">allCovered=true,
 x=0</label>
 		</transition>
-		<transition>
-			<source ref="id4"/>
-			<target ref="id3"/>
+		<transition id="id14">
+			<source ref="id7"/>
+			<target ref="id6"/>
 			<label kind="synchronisation" x="-289" y="-25">update!</label>
 			<label kind="assignment" x="-280" y="0">f(), x=0</label>
 		</transition>
-		<transition>
-			<source ref="id6"/>
-			<target ref="id4"/>
+		<transition id="id15">
+			<source ref="id9"/>
+			<target ref="id7"/>
 			<label kind="synchronisation" x="-365" y="-93">cmpDone?</label>
 			<nail x="-374" y="-102"/>
 		</transition>
 	</template>
-<template>
-	<name>tmul2_tb_nondet</name>
-	<parameter>const int range_min, const int range_max, const int dly, const double covratio</parameter>
-	<declaration>clock x;
+	<template>
+		<name>tmul2_tb_nondet</name>
+		<parameter>const int range_min, const int range_max, const int dly, const double covratio</parameter>
+		<declaration>clock x;
 clock tcover;
 int input=0;
 int nsame=0, inSame=0;
@@ -620,59 +620,59 @@ void inits(){
         }
     }
 }</declaration>
-		<location id="id8" x="-119" y="-102">
+		<location id="id16" x="-119" y="-102">
 			<name x="-129" y="-136">wait</name>
 		</location>
-		<location id="id9" x="-246" y="0">
+		<location id="id17" x="-246" y="0">
 			<name x="-255" y="8">get</name>
 			<committed/>
 		</location>
-		<location id="id10" x="170" y="0">
+		<location id="id18" x="170" y="0">
 			<name x="153" y="8">done</name>
 			<label kind="invariant" x="136" y="-34">tcover'==0</label>
 		</location>
-		<location id="id11" x="0" y="0">
+		<location id="id19" x="0" y="0">
 			<name x="-17" y="8">apply</name>
 			<committed/>
 		</location>
-		<location id="id12" x="-246" y="-102">
+		<location id="id20" x="-246" y="-102">
 			<committed/>
 		</location>
-		<location id="id13" x="-374" y="0">
+		<location id="id21" x="-374" y="0">
 			<urgent/>
 		</location>
-		<init ref="id13"/>
-		<transition>
-			<source ref="id13"/>
-			<target ref="id9"/>
+		<init ref="id21"/>
+		<transition id="id22">
+			<source ref="id21"/>
+			<target ref="id17"/>
 			<label kind="assignment" x="-331" y="0">inits()</label>
 		</transition>
-		<transition>
-			<source ref="id12"/>
-			<target ref="id9"/>
+		<transition id="id23">
+			<source ref="id20"/>
+			<target ref="id17"/>
 			<label kind="select" x="-238" y="-68">i: int[range_min, range_max]</label>
 			<label kind="assignment" x="-238" y="-51">bits[i] ^= 1, idx=i</label>
 		</transition>
-		<transition>
-			<source ref="id8"/>
-			<target ref="id12"/>
+		<transition id="id24">
+			<source ref="id16"/>
+			<target ref="id20"/>
 			<label kind="synchronisation" x="-212" y="-102">cmpDone?</label>
 		</transition>
-		<transition>
-			<source ref="id11"/>
-			<target ref="id8"/>
+		<transition id="id25">
+			<source ref="id19"/>
+			<target ref="id16"/>
 			<label kind="guard" x="-93" y="-93">!inCovered()</label>
 			<nail x="0" y="-102"/>
 		</transition>
-		<transition>
-			<source ref="id9"/>
-			<target ref="id11"/>
+		<transition id="id26">
+			<source ref="id17"/>
+			<target ref="id19"/>
 			<label kind="synchronisation" x="-153" y="-25">update!</label>
 			<label kind="assignment" x="-144" y="0">f(idx)</label>
 		</transition>
-		<transition>
-			<source ref="id11"/>
-			<target ref="id10"/>
+		<transition id="id27">
+			<source ref="id19"/>
+			<target ref="id18"/>
 			<label kind="guard" x="42" y="-25">inCovered()</label>
 			<label kind="assignment" x="34" y="0">allCovered=true</label>
 		</transition>
@@ -860,137 +860,137 @@ void inits(){
         }
     }
 }</declaration>
-		<location id="id14" x="-119" y="-102">
+		<location id="id28" x="-119" y="-102">
 			<name x="-129" y="-136">wait</name>
 		</location>
-		<location id="id15" x="-246" y="0">
+		<location id="id29" x="-246" y="0">
 			<name x="-255" y="8">get</name>
 			<committed/>
 		</location>
-		<location id="id16" x="170" y="0">
+		<location id="id30" x="170" y="0">
 			<name x="153" y="8">done</name>
 			<label kind="invariant" x="136" y="-34">tcover'==0</label>
 		</location>
-		<location id="id17" x="0" y="0">
+		<location id="id31" x="0" y="0">
 			<name x="-17" y="8">apply</name>
 			<committed/>
 		</location>
-		<location id="id18" x="-246" y="-102">
+		<location id="id32" x="-246" y="-102">
 			<committed/>
 		</location>
-		<location id="id19" x="-374" y="0">
+		<location id="id33" x="-374" y="0">
 			<urgent/>
 		</location>
-		<init ref="id19"/>
-		<transition>
-			<source ref="id19"/>
-			<target ref="id15"/>
+		<init ref="id33"/>
+		<transition id="id34">
+			<source ref="id33"/>
+			<target ref="id29"/>
 			<label kind="assignment" x="-331" y="0">inits()</label>
 		</transition>
-		<transition>
-			<source ref="id18"/>
-			<target ref="id15"/>
+		<transition id="id35">
+			<source ref="id32"/>
+			<target ref="id29"/>
 		</transition>
-		<transition>
-			<source ref="id14"/>
-			<target ref="id18"/>
+		<transition id="id36">
+			<source ref="id28"/>
+			<target ref="id32"/>
 			<label kind="synchronisation" x="-212" y="-102">cmpDone?</label>
 		</transition>
-		<transition>
-			<source ref="id17"/>
-			<target ref="id14"/>
+		<transition id="id37">
+			<source ref="id31"/>
+			<target ref="id28"/>
 			<label kind="guard" x="-93" y="-93">!inCovered()</label>
 			<nail x="0" y="-102"/>
 		</transition>
-		<transition>
-			<source ref="id15"/>
-			<target ref="id17"/>
+		<transition id="id38">
+			<source ref="id29"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="-153" y="-25">update!</label>
 			<label kind="assignment" x="-144" y="0">f(idx)</label>
 		</transition>
-		<transition>
-			<source ref="id17"/>
-			<target ref="id16"/>
+		<transition id="id39">
+			<source ref="id31"/>
+			<target ref="id30"/>
 			<label kind="guard" x="42" y="-25">inCovered()</label>
 			<label kind="assignment" x="34" y="0">allCovered=true</label>
 		</transition>
 	</template>
-<template>
+	<template>
 		<name>syncPrimary</name>
 		<declaration>int idx;</declaration>
-		<location id="id20" x="-748" y="-306">
+		<location id="id40" x="-748" y="-306">
 		</location>
-		<location id="id21" x="-646" y="-306">
+		<location id="id41" x="-646" y="-306">
 			<committed/>
 		</location>
-		<location id="id22" x="-510" y="-306">
+		<location id="id42" x="-510" y="-306">
 			<committed/>
 		</location>
-		<init ref="id20"/>
-		<transition>
-			<source ref="id22"/>
-			<target ref="id20"/>
+		<init ref="id40"/>
+		<transition id="id43">
+			<source ref="id42"/>
+			<target ref="id40"/>
 			<label kind="guard" x="-646" y="-399">idx&gt;=NPI</label>
 			<nail x="-510" y="-374"/>
 			<nail x="-748" y="-374"/>
 		</transition>
-		<transition>
-			<source ref="id22"/>
-			<target ref="id21"/>
+		<transition id="id44">
+			<source ref="id42"/>
+			<target ref="id41"/>
 			<label kind="guard" x="-595" y="-323">idx&lt;NPI</label>
 			<nail x="-578" y="-272"/>
 		</transition>
-		<transition>
-			<source ref="id21"/>
-			<target ref="id22"/>
+		<transition id="id45">
+			<source ref="id41"/>
+			<target ref="id42"/>
 			<label kind="synchronisation" x="-612" y="-340">change[idx]!</label>
 			<label kind="assignment" x="-629" y="-280">idx++</label>
 		</transition>
-		<transition>
-			<source ref="id20"/>
-			<target ref="id21"/>
+		<transition id="id46">
+			<source ref="id40"/>
+			<target ref="id41"/>
 			<label kind="synchronisation" x="-730" y="-323">update?</label>
 			<label kind="assignment" x="-714" y="-306">idx=0</label>
 		</transition>
 	</template>
-<template>
+	<template>
 		<name>eval_diff</name>
 		<parameter>const int dly</parameter>
 		<declaration>clock x;</declaration>
-		<location id="id23" x="-238" y="0">
+		<location id="id47" x="-238" y="0">
 			<label kind="invariant" x="-297" y="-8">x&lt;=dly</label>
 		</location>
-		<location id="id24" x="-102" y="0">
+		<location id="id48" x="-102" y="0">
 			<committed/>
 		</location>
-		<init ref="id23"/>
-		<transition>
-			<source ref="id24"/>
-			<target ref="id23"/>
+		<init ref="id47"/>
+		<transition id="id49">
+			<source ref="id48"/>
+			<target ref="id47"/>
 			<label kind="synchronisation" x="-178" y="51">cmpDone!</label>
 			<label kind="assignment" x="-246" y="110">outcnt=0, diffctrl=0, x=0</label>
 			<nail x="-102" y="110"/>
 			<nail x="-238" y="110"/>
 		</transition>
-		<transition>
-			<source ref="id23"/>
-			<target ref="id23"/>
+		<transition id="id50">
+			<source ref="id47"/>
+			<target ref="id47"/>
 			<label kind="guard" x="-331" y="-93">diffctrl&lt;2
 &amp;&amp; x==dly</label>
 			<label kind="assignment" x="-289" y="-42">x=0</label>
 			<nail x="-263" y="-76"/>
 			<nail x="-229" y="-76"/>
 		</transition>
-		<transition>
-			<source ref="id23"/>
-			<target ref="id24"/>
+		<transition id="id51">
+			<source ref="id47"/>
+			<target ref="id48"/>
 			<label kind="guard" x="-204" y="0">diffctrl==2</label>
 			<label kind="assignment" x="-212" y="-68">err_magn_v=0,
 err_magn_r=0.0,
 diff()</label>
 		</transition>
 	</template>
-<template>
+	<template>
 		<name>gate2</name>
 		<parameter>const int id, const int a0, const int a1, const int y0, broadcast chan &amp;cin0, broadcast chan &amp;cin1, broadcast chan &amp;cout0</parameter>
 		<declaration>clock x;
@@ -1059,45 +1059,45 @@ void outGen(tOp op){
     delay_sum = delay_sum + duration(tbl_op[id]); 
 }
 </declaration>
-		<location id="id25" x="-170" y="0">
+		<location id="id52" x="-170" y="0">
 		</location>
-		<location id="id26" x="0" y="0">
+		<location id="id53" x="0" y="0">
 			<label kind="invariant" x="-17" y="17">x&lt;=duration(tbl_op[id])</label>
 		</location>
-		<location id="id27" x="-272" y="0">
+		<location id="id54" x="-272" y="0">
 			<committed/>
 		</location>
-		<init ref="id27"/>
-		<transition>
-			<source ref="id27"/>
-			<target ref="id25"/>
+		<init ref="id54"/>
+		<transition id="id55">
+			<source ref="id54"/>
+			<target ref="id52"/>
 			<label kind="assignment" x="-238" y="0">inits()</label>
 		</transition>
-		<transition>
-			<source ref="id25"/>
-			<target ref="id26"/>
+		<transition id="id56">
+			<source ref="id52"/>
+			<target ref="id53"/>
 			<label kind="synchronisation" x="-144" y="0">cin1?</label>
 			<label kind="assignment" x="-76" y="0">x=0</label>
 			<nail x="-85" y="0"/>
 		</transition>
-		<transition>
-			<source ref="id26"/>
-			<target ref="id25"/>
+		<transition id="id57">
+			<source ref="id53"/>
+			<target ref="id52"/>
 			<label kind="guard" x="-110" y="-127">x==duration(tbl_op[id])</label>
 			<label kind="synchronisation" x="8" y="-68">cout0!</label>
 			<label kind="assignment" x="-144" y="-102">outGen(tbl_op[id])</label>
 			<nail x="0" y="-102"/>
 			<nail x="-170" y="-102"/>
 		</transition>
-		<transition>
-			<source ref="id25"/>
-			<target ref="id26"/>
+		<transition id="id58">
+			<source ref="id52"/>
+			<target ref="id53"/>
 			<label kind="synchronisation" x="-136" y="-42">cin0?</label>
 			<label kind="assignment" x="-59" y="-42">x=0</label>
 			<nail x="-85" y="-34"/>
 		</transition>
 	</template>
-<system>
+	<system>
 // Place template instantiations here.
 
 synPri = syncPrimary();
@@ -1178,18 +1178,324 @@ g342,
 g351,
 g352;
 </system>
-
 	<queries>
+		<query>
+			<formula>simulate[&lt;=20000;1] {input_a, input_b}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-04-08 14:54:07 +0200">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="input_a" type="l" color="0xff0000" encoding="csv">0.0,0.0
+0.0,85.0
+500.0,85.0
+500.0,161.0
+1003.8868638500571,161.0
+1003.8868638500571,220.0
+1507.6371072186157,220.0
+1507.6371072186157,123.0
+2009.2980101832654,123.0
+2009.2980101832654,162.0
+2509.8344350943808,162.0
+2509.8344350943808,52.0
+3011.804931726074,52.0
+3011.804931726074,17.0
+3511.804931726074,17.0
+3511.804931726074,209.0
+4014.6230459806975,209.0
+4014.6230459806975,180.0
+4518.067721001571,180.0
+4518.067721001571,37.0
+5019.961470135022,37.0
+5019.961470135022,42.0
+5519.961470135022,42.0
+5519.961470135022,80.0
+6019.961470135022,80.0
+6019.961470135022,8.0
+6524.715315040667,8.0
+6524.715315040667,20.0
+7026.448170116637,20.0
+7026.448170116637,116.0
+7526.987983789295,116.0
+7526.987983789295,184.0
+8026.987983789295,184.0
+8026.987983789295,62.0
+8530.615750941215,62.0
+8530.615750941215,89.0
+9033.935660650022,89.0
+9033.935660650022,76.0
+9538.2080586534,76.0
+9538.2080586534,100.0
+10042.142550203716,100.0
+10042.142550203716,69.0
+10545.487607864197,69.0
+10545.487607864197,31.0
+11045.487607864197,31.0
+11045.487607864197,11.0
+11545.487607864197,11.0
+11545.487607864197,98.0
+12048.323229416274,98.0
+12048.323229416274,6.0
+12548.323229416274,6.0
+12548.323229416274,174.0
+13048.323229416274,174.0
+13048.323229416274,54.0
+13548.323229416274,54.0
+13548.323229416274,254.0
+14048.38626014418,254.0
+14048.38626014418,13.0
+14548.38626014418,13.0
+14548.38626014418,76.0
+15049.556667332072,76.0
+15049.556667332072,61.0
+15549.782523987815,61.0
+15549.782523987815,231.0
+16049.782523987815,231.0
+16049.782523987815,136.0
+16549.782523987815,136.0
+16549.782523987815,40.0
+17053.74730561278,40.0
+17053.74730561278,203.0
+17553.74730561278,203.0
+17553.74730561278,128.0
+18053.74730561278,128.0
+18053.74730561278,29.0
+18555.11047342792,29.0
+18555.11047342792,181.0
+19057.478080459405,181.0
+19057.478080459405,159.0
+19558.000093186274,159.0
+19558.000093186274,32.0
+20000.0,32.0
+					</series>
+					<series title="input_b" type="l" color="0x00ffff" encoding="csv">0.0,0.0
+500.0,0.0
+500.0,60.0
+1507.6371072186157,60.0
+1507.6371072186157,0.0
+2009.2980101832654,0.0
+2009.2980101832654,60.0
+2509.8344350943808,60.0
+2509.8344350943808,0.0
+3011.804931726074,0.0
+3011.804931726074,180.0
+3511.804931726074,180.0
+3511.804931726074,0.0
+5019.961470135022,0.0
+5019.961470135022,60.0
+6524.715315040667,60.0
+6524.715315040667,180.0
+7026.448170116637,180.0
+7026.448170116637,0.0
+8026.987983789295,0.0
+8026.987983789295,60.0
+9538.2080586534,60.0
+9538.2080586534,120.0
+10042.142550203716,120.0
+10042.142550203716,0.0
+10545.487607864197,0.0
+10545.487607864197,60.0
+12548.323229416274,60.0
+12548.323229416274,0.0
+13048.323229416274,0.0
+13048.323229416274,60.0
+13548.323229416274,60.0
+13548.323229416274,0.0
+16049.782523987815,0.0
+16049.782523987815,60.0
+17053.74730561278,60.0
+17053.74730561278,0.0
+17553.74730561278,0.0
+17553.74730561278,60.0
+18053.74730561278,60.0
+18053.74730561278,120.0
+18555.11047342792,120.0
+18555.11047342792,0.0
+20000.0,0.0
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
 		<query>
 			<formula>simulate[&lt;=20000;1] {res_acc, res_approx}</formula>
 			<comment>Accurate results vs approximate results</comment>
+			<result outcome="success" type="quality" timestamp="2024-04-08 14:54:13 +0200">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="res_acc" type="l" color="0xff0000" encoding="csv">0.0,0.0
+504.5737593434751,0.0
+504.5737593434751,9180.0
+1009.2968896310776,9180.0
+1009.2968896310776,1800.0
+1509.2968896310776,1800.0
+1509.2968896310776,20340.0
+2009.3584137118887,20340.0
+2009.3584137118887,0.0
+2513.187621794641,0.0
+2513.187621794641,3840.0
+3013.187621794641,3840.0
+3013.187621794641,0.0
+4514.289587532403,0.0
+4514.289587532403,180.0
+5018.912480089348,180.0
+5018.912480089348,0.0
+6021.143452445976,0.0
+6021.143452445976,4140.0
+6521.143452445976,4140.0
+6521.143452445976,2520.0
+7021.143452445976,2520.0
+7021.143452445976,7080.0
+7521.372325588018,7080.0
+7521.372325588018,11340.0
+8021.372325588018,11340.0
+8021.372325588018,3360.0
+8522.171429872978,3360.0
+8522.171429872978,5280.0
+9024.961515798932,5280.0
+9024.961515798932,13140.0
+9524.961515798932,13140.0
+9524.961515798932,2340.0
+10024.961515798932,2340.0
+10024.961515798932,0.0
+10528.424005478155,0.0
+10528.424005478155,4020.0
+11031.890590873081,4020.0
+11031.890590873081,25680.0
+11531.890590873081,25680.0
+11531.890590873081,1620.0
+12032.567331813043,1620.0
+12032.567331813043,0.0
+12536.095104612177,0.0
+12536.095104612177,2160.0
+13036.360209359555,2160.0
+13036.360209359555,0.0
+13537.953893656377,0.0
+13537.953893656377,7140.0
+14037.953893656377,7140.0
+14037.953893656377,0.0
+14537.953893656377,0.0
+14537.953893656377,19200.0
+15037.953893656377,19200.0
+15037.953893656377,480.0
+15539.465979904635,480.0
+15539.465979904635,11400.0
+16041.806642690208,11400.0
+16041.806642690208,240.0
+16544.91789205349,240.0
+16544.91789205349,0.0
+17544.91789205349,0.0
+17544.91789205349,4560.0
+18044.91789205349,4560.0
+18044.91789205349,540.0
+18544.91789205349,540.0
+18544.91789205349,2940.0
+19047.58886464988,2940.0
+19047.58886464988,540.0
+19549.20274511096,540.0
+19549.20274511096,0.0
+20000.0,0.0
+					</series>
+					<series title="res_approx" type="l" color="0x00ffff" encoding="csv">0.0,0.0
+504.5737593434751,0.0
+504.5737593434751,7712.0
+1009.2968896310776,7712.0
+1009.2968896310776,0.0
+1509.2968896310776,0.0
+1509.2968896310776,16032.0
+2009.3584137118887,16032.0
+2009.3584137118887,0.0
+4514.289587532403,0.0
+4514.289587532403,32.0
+5018.912480089348,32.0
+5018.912480089348,0.0
+6021.143452445976,0.0
+6021.143452445976,32.0
+6521.143452445976,32.0
+6521.143452445976,1632.0
+7021.143452445976,1632.0
+7021.143452445976,1536.0
+7521.372325588018,1536.0
+7521.372325588018,7712.0
+8021.372325588018,7712.0
+8021.372325588018,1536.0
+8522.171429872978,1536.0
+8522.171429872978,3584.0
+9024.961515798932,3584.0
+9024.961515798932,9888.0
+9524.961515798932,9888.0
+9524.961515798932,1568.0
+10024.961515798932,1568.0
+10024.961515798932,0.0
+10528.424005478155,0.0
+10528.424005478155,32.0
+11031.890590873081,32.0
+11031.890590873081,16000.0
+11531.890590873081,16000.0
+11531.890590873081,32.0
+12032.567331813043,32.0
+12032.567331813043,0.0
+12536.095104612177,0.0
+12536.095104612177,1536.0
+13036.360209359555,1536.0
+13036.360209359555,0.0
+13537.953893656377,0.0
+13537.953893656377,1568.0
+14037.953893656377,1568.0
+14037.953893656377,0.0
+14537.953893656377,0.0
+14537.953893656377,15872.0
+15037.953893656377,15872.0
+15037.953893656377,384.0
+15539.465979904635,384.0
+15539.465979904635,7680.0
+16041.806642690208,7680.0
+16041.806642690208,0.0
+17544.91789205349,0.0
+17544.91789205349,3712.0
+18044.91789205349,3712.0
+18044.91789205349,32.0
+18544.91789205349,32.0
+18544.91789205349,1568.0
+19047.58886464988,1568.0
+19047.58886464988,32.0
+19549.20274511096,32.0
+19549.20274511096,0.0
+20000.0,0.0
+					</series>
+					<comment/>
+				</plot>
+			</result>
 		</query>
 		<query>
 			<formula>simulate[&lt;=1000;1] {current_delay}</formula>
 			<comment>Jitter of delay for each result</comment>
+			<result outcome="success" type="quality" timestamp="2024-04-08 14:54:17 +0200">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="current_delay" type="l" color="0xff0000" encoding="csv">0.0,0.0
+10.0,0.0
+10.0,190.0
+20.0,190.0
+20.0,300.0
+30.0,300.0
+30.0,330.0
+40.0,330.0
+40.0,350.0
+500.69136990467086,350.0
+500.69136990467086,0.0
+510.69136990467086,0.0
+510.69136990467086,190.0
+520.6913699046709,190.0
+520.6913699046709,300.0
+530.6913699046709,300.0
+530.6913699046709,350.0
+540.6913699046709,350.0
+540.6913699046709,360.0
+1000.0,360.0
+					</series>
+					<comment/>
+				</plot>
+			</result>
 		</query>
 		<query>
-			<formula>simulate[&lt;=5000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
+			<formula>simulate[&lt;=10000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
 mean_relative_error, mean_squared_error, avg_flips_per_res, worst_case_error, 
 worst_case_relative_error, max_hamming_distance, max_bit_flips, worst_delay
 }</formula>

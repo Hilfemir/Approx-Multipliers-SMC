@@ -564,8 +564,7 @@ class Parser(object):
 			replacement =  "    input_a = fint(random_tri(-50,70,450));\n"
 			replacement += "    if(input_a &gt; imax-1) { input_a = fint(random(150)); }\n\n"
 
-			replacement += "    input_b = fint(random_beta(2.0,2.0));\n"
-			replacement += "    input_b = input_b * 255;\n"
+			replacement += "    input_b = fint(random_beta(2.0,2.0) * 255);\n"
 
 		elif distribution == "gamma_2norm":
 			comment = "    //Gammavariate and two normal distributions (eg. Sieve of Pritchard algo.)\n"
@@ -687,7 +686,7 @@ def main():
 		'--distribution', '-d', 
 		default="uni_uni",
 		help="Distributions of numbers from the random number generator.",
-		choices=['uni_ini', 'same_triang', 'beta_uni', 'triang_beta', 'gamma_2norm', 'triang_weibull', 'same_uni', 'const_norm']
+		choices=['uni_uni', 'same_triang', 'beta_uni', 'triang_beta', 'gamma_2norm', 'triang_weibull', 'same_uni', 'const_norm']
 		)
 	args = argparser.parse_args()
 

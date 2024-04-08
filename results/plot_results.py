@@ -16,19 +16,38 @@ def determine_inpath(args_file: str) -> PathLike[str]:
 		args_file = f"./pickles/{args_file}"
 
 	return Path(args_file)
+
+
+def determine_outpath(args_outname: str) -> PathLike[str]:
+	"""Take path to the output file, edit if necessary.
+	Returns Path object of the output file.
+	"""
+	if not args_outname.endswith(".png"):
+		args_outname += ".png"
+
+	if not args_outname.startswith("./plots/"):
+		args_outname = f"./plots/{args_outname}"
+
+	return Path(args_outname)
 		
 
-def transform_scatter(df: pd.DataFrame, metric: str = "mean_abs_error") -> pd.DataFrame:
+def transform_scatter(df: pd.DataFrame, metric: str, distribution: str | None) -> pd.DataFrame:
 	"""Transform the input dataframe to make it ready for a scatter plot and return it.
 	"""
+	if distribution is not None:
+		df = df[df['distribution'] == distribution]
+
 	df = df[(df["metric"] == metric) | (df["metric"] == "avg_flips_per_res")]
 	df = pd.pivot(df, columns="metric", values="value", index="multiplier")
 	return df
 
 
-def transform_barplot(df: pd.DataFrame, multiplier: str, metric: str) -> pd.DataFrame:
+def transform_barplot(df: pd.DataFrame, multiplier: str, metric: str, distribution: str | None) -> pd.DataFrame:
 	"""Transform the input dataframe to make it ready for a bar plot and return it.
 	"""
+	if distribution is not None:
+		df = df[df['distribution'] == distribution]
+
 	df = df[(df["multiplier"] == multiplier) & (df["metric"] == metric)]
 	df = df[['distribution', 'value']]
 
@@ -58,6 +77,14 @@ def main():
 	)
 
 	parser.add_argument(
+		'--distribution', '-d',
+		help="Filter out only certain distribution.",
+		choices=[None, 'uni_uni', 'same_triang', 'beta_uni', 'triang_beta', 'gamma_2norm', 'triang_weibull', 'same_uni', 'const_norm'],
+		default=None,
+		required=False
+	)
+
+	parser.add_argument(
 		'--metric',
 		help="Which metric should be on the Y-axis.",
 		choices=[
@@ -83,23 +110,50 @@ def main():
 		default=False
 	)
 
+	parser.add_argument(
+		'--noout',
+		help="Don't save the plot.",
+		action="store_true",
+		default=False
+	)
+
+	parser.add_argument(
+		'--outname',
+		help="Name of the output file.",
+		default="output.png"
+	)
+
+	parser.add_argument(
+		'--noshow',
+		help="Don't show the plot.",
+		action="store_true",
+		default=False
+	)
+
 	args = parser.parse_args()
 	input_file = determine_inpath(args.file)
+	output_file = determine_outpath(args.outname)
 
 	df = pd.read_pickle(input_file)
+	fig = plt.figure(figsize=(12,8))
+	ax = fig.add_subplot(1,1,1)
 
 	if args.type == "scatter":
-		df = transform_scatter(df, args.metric)
-		df.plot.scatter(x="avg_flips_per_res", y=args.metric)
+		df = transform_scatter(df, args.metric, args.distribution)
+		df.plot.scatter(x="avg_flips_per_res", y=args.metric, ax=ax)
 
 	elif args.type == "bar":
-		df = transform_barplot(df, args.multiplier, args.metric)
-		df.plot.bar(x='distribution', y=args.metric, rot=0)
+		df = transform_barplot(df, args.multiplier, args.metric, args.distribution)
+		df.plot.bar(x='distribution', y=args.metric, rot=0, ax=ax)
 
 	if args.print:
 		print(df.to_string())
 
-	plt.show()
+	if not args.noout:
+		plt.savefig(output_file)
+
+	if not args.noshow:
+		plt.show()
 
 if __name__ == "__main__":
 	main()
