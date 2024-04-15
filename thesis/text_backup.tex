@@ -29,7 +29,7 @@ V oblasti zpracování obrazu mohou přibližné výpočetní systémy zrychlit 
 \end{figure}
 
 \subsubsection{Analýza velkých dat}
-Při zpracování tzv. velkých dat (angl. \textit{big data}) lze aproximovat dotazy na data, které jsou často velmi komplexní, výsledky jejich přibližných variant jsou ovšem mnohdy dostačující. Dále lze aproximovat i samotná data za účelem snížení nároků na úložný prostor. Pro nějakou třídu dotazů Q na data D musí platit, že pro aproximovaná data D' vrátí dotazy Q uspokojivé výsledky. Dotazy Q bývá obvykle potřeba mírně upravit, aby vyhovovala aproximovaným datům. V obou přístupech je třeba zvážit rovnováhu mezi efektivitou dotazů a kvalitou výsledků \cite{approx_big_data}.
+Při zpracování tzv. velkých dat (angl. \textit{big data}) lze aproximovat dotazy na data, které jsou často velmi komplexní, výsledky jejich přibližných variant jsou ovšem mnohdy dostačující. Dále lze aproximovat i samotná data za účelem snížení nároků na úložný prostor. Pro nějakou třídu dotazů $Q$ na data $D$ musí platit, že pro aproximovaná data $D'$ vrátí dotazy $Q$ uspokojivé výsledky. Dotazy $Q$ bývá obvykle potřeba mírně upravit, aby vyhovovaly aproximovaným datům. V obou přístupech je třeba zvážit rovnováhu mezi efektivitou dotazů a kvalitou výsledků \cite{approx_big_data}.
 
 \subsubsection{Strojové učení}
 Přibližné počítání má ve strojovém učení (dále SU) obrovské využití, prostředí SU má totiž v mnoha ohledech ideální podmínky k využítí aproximace. Mnoho úloh SU lze redukovat na problém aproximace nějaké funkce, kde daná funkce není kompletně specifikována. Samotný proces trénování modelů lze přizpůsobit tak, aby se byl schopen zotavit ze všech případných nepříznivých účinků aproximace \cite{approx_ai}.
@@ -160,14 +160,14 @@ Aproximační systémy je dále možné posuzovat vhodnými \textbf{kvalitativn�
 Výstupy systémů založených na strojovém učení nebo na shlukování lze posuzovat např. na základě \textbf{Přesnosti} (angl. \textit{Precision}), \textbf{Výtěžnosti} (angl. \textit{Recall}), metrikou \textbf{F-score}, nebo dalších složitějších metrik \cite{clustering_eval}.
 
 \section{Aproximační násobičky} \label{approx_mult}
-Násobení je operace, která je při spouštění datově náročných aplikací (např. streamování, zpracování obrazu, strojové učení, aj.) utilizována velmi často a která tím pádem spotřebuje nemalé množství energie. Mnohé z těchto aplikací jsou ovšem schopné vytvořit dostatečně dobrý výsledek i přes nepřesnosti v násobení. Dalším příkladem využití přibližných násobiček jsou zařízení z oblasti internetu věcí, u nichž je kladen důraz na co nejmenší spotřebu energie a u nichž také mnohdy není nutné vše počítat přesně \cite{approx_mult_survey}. 
+Násobení je operace, která je při spouštění datově náročných aplikací (např. streamování, zpracování obrazu, strojové učení, aj.) utilizována velmi často a která tím pádem spotřebuje nemalé množství energie. Mnohé z těchto aplikací jsou ovšem schopné vytvořit dostatečně dobrý výsledek i přes nepřesnosti v násobení. Dalším příkladem využití přibližných násobiček jsou zařízení z oblasti internetu věcí, u nichž je kladen důraz na co nejmenší spotřebu energie a u nichž také mnohdy není nutné vše počítat přesně \cite{approx_mult_survey}.
 
 Tato podkapitola se zaměřuje nejprve na vysvětlení funkcionality binárních násobiček a následně na popis základních přístupů k vytváření přibližných násobiček.
 
 \subsubsection{Základní princip binárních násobiček}
 Při binárním násobení uvažujeme pouze 2 hodnoty -- 1 a 0, z toho důvodu je možné na binární násobení nahlížet jako na sekvenci sčítání a bitových posunů. Uvažme příklad z obrázku \ref{fig:binmult}, kde vstup $x$ je násoben vstupem $y$. Operaci násobení lze rozdělit do 3 fází: načtení dat na vstupu, generování částečných součinů a finální suma.
 
-Základní binární násobička funguje tak, že se postupně roznásobují jednotlivé bity vstupu $y$ se všemi bity vstupu $x$ a následně na základě váhy bitu $y$ dochází k bitovému posunu vlevo. První řádek částečných součinů v příkladu z obrázku \ref{fig:binmult} tedy vznikne roznásobením bitu $y_0$ se všemi bity vstupu $x$, atd. Nakonec se všechny částečné 1součiny sečtou v konečný výsledek.
+Základní binární násobička funguje tak, že se postupně roznásobují jednotlivé bity vstupu $y$ se všemi bity vstupu $x$ a následně na základě váhy bitu $y$ dochází k bitovému posunu vlevo. První řádek částečných součinů v příkladu z obrázku \ref{fig:binmult} tedy vznikne roznásobením bitu $y_0$ se všemi bity vstupu $x$, atd. Nakonec se všechny částečné součiny sečtou v konečný výsledek.
 
 \begin{figure}[H]
     \centering
@@ -204,7 +204,14 @@ SSM zpravidla potřebuje méně hardwarových zdrojů než DSM, na druhou stranu
 \subsubsection{Aproximace při generování částečných součinů}
 Jedním z možných přístupů je využití malých bloků nepřesných násobiček k vytvoření dílčích součinů a poté sečtení těchto různě bitově posunutých dílčích součinů. Takové násobičky lze nazývat pojmem \textit{Nedostatečně navržená násobička} neboli anglicky \textbf{Under-designed multiplier}. 
 
-Příkladem stavebního bloku může být násobička na obrázku TODO. Jak lze pozorovat v Karnaughově mapě v tabulce \ref{tab:kmap2x2}, tato násobička je přesná pro 15 ze 16 možných vstupních kombinací (nepřesný výsledek je v tabulce vyznačen červeně). Změna oproti přesné násobičce je v tom, že výsledek vstupu $3*3$ je reprezentován bity $111$ oproti přesnému výsledku $1001$, díky čemuž se snížila plocha obvodu téměř na polovinu (5 logických hradel oproti 9 u přesné násobičky, méně drátů) s pravděpodobností chyby pouze $\frac{1}{16}$ \cite{underdesigned_mult}.
+Příkladem stavebního bloku může být násobička na obrázku \ref{fig:approx_acc_mult}. Jak lze pozorovat v Karnaughově mapě v tabulce \ref{tab:kmap2x2}, tato násobička je přesná pro 15 ze 16 možných vstupních kombinací (nepřesný výsledek je v tabulce vyznačen červeně). Změna oproti přesné násobičce je v tom, že výsledek vstupu $3*3$ je reprezentován bity $111$ oproti přesnému výsledku $1001$, díky čemuž se snížila plocha obvodu téměř na polovinu (5 logických hradel oproti 9 u přesné násobičky, méně drátů) s pravděpodobností chyby pouze $\frac{1}{16}$ \cite{underdesigned_mult}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky-figures/approx_acc_mult.png}
+    \caption{(a) Přibližná násobička 2x2 bity (b) Přesná násobička 2x2 bity}
+    \label{fig:approx_acc_mult}
+\end{figure}
 
 \begin{table}[H]
 \centering
@@ -221,7 +228,7 @@ Příkladem stavebního bloku může být násobička na obrázku TODO. Jak lze 
 11 & 000 & 011 & {\color[HTML]{FE0000} 111} & 110 \\ \hline
 10 & 000 & 010 & 110                        & 100 \\ \hline
 \end{tabular}
-\caption{Karnaughova mapa pro nepřesnou násobičku z obrázku TODO}
+\caption{Karnaughova mapa pro nepřesnou násobičku z obrázku \ref{fig:approx_acc_mult}}
 \label{tab:kmap2x2}
 \end{table}
 
@@ -230,17 +237,307 @@ bity. A a X jsou vstupní hodnoty, dolní indexy H, respektive L značí 2 vyš�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{obrazky-figures/larger_mults.png}
+    \includegraphics[width=0.5\textwidth]{obrazky-figures/larger_mults.png}
     \caption{Tvorba násobiček z menších bloků. Převzato z \cite{underdesigned_mult}}
     \label{fig:larger_mults}
 \end{figure}
 
-\subsubsection{Aproximace při finálním sčítání}
+\subsubsection{Aproximace při závěrečném sčítání}
+Pro závěrečné sčítání částečných součinů se používají sčítačky a kompresory, je proto přirozené uvažovat o aproximaci těchto komponent za účelem aproximace celé násobičky. Přístupů k tomuto řešení existuje celá řada, v posledních letech výzkumníci pracují s myšlenkou rozdělení matice částečných součinů na několik skupin (obvykle 2 nebo 3), přičemž u každé skupiny by docházelo k jinak velké aproximaci. U příkladu na obrázku \ref{fig:accumulation_approx} by nejvíce významné bity zůstaly nezměněny, prostřední bity by podléhaly určité aproximaci a nejnižší bity by byly uříznuty nebo akumulovány pouze pomocí OR hradel.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{obrazky-figures/accumulation_approx.png}
+    \caption{Příklad rozdělení matice částečných součinů na skupiny s různou úrovní aproximace. Převzato z \cite{approx_mult_survey}}
+    \label{fig:accumulation_approx}
+\end{figure}
+
+Další možností je rozdělení matice částečných součinů pomocí vertikálního a horizontálního uříznutí. Jak je vidět v příkladu na obrázku \ref{fig:bam}, všechny částečné součiny nahoru od horizontální hranice jsou při konečném součtu ignorovány, to stejné platí i pro částečné součiny napravo od vertikální hranice. Pomocí posouvání těchto hranic lze modifikovat míru aproximace. Takto navržené násobičky se nazývají anglickým pojmem \textbf{Broken-Array Multiplier}, tedy násobička s rozbitou maticí částečných součinů \cite{bio_inspired_blocks}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{obrazky-figures/bam.png}
+    \caption{Přiklad násobičky typu Broken-Array. Převzato z \cite{bio_inspired_blocks}}
+    \label{fig:bam}
+\end{figure}
+
+\subsubsection{Logaritmické násobičky}
+Násobičky lze aproximovat také na úrovni algoritmů. Jednou z možností je tvorba logaritmických násobiček, kde lze na násobení nahlížet jako na součet logaritmů obou činitelů. Při násobení čísel $A * B$ lze logaritmus pro číslo $A$ vyjádřit následovně \cite{mitchell_log}:
+
+\begin{equation}
+    A = 2^{k_1}(1+x_1),
+\end{equation}
+
+\begin{equation}
+    \log_2(A) = k_1 + \log_2(1+x_1),
+\end{equation}
+
+kde $A$ je činitel, $k_1$ je pozice nejvýznamnějšího bitu s hodnotou 1 a $x_1$ je desetinná část ležicí v intervalu $\langle0,1)$. Stejnou formulí s parametry $k_2$ a $x_2$ lze vyjádřit i logaritmus pro činitel $B$. Logaritmus samotného násobení lze poté vyjádřit následujícím způsobem:
+
+\begin{equation}
+    \log_2(A*B) = k_1 + k_2 + log_2(1+x_1) + log_2(1 + x_2)
+\end{equation}
+
+Implementace tohoto výpočtu vyžaduje použití detektoru nejvyššího jedničkového bitu (angl. \textit{Leading-one detector}), binárně-logaritmických převodníků (angl. \textit{logarithm-binary converter} a \textit{binary-logaritm converter}) a sčítačky \cite{approx_mult_survey}. Pro snížení implementační náročnosti lze výpočet aproximovat následovně:
+
+\begin{equation}
+    \log_2(x+1) \approx x, 0 \leq x < 1.
+\end{equation}
+
+Tím vzniká rovnice $A*B \approx 2^{k_1+k_2+x_1+x_2} = 2^{k_1+k_2} * 2^{x_1+x_2}$. Na základě přenosu z výpočtu $x_1 + x_2$ může být výpočet $A*B$ dále aproximován jako:
+
+\begin{equation}
+    A*B \approx \Bigg\{ 
+    \begin{array}{ll}
+        2^{k_1+k_2}(x_1+x_2+1) & \text{pro } x_1 + x_2 < 1, \\
+        2^{k_1+k_2+1}(x_1+x_2) & \text{pro } x_1 + x_2 \geq 1.
+    \end{array}
+\end{equation}
+
+Při porovnání s výsledkem přesného násobení (za předpokladu, že $x_1 + x_2 < 1$) lze chybu aproximovaného výpočtu vyjádřit jako \cite{approx_mult_survey}:
+
+\begin{equation}
+    \begin{array}{rl}
+       Chyba & = A*B - 2^{k_1+k_2}(x_1+x_2+1) \\
+             & = 2^{k_1+k_2}(1+x_1)(1+x_2)-2^{k_1+k_2}(x_1+x_2+1) \\
+             & = 2^{k_1+k_2}x_1x_2
+    \end{array}
+\end{equation}
 
 \chapter{Statistické ověřování modelů}
 \label{smc}
-TODO
+Chyby v počítačových systémech mohou mít v dnešní době drastické dopady na společnost, včetně ohrožení lidských životů, proto je dokazování správnosti těchto systémů mimořádně důležitá činnost. K verifikaci počítačových systémů tradičně existují dva základní přístupy: Statická a dynamická analýza (viz obrázek \ref{fig:verifikace_rozdeleni}).
+
+Statická analýza využívá metody formální verifikace, např. ověřování modelů, kterými lze garantovat (matematicky dokázat) bezchybnost nějakého systému. Oproti tomu dynamická analýza spočívá v simulování a testování daného systému, přičemž chyby se zachytávají při bězích jednotlivých testovacích případů. Ideální by bylo všechny systémy formálně verifikovat a zamezit tak možnosti výskytu chyby, na formální verifikaci mnohých reálných komplexních systémů ovšem nestačí výpočetní výkon současných počítačů. Tyto systémy lze ověřovat testováním, které ale pro změnu téměř nikdy neodhalí všechny chyby systému.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{obrazky-figures/verifikace_rozdeleni.png}
+    \caption{Rozdělení přístupů k verifikaci programů}
+    \label{fig:verifikace_rozdeleni}
+\end{figure}
+
+Metody formální verifikace se původně zaměřovaly na diskrétní chování systémů. Výzkum v posledních letech ovšem ukazuje, že spojitý (reálný) čas hraje u mnohých systémů klíčovou roli, a měl by proto být zohledněn při verifikaci. K modelování takových systémů proto vznikly časové automaty. Jedním z nejvýznamnějších nástrojů, které se prací s časovými automaty zabývají, je UPPAAL \cite{uppaal_smc}.
+
+Časové automaty ovšem nejsou dostatečně expresivní na to, aby dokázaly popsat chování komplexnější systémů s reálným časem. Chování těchto systémů často závisí na stochastických jevech, ověřování modelů takových systémů je nerozhodnutelné. S alternativním řešením tohoto problému přichází UPPAAL SMC, které tyto systémy reprezentuje pomocí sítí automatů, jejichž chování může záviset na stochastických a nelineárních dynamických jevech. K efektivní analýze vlastností modelů využívá \textbf{statistického ověřování modelů}.
+
+Tato kapitola se zabývá nejprve uvedením principu statistického ověřování modelů, poté definicí časových automatů a nakonec rozborem nástroje UPPAAL včetně jeho uživatelského rozhraní, dotazovacího jazyka, dalších rozšíření a porovnání s alternativními nástroji.
+
+\section{Úvod do statistického ověřování modelů}
+Statistické ověřování modelů (SMC) představuje určitý kompromis mezi testováním a klasickými formálními technikami ověřování modelů. Jedná se o techniku, která spočívá v monitorování simulací nějakého systému, zaměřujíc se na určité vlastnosti, a poté využití výsledků simulací k získání statistik sloužících k odhadu správnosti daného systému.
+
+SMC nachází využití u systémů, které jsou příliš komplikované pro tradiční metody ověřování modelů z důvodu exploze stavového prostoru. Konkrétně se SMC využívá při ověřování systémů v biologii \cite{smc_biology}, systémů zaměřujících se na optimalizaci spotřeby energie \cite{smc_energy_centric}, v leteckém a automobilovém průmyslu i jinde.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{obrazky-figures/smc_diagram.png}
+    \caption{Diagram }
+    \label{fig:smc_diagram}
+\end{figure}
+
+\section{Časové automaty}
+Celá tato sekce čerpá z publikace \cite{mc_principles}. Časové automaty modelují chování \textbf{časově kritických systémů} (angl. \textit{time-critical system}). To jsou takové systémy, jejichž správná funkčnost nezávisí pouze na logickém výsledku nějakého výpočtu, ale také na čase, ve kterém daný výsledek vznikl. Může se jednat o ovladače zařízení v počítačích, různé komunikační protokoly a obecně systémy, které musí na něco reagovat v rámci určitého časového úseku. Díky zavedení časových omezení do automatů poté lze modelovat tvrzení jako např. \uv{Semafor se přepne na zelenou v rámci následujících 30 sekund.} Čas lze v rámci časových automatů uvažovat jak diskrétní, tak spojitý. Pro synchronní systémy, které jsou používány v nástroji UPPAAL (viz sekce \ref{uppaal}), je vhodné využití diskrétního času.
+
+Časové automaty tedy zavádějí časové proměnné neboli hodiny, které se liší od běžných proměnných tím, že lze pouze sledovat jejich hodnotu nebo je resetovat na 0 (tj. nelze je nastavit na libovolnou hodnotu). Omezení, která jsou závislá na čase (tedy na hodnotách hodin), lze nazývat časovými omezeními (v angličtině \textbf{clock constraints}). Každé takové omezení odpovídá gramatice
+
+\begin{equation*}
+    g ::= x < c \hspace{0.15cm} \Big| \hspace{0.15cm} x \leq c \hspace{0.15cm} \Big| \hspace{0.15cm} x > c \hspace{0.15cm} \Big| \hspace{0.15cm} x \geq c \hspace{0.15cm} \Big| \hspace{0.15cm} g \wedge g,
+\end{equation*}
+
+kde $c \in \mathbb{N}$ a $x$ je proměnná z množiny hodin. Časová omezení, která neobsahují konjunkce, jsou atomická.
+
+Časová omezení lze přiřazovat jak k lokacím, tak k hranám automatů, v obou případech se jejich význam liší. Časová omezení u lokací se nazývají pojmem \textbf{invariant} a značí maximální dobu, kterou může automat v dané lokaci strávit. Časovým omezením u hran se říká strážci (angl. \textbf{guard}). Ti udávají, po jaké době je možné učinit přechod po dané hraně do další lokace (tedy jak dlouho musí automat strávit v lokaci, z níž hrana vychází).
+
+\bigskip
+
+Časový automat je osmice $TA = (Loc, Act, C, \hookrightarrow, Loc_0, Inv, AP, L)$, kde
+
+\begin{itemize}
+    \item $Loc$ je konečná množina lokací,
+    \item $Loc_0 \subseteq Loc$ je množina počátečních lokací,
+    \item $Act$ je konečná množina akcí,
+    \item $C$ je konečná množina hodin,
+    \item $\hookrightarrow \hspace{0.15cm} \subseteq Loc \times CC(C) \times Act \times 2^C \times Loc$ je relace přechodu,
+    \item $Inv: Loc \rightarrow CC(C)$ je funkce přiřazení invariantu (\textit{invariant-assignment function}),
+    \item $AP$ je konečná množina atomických tvrzení (\textit{atomic proposition}),
+    \item $L: Loc \rightarrow 2^{AP}$ je funkce označení (názvů) lokací.
+\end{itemize}
+
+Intuitivní reprezentace přechodu $\ell \xhookrightarrow{g:\alpha,D} \ell'$, kde $g$ je časové omezení, $\alpha$ je akce a $D$ je množina hodin, je následující: Automat přechází z lokace $\ell$ do lokace $\ell'$ pokud je splněno časové omezení $g$. Dále je provedena akce $\alpha$ a všechny hodiny z množiny $D$ jsou resetovány na hodnotu 0. Příklad znázornění jednoduchého časového automatu je možné vidět v následující sekci na obrázku \ref{fig:lamp}.
+
+\section{Modelovací nástroj UPPAAL} \label{uppaal}
+UPPAAL je program určený k modelování, simulaci a verifikaci systémů s realným časem. Byl vyvinut za spolupráce výzkumníků z univerzit Aalborg (Dánsko) a Uppsala (Švédsko). První vydání vzniklo v roce 1995, v době vzniku této bakalářské práce byla aktuální verze 5.0 vydaná v červnu 2023. Uživatelské rozhraní je napsáno v jazyce Java, zbytek v C++, na C++ je také postaven jazyk používaný k deklaracím a definicím součástí modelů (k tomu více níže).
+
+\subsection{Rozšíření časových automatů v nástroji UPPAAL}
+Modelovací jazyk programu UPPAAL rozšiřuje časové automaty o následující součásti \cite{uppaal_intro}:
+
+\begin{itemize}
+    \item Šablony (Templates) -- Při definici automatů je možné specifikovat parametry libovolného validního datového typu, které se automatu předají jako argumenty při inicializaci.
+    \item Konstanty -- Konstantní datové proměnné, pouze integer. Deklarovány jako \texttt{const name value}.
+    \item Ohraničené proměnné -- Proměnné deklarované jako \texttt{int[min, max] name}, kde \texttt{min} a \texttt{max} značí minimální, respektive maximální hodnotu proměnné. Tyto hranice jsou kontrolovány při verifikaci a překročení některé z nich vede k nevalidnímu stavu systému. Implicitní hranice jsou -32768 a 32768.
+    \item Binární synchronizace -- Využívá kanály deklarované jako \texttt{chan c}. Hrana automatu označena pomocí \texttt{c!} se synchronizuje s další hranou označenou pomocí \texttt{c?}. Hrana s otazníkem čeká na signál, hrana s vykřičníkem jej vysílá. Pokud existuje více synchronizačních kombinací, je jedna z nich vybrána nedeterministicky.
+    \item Broadcastové kanály -- Při broadcastové synchronizaci rozesílá jeden odesílatel \texttt{c!} signál několika příjemcům \texttt{c?} najednou. Takový kanál je deklarován jako \texttt{broadcast chan c}. Broadcastová synchronizace je neblokující, odesílatel tedy může signál vysílat i v případě, že neexistují žádní příjemci.
+    \item Urgentní synchronizace -- Při urgentní synchronizaci nesmí docházet k žádnému zpoždění. Hrany, které jsou označeny kanálem urgentní synchronizace, nesmí obsahovat žádná časová omezení. Kanály urgentní synchronizace jsou deklarovány jako \texttt{urgent broadcast chan c}.
+    \item Urgentní a zavázané lokace -- popsány v podsekci \ref{uppaal_gui} v části \textbf{Editor}.
+    \item Pole -- V UPPAALu je možné vytvářet pole hodin, kanálů, konstant a celočíselných proměnných.
+    \item Funkce -- Uživatelské funkce lze definovat buď globálně, nebo lokálně pro jednotlivé šablony automatů. Syntax je podobná jazyku C.
+\end{itemize}
+
+\subsection{Uživatelské rozhraní} \label{uppaal_gui}
+Tato podsekce čerpá z dokumentace \cite{uppaal_doc}. Uživatelské rozhraní programu se skládá ze 4 základních součástí: editor, symbolický simulátor, konkrétní simulátor a verifikátor.
+
+\subsubsection{Editor}
+Systémový editor slouží k vytváření a úpravám modelovaného systému. Popis systému je složen z množiny šablon procesů s možnými lokálními deklaracemi, dále z globálních deklarací a nakonec systémových deklarací, v nichž dochází mimo jiné k vytvoření instancí jednotlivých šablon procesů.
+
+Jednotlivé procesy jsou reprezentovány pomocí časových automatů, celý systém je potom tedy síť časových automatů s možností synchronizace. Modely navíc mohou obsahovat ohraničené diskrétní proměnné, se kterými lze zacházet obdobně jako s proměnnými v programovacích jazycích (čtení, zápis, aritmetické operace). Stav systému je dán aktuální pozicí (angl. pojem \textit{location}) jednotlivých automatů, aktuálním časem a hodnotami diskrétních proměnných.
+
+Lokace jednotlivých automatů jsou značeny pomocí koleček, existují čtyři druhy:
+\begin{itemize}
+    \item Počáteční lokace (\textbf{initial location}) -- každý automat v UPPAALu má právě jednu, značena dvojitým kolečkem.
+    \item Urgentní lokace (\textbf{urgent location}) -- pokud se automat nachází v této lokaci, zastavuje se čas. Značena písmenem U uvnitř kolečka.
+    \item Zavázaná lokace (\textbf{commited location}) -- nejvíce omezující lokace, kromě zastavení času přidává podmínku, že další přechod musí být z některé ze zavázaných lokací. Značena písmenem C uvnitř kolečka.
+    \item Normální lokace -- nemá žádné speciální vlastnosti.
+\end{itemize}
+
+Na obrázku \ref{fig:lamp} je ilustrován jednoduchý příklad sítě automatů reprezentující ovládání lampy. Levý automat představuje lampu, pravý automat tlačítko ovládané uživatelem. Automat lampy má 3 lokace: počáteční \texttt{off}, dále \texttt{low} a \texttt{bright}. Pro synchronizaci obou automatů je využíván synchronizační kanál nazvaný \texttt{press}, lampa čeká (\texttt{press?} u všech hran), až uživatel stiskne tlačítko (\texttt{press!}), a následně přejde do další lokace.
+
+Lampa obsahuje také hodiny \texttt{y}. Pokud uživatel stiskne tlačítko několikrát za sebou dostatečně rychle (\texttt{y<5}), může tím zvýšit jas lampy (přechod do lokace \texttt{bright}), při větší prodlevě se po druhém stisknutí lampa vypíná (vrací do lokace \texttt{off}) \cite{uppaal_intro}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{obrazky-figures/lamp_model.png}
+    \caption{Jednoduchý model lampy. Převzato z \cite{uppaal_intro}}
+    \label{fig:lamp}
+\end{figure}
+
+\subsubsection{Symbolický simulátor a konkrétní simulátor}
+\textbf{Symbolický simulátor} je nástroj určený k validaci modelovaného systému. Umožňuje spouštět běhy systému i na začátku návrhu (nebo při modelování) systému, čímž lze objevit chyby ještě před verifikací. Simulátor dále umožňuje vizualizovat běhy systému pomocí tzv. symbolických stop (angl. \textbf{symbolic traces}).
+
+Časový automat se může nacházet v nekonečně mnoho různých stavech, tím pádem může vznikat i nekonečně mnoho konkrétních stop běhu systému. Simulátor není schopen všechny tyto stopy vizualizovat, proto zavádí symbolické stopy. Každý symbolický stav systému v symbolické stopě je sada stavů a jejich následovníků popsaná časovými omezeními. Aktivní lokace a hodnoty diskrétních proměnných jsou stejné pro všechny stavy v symbolickém stavu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky-figures/uppaal_symbsim.png}
+    \caption{Symbolický simulátor v programu UPPAAL}
+    \label{fig:uppaal_symbsim}
+\end{figure}
+
+Na obrázku \ref{fig:uppaal_symbsim} jsou barevně rozlišeny jednotlivé součásti simulátoru. Červená část s názvem \textit{Enabled Transitions} slouží ke krokování simulace, uživatel si sám může vybrat, který další přechod se provede. Žlutá část \textit{Simulation Trace} zobrazuje dosavadní vygenerovanou stopu. Dohromady tyto dva elementy slouží k ovládání simulace.
+
+Prostřední modrý panel slouží k zobrazení hodnot globálních a časových proměnných ve stavu systému zvoleném ve výše popsané části \textit{Simulation Trace}. Hodnoty hodin jsou zobrazeny symbolicky jako konjunkce jednotlivých časových omezení (tedy nejsou to přesné hodnoty, ale intervaly, viz např. hodnota \texttt{time $\geq$ 5} na obrázku \ref{fig:uppaal_symbsim}).
+
+V zelené části jsou zobrazeny jednotlivé automaty systému. Jejich aktuální lokace ve vybraném stavu jsou zvýrazněny červenou barvou. V růžové části se nachází tzv. \textit{Message sequence chart}, tedy graf sekvencí zpráv, v rámci něhož lze sledovat komunikaci a synchronizaci jednotlivých automatů systému.
+
+\bigskip
+
+\textbf{Konkrétní simulátor} funguje na podobném principu jako symbolický simulátor, tzn. také slouží k ranné validaci modelů. Odlišuje se tím, že simulace je založena na konkrétních stopách průchodů, takže uživatel může určit, v jaký přesný čas dochází k přechodu do dalšího stavu.
+
+\subsubsection{Verifikátor}
+Verifikátor slouží k ověřování bezpečnostních a živostních vlastností (\textit{safety and liveness properties}) systému pomocí procházení symbolického stavového prostoru reprezentovaného omezeními. Dále umožňuje specifikovat a dokumentovat požadavky na systém. Na obrázku \ref{fig:uppaal_verifier} je vidět příklad verifikátoru obsahujícího několik dotazů, syntaxí a sémantikou dotazů se zabývají podsekce \ref{uppaal_query_lang} a \ref{uppaal_smc_queries}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky-figures/uppaal_verifier.png}
+    \caption{Verifikátor programu UPPAAL}
+    \label{fig:uppaal_verifier}
+\end{figure}
+
+\subsection{Dotazovací jazyk} \label{uppaal_query_lang}
+Tato podsekce čerpá z článků \cite{uppaal_intro} a \cite{uppaal_smc}. Hlavním úkolem nástroje na ověřování modelů je verifikace modelu s ohledem na nějaké požadavky. Takové požadavky musejí být vyjádřeny v nějakém formálně definovaném a strojově čitelném jazyce. Existuje několik logik, které toto splňují, UPPAAL používá zjednodušenou verzi logiky TCTL (\textit{Timed Computation Tree Logic}). Dotazovací jazyk se tedy, podobně jako v TCTL, skládá ze stavových formulí (\textbf{state formulae}) a běhových formulí (\textbf{path formulae}). Stavové formule popisují jednotlivé stavy systému, běhové formule kvantifikují jednotlivé běhy nebo trasy systému.
+
+Příklady běhových formulí lze pozorovat na obrázku \ref{fig:uppaal_path_form}. Stavy, které splňují danou stavovou formuli $\varphi$, jsou vybarveny žlutě. Hrany, které jsou procházeny při vyhodnocování, jsou ztučněny. Významy jednotlivých běhových formulí jsou vysvětleny níže ve zbytku podsekce.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky-figures/uppaal_path_form.png}
+    \caption{Běhové formule v nástroji UPPAAL. Převzato z \cite{uppaal_intro}}
+    \label{fig:uppaal_path_form}
+\end{figure}
+
+\subsubsection{Stavové formule}
+Stavová formule je výraz, který může být vyhodnocen pro nějaký stav modelu bez ohledu na jeho chování. Příkladem může být jednoduchý výraz \texttt{i == 7}, který bude platit tehdy, pokud se v daném stavu $i$ rovná 7. Syntax stavových formulí je nadmnožinou syntaxe časových omezení, u stavových formulí je navíc možné použití disjunkce. Dále je možno otestovat, zda se proces nachází v určité lokaci pomocí výrazu \texttt{P.1}, kde \texttt{P} je proces a \texttt{1} je lokace.
+
+\subsubsection{Dosažitelnost}
+Dotazy na dosažitelnost se snaží zjistit, zda je daná stavová formule $\varphi$ splnitelná nějakých dosažitelným stavem. Jinými slovy zda existuje cesta z počátečního stavu taková, že je během ní $\varphi$ eventuelně splněno. Například při návrhu modelu nějakého komunikačního protokolu, v němž figurují odesílatel a příjemce, lze dotaz na dosažitelnost využít k ověření, že odesílatel může vůbec někdy poslat zprávu, nebo že ji příjemce eventuelně může přijmout.
+
+K vyjádření, že by nějaký stav $\varphi$ měl být eventuelně dosažitelný, lze použít běhovou formuli $E \diamond \varphi$. V syntaxi programu UPPAAL je to \texttt{E<> $\varphi$}.
+
+\subsubsection{Bezpečnost}
+Dotazy na bezpečnost zajišťují, že nikdy nenastane \uv{něco špatného}. Příkladem může být sledování teploty v nějakém modelu elektrárny a nastavení hodnoty, přes kterou by se teplota nikdy neměla dostat. Jinou variantou tohoto dotazu je dotaz \uv{Něco se možná nikdy nestane.} Například při hraní hry je stav bezpečný, pokud v něm stále má hráč šanci vyhrát, tedy možná neprohraje.
+
+V nástroji UPPAAL jsou tyto dotazy formulovány kladně, tedy \uv{Něco správného vždy platí.} Pro stavovou formuli $\varphi$ lze dosažitelnost ve všech stavech vyjádřit běhovou formulí $A \square \varphi$ (v syntaxi UPPAAL je to \texttt{A[] $\varphi$}). Pomocí běhové formule $E \square \varphi$ (v syntaxi UPPAAL \texttt{E[] $\varphi$}) lze vyjádřit, že by měla existovat maximální cesta taková, že $\varphi$ vždy platí. Maximální cesta je taková cesta, která je buď nekonečná, nebo končí ve stavu, z nějž nevedou žádné další přechody.
+
+\subsubsection{Živost}
+Dotazy na živost (angl. \textit{liveness}) ověřují, že se něco eventuelně stane. Například pokud došlo ke stisknutí tlačítka pro spuštění televize, že se televize eventuelně spustí, nebo že zpráva, která byla odeslána v rámci nějakého komunikačního protokolu, bude eventuelně doručena.
+
+V nejjednodušší formě lze tyto dotazy zapisovat jako $A \diamond \varphi$, tedy že stavová formule $\varphi$ je eventuelně splněna. Složitější a užitečnější je forma dotazu $\varphi \rightsquigarrow \psi$ vyjadřující situaci \uv{Vždy, když je splněno $\varphi$, bude eventuelně později splněno i $\psi$}. V programu UPPAAL tyto dotazy zapisujeme jako \texttt{A<> $\varphi$}, respektive \texttt{$\varphi$ ----> $\psi$}.
+
+\subsection{Rozšíření dotazovacího jazyka v rámci UPPAAL SMC} \label{uppaal_smc_queries}
+Zdrojem této podsekce je článek \cite{uppaal_smc}. UPPAAL SMC rozšiřuje dotazovací jazyk o nové dotazy zaměřené na stochastickou interpretaci časových automatů. Také umožňuje uživatelům vizualizovat hodnoty výrazů a proměnných přímo v průběhu simulačních běhů. Syntax takových dotazů je následující:
+\begin{equation*}
+    \texttt{simulate [<=bound;N] \{ E1,...,Ek \}},
+\end{equation*}
+kde \texttt{N} je přirozené číslo určující počet simulací, které se mají provést, \texttt{bound} je časová hranice jednotlivých simulací a \texttt{E1,...,Ek} jsou jednotlivé výrazy, které mají být monitorovány a vizualizovány. Příkladem může být dotaz používaný v praktické části práce k vizualizaci výsledků výpočtů přesné násobičky (proměnná \texttt{res\_acc}) a zkoumané přibližné násobičky (proměnná \texttt{res\_approx}):
+
+\begin{equation*}
+    \texttt{simulate [<=20000;1] \{ res\_acc, res\_approx \}}
+\end{equation*}
+
+Výslednou vizualizaci je možno vidět na obrázku \ref{fig:simulate_example}. Nástroj UPPAAL také umožňuje export dat ve formátu csv, čehož lze využít při další podrobnější analýze.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky-figures/simulate_example.png}
+    \caption{Vizualizace hodnot při simulaci, nástroj UPPAAL}
+    \label{fig:simulate_example}
+\end{figure}
+
+\subsubsection{Odhad pravděpodobnosti}
+Dotazy kvantitativního ověřování modelů mají následující syntax:
+
+\begin{equation*}
+    \texttt{Pr[<=bound;N](<>|[] expression)}
+\end{equation*}
+
+Výsledek takového dotazu je interval spolehlivosti odhadu pravděpodobnosti, s jakou bude běhová formule \texttt{<>|[] expression} platná za předpokladu, že platí výraz \texttt{bound}. Jako hranice \texttt{bound} lze typicky zvolit nějaké časové omezení, ať už omezení globálního času, konkrétních hodin nebo třeba počet kroků (diskrétních přechodů). Konfidenční hladinu intervalu spolehlivosti lze modifikovat parametry $\alpha$ a $\epsilon$ v nastavení nástroje UPPAAL.
+
+\subsubsection{Testování hypotéz}
+Testování hypotéz, neboli kvalitativní ověřování modelů, zjišťuje, zda je pravděpodobnosti platnosti nějakého výrazu vyšší nebo nižší než nějaká daná hodnota (\texttt{prob\_number}). Je efektivnější než dotaz na odhad pravděpodobnosti, protože je jednostranné, tudíž je potřeba méně simulací k dosažení stejně významného výsledku. Syntax je následující:
+
+\begin{equation*}
+    \texttt{Pr[<=bound;N] (<>|[] expression) <=|>= prob\_number}
+\end{equation*}
+
+\subsubsection{Porovnání pravděpodobností}
+Tento dotaz nepřímo porovnává dvě pravděpodobnosti, aniž by je odhadoval. Syntax je následující:
+
+\begin{equation*}
+    \texttt{Pr[<=bound1;N1] (<>|[] expression1) >= Pr[<=bound2;N2] (<>|[] expression2)}
+\end{equation*}
+
+\subsubsection{Odhad hodnoty}
+Umožňuje odhadnout maximální nebo minimální hodnotu nějaké proměnné (pouze integer nebo hodiny) v rámci časového omezení \texttt{bound}. Syntax je následující:
+
+\begin{equation*}
+    \texttt{E[<=bound;N] (min|max: expression)}
+\end{equation*}
+
+Příklad využití z praktické části práce odhaduje maximální zpoždění vzniklé při výpočtu jednoho výsledku přibližné násobičky. Časové omezení je stanoveno na 20000 jednotek, také je v dotazu explicitně stanoveno 5 simulačních běhů:
+
+\begin{equation*}
+    \texttt{E[<=20000;5] (max: current\_delay)}
+\end{equation*}
+
+Výsledkem dotazu je nějaký konfidenční interval s předem danou hladinou spolehlivosti. Výsledkem tohoto konkrétního dotazu při simulaci jedné konkrétní náhodně vybrané přibližné násobičky byla hodnota \texttt{1138 +- 18.4169 (95\% CI)}. 
+
+Jak lze vidět na obrázku \ref{fig:prob_plots}, nástroj UPPAAL dále umožňuje některé detailnější pohledy na odhad dané hodnoty. Konkrétně se jedná o grafy rozdělení hustoty pravděpodobnosti (\textit{Probability Density Distribution}), rozdělení pravděpodobnosti (\textit{Probability Distribution}), rozdělení distribuční funkce pravděpodobnosti (\textit{Cumulative Probability Distribution}), zobrazení konfidenčních intervalů distribuční funkce (\textit{Cumulative Probability Confidence Intervals}) a také histogram frekvencí výskytu jednotlivých hodnot při simulačních bězích (\textit{Frequency Histogram}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky-figures/prob_plots.png}
+    \caption{Grafy pravděpodobnostního rozdělení při odhadu maximální hodnoty proměnné v nástroji UPPAAL}
+    \label{fig:prob_plots}
+\end{figure}
 
 \chapter{Rozbor a návrh řešení}
 \label{rozbor}
