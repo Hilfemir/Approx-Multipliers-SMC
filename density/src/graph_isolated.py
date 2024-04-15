@@ -110,6 +110,9 @@ except Exception as e:
 	print("Error: invalid savefig path.")
 	exit(2)
 
+fig = plt.figure(figsize=(10,6))
+ax = fig.add_subplot()
+
 #load data from the pickle file
 data = Pairs()
 data.from_pkl(filename)
@@ -117,10 +120,17 @@ data.from_pkl(filename)
 xmin, xmax = axis_setup(data, xmin, xmax)
 
 df = data.singular_dataframe(step=step)
+df.rename(columns={'x' : 'X', 'y' : 'Y'}, inplace=True)
 
-print(df)
+df.plot(
+	ax=ax,
+	kind='density',
+	xlim=(xmin, xmax),
+	title=title
+	)
 
-df.plot(kind='density', xlim=(xmin, xmax), title=title)
+ax.set_xlabel("Hodnota vstupu", fontsize=11)
+ax.set_ylabel("Pravděpodobnost výskytu", fontsize=11)
 
 if not nosave:
 	plt.savefig(savepath)
