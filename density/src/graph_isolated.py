@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+
+"""Script used to plot the distribution of multiplication pairs in selected algorithm.
+This variant plots input X and input Y separately.
+
+author: Michal Blazek
+organization: BUT FIT
+date: 2024
+
+Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
@@ -7,7 +19,6 @@ import pandas as pd
 from pathlib import Path
 
 from pairs import Pairs
-from stats import Stats as st
 from utils import find_data_file, axis_setup, get_save_path
 
 

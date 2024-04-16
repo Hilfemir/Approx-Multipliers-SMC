@@ -1,3 +1,12 @@
+"""The Pairs class is where the multiplication pairs of a selected algorithms are stored.
+
+author: Michal Blazek
+organization: BUT FIT
+date: 2024
+
+Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+"""
+
 import pickle
 import numpy as np
 from numpy.typing import NDArray
@@ -5,8 +14,6 @@ import os
 import sys
 import pandas as pd
 from pathlib import Path
-
-from stats import Stats as st
 
 class Pairs(object):
 	def __init__(self):

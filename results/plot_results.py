@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+"""Script used to plot the simulation results stored in a pickled dataframe.
+author: Michal Blazek
+organization: BUT FIT
+date: 2024
+
+Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+"""
+
 import pandas as pd
 import argparse
 from os import PathLike

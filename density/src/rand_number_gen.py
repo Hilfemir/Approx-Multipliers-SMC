@@ -1,3 +1,18 @@
+#!/usr/bin/env python
+
+"""Random number generation with different distributions.
+
+Script used to approximate and plot the probability distributions
+ of randomly generated pairs of numbers. The goal is to mimic the distributions
+ of multiplication pairs in real algorithms.
+
+author: Michal Blazek
+organization: BUT FIT
+date: 2024
+
+Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+"""
+
 import random
 import matplotlib.pyplot as plt
 from pyparsing import alphanums

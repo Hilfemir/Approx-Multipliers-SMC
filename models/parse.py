@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+
+"""Verilog to UPPAAL parser
+
+Script used to parse verilog approx. mult. models from the EvoApproxLib library 
+into models in UPPAAL.
+
+usage: python3 parse.py input_file [-d DISTRIBUTION] [--noout]
+	where DISTRIBUTION is one of {'uni_uni', 'same_triang', 'beta_uni', 'triang_beta',
+	'gamma_2norm', 'triang_weibull', 'same_uni', 'const_norm'}. 'uni_uni' is default.
+
+author: Michal Blazek
+organization: BUT FIT
+date: 2024
+
+Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+"""
+
 from importlib.metadata import distribution
 from math import dist
 from os import replace
@@ -681,7 +699,7 @@ def main():
 	                    description='Generate .xml UPPAAL files from verilog templates.')
 	
 	argparser.add_argument('filepath')
-	argparser.add_argument('--noout', action="store_true", default=False, help="Don't save the output plot.")
+	argparser.add_argument('--noout', action="store_true", default=False, help="Don't save the output file (useful only for debugging).")
 	argparser.add_argument(
 		'--distribution', '-d', 
 		default="uni_uni",

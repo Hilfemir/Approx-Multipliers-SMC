@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+"""Script used to process simulation results in csv files into a pickled dataframe.
+author: Michal Blazek
+organization: BUT FIT
+date: 2024
+
+Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+"""
+
 import csv
 from os import PathLike
 from pathlib import Path

@@ -1,3 +1,12 @@
+"""Utility functions used in the plotting scripts.
+
+author: Michal Blazek
+organization: BUT FIT
+date: 2024
+
+Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+"""
+
 from pathlib import Path
 from numpy.typing import NDArray
 
