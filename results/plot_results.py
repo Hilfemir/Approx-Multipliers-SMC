@@ -39,6 +39,7 @@ def transform_scatter(df: pd.DataFrame, metric: str, distribution: str | None) -
 
 	df = df[(df["metric"] == metric) | (df["metric"] == "avg_flips_per_res")]
 	df = pd.pivot(df, columns="metric", values="value", index="multiplier")
+	
 	return df
 
 
@@ -54,6 +55,7 @@ def transform_barplot(df: pd.DataFrame, multiplier: str, metric: str, distributi
 	df.rename(columns={'value' : metric}, inplace=True)
 
 	return df
+
 
 def main():
 	parser = argparse.ArgumentParser(
@@ -154,6 +156,7 @@ def main():
 
 	if not args.noshow:
 		plt.show()
+
 
 if __name__ == "__main__":
 	main()
