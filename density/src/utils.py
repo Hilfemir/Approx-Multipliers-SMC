@@ -17,7 +17,7 @@ def find_data_file(dirname: str, filename: str | None = None) -> Path:
 	if filename is None:
 		filename = '*.pkl'
 	try:
-		file_path = list(Path(dirname).glob(f"{filename}"))[0]
+		file_path = list(Path(f"../in/{dirname}").glob(f"{filename}"))[0]
 	except Exception as e:
 		raise e
 
@@ -83,8 +83,8 @@ def get_range(x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int
 
 def fig_setup(ax, x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int, title: str):
 	#labels
-	ax.set_xlabel(r"x")
-	ax.set_ylabel(r"y")
+	ax.set_xlabel(r"Hodnota vstupu X", fontsize=11)
+	ax.set_ylabel(r"Hodnota vstupu Y", fontsize=11)
 
 	#axis setup
 	ax.set_xlim(xmin, xmax)
