@@ -21,6 +21,7 @@ from pathlib import Path
 from pairs import Pairs
 from utils import find_data_file, axis_setup, get_save_path
 
+plt.rc('legend',fontsize=20)
 
 # parse args #
 parser = argparse.ArgumentParser(
@@ -121,7 +122,7 @@ except Exception as e:
 	print("Error: invalid savefig path.")
 	exit(2)
 
-fig = plt.figure(figsize=(10,6))
+fig = plt.figure(figsize=(9,6))
 ax = fig.add_subplot()
 
 #load data from the pickle file
@@ -131,6 +132,7 @@ data.from_pkl(filename)
 xmin, xmax = axis_setup(data, xmin, xmax)
 
 df = data.singular_dataframe(step=step)
+
 df.rename(columns={'x' : 'X', 'y' : 'Y'}, inplace=True)
 
 df.plot(
@@ -140,8 +142,10 @@ df.plot(
 	title=title
 	)
 
-ax.set_xlabel("Hodnota vstupu", fontsize=11)
-ax.set_ylabel("Pravděpodobnost výskytu", fontsize=11)
+ax.set_xlabel("Hodnota vstupu", fontsize=20)
+ax.set_ylabel("Pravděpodobnost výskytu", fontsize=20)
+
+ax.tick_params(axis='both', which='major', labelsize=15)
 
 if not nosave:
 	plt.savefig(savepath)

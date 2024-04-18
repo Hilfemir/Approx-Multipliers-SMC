@@ -38,11 +38,11 @@ for i in range(10000):
 	#	num = int(random.uniform(200,255))
 
 	#AKS Primality test - A
-	#num = random.triangular(-50, 450, 70)
-	#num = int(num)
+	num = random.triangular(0, 180, 10)
+	num = int(num)
 
-	#if num < 0:
-	#	num = 0
+	if num < 0:
+		num = int(random.uniform(0,50))
 
 	#if num > 255:
 	#	num = int(random.uniform(0,150))
@@ -92,20 +92,23 @@ for i in range(10000):
 	#num = 2
 
 	#Bresenham - B
-	num = random.gauss(50, 30)
-	num = int(num)
+	#num = int(random.gauss(140, 100))
 
-	if num < 0:
-		num = int(random.uniform(100,255))
+	#if num > 255 or num < 0:
+	#	num = int(random.uniform(0,255))
 
 	numbers.append(num)
 
 
 plt.figure(figsize=(10, 6))
-sns.kdeplot(numbers)
-plt.xlabel('Hodnota vstupu')
-plt.ylabel('Pravděpodobnost výskytu')
+sns.kdeplot(numbers, color='C0')
+#sns.kdeplot(numbers, color='C1')
+
+plt.xlabel('Hodnota vstupu X', fontsize=20)
+plt.ylabel('Pravděpodobnost výskytu', fontsize=20)
+plt.tick_params(axis='both', which='major', labelsize=15)
 plt.grid(False)
-outname = "bresenham_b"
+
+outname = "aks_x"
 plt.savefig(f"../out/rand_generated_numbers/{outname}_randgen_num.png")
 plt.show()

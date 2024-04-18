@@ -16,9 +16,6 @@ date: 2024
 Part of bachelor's thesis called Statistical model checking of approximate computing systems.
 """
 
-from importlib.metadata import distribution
-from math import dist
-from os import replace
 import re
 import argparse
 
@@ -65,7 +62,7 @@ class SignalAssign(object):
 	@staticmethod
 	def parse_input_sig(sig: str, PIxy_mapping: dict, POy_mapping: dict) -> tuple:
 		"""Determines whether the input signal is an output of a different gate or if it's one
-		of the original input bits and returns the correct presentations.
+		of the original input bits and returns the correct representations.
 		"""
 		pattern1 = r'^sig_([0-9]+)$' #eg. sig_221
 		pattern2 = r'^[A-Z]\[[0-9]+\]$' #eg. A[1]
@@ -579,8 +576,7 @@ class Parser(object):
 
 		elif distribution == "triang_beta":
 			comment = "    //Triangular dist. and betavariate dist. (eg. AKS primality test)\n"
-			replacement =  "    input_a = fint(random_tri(-50,70,450));\n"
-			replacement += "    if(input_a &gt; imax-1) { input_a = fint(random(150)); }\n\n"
+			replacement =  "    input_a = fint(random_tri(0,10,180));\n\n"
 
 			replacement += "    input_b = fint(random_beta(2.0,2.0) * 255);\n"
 
@@ -609,8 +605,8 @@ class Parser(object):
 		elif distribution == "const_norm":
 			comment = "    //Constant 2 and normal distribution (eg. Bresenham line algorithm)\n"
 			replacement =  "    input_a = 2;\n\n"
-			replacement += "    input_b = fint(random_normal(50, 30));\n"
-			replacement += "    if(input_b &lt; 0) { input_b = fint(random(155)) + 100; }\n"
+			replacement += "    input_b = fint(random_normal(140, 100));\n"
+			replacement += "    if(input_b &lt; 0 or input_b &gt; 255) { input_b = fint(random(imax)); }\n"
 			
 		with open("./templates/tmul2_tb_random_template.xml") as f:
 			original = f.readlines()

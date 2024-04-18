@@ -185,7 +185,7 @@ extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
 #plot the results
 #set up the graph figure
-fig = plt.figure(figsize=(10,6))
+fig = plt.figure(figsize=(8,6))
 ax = fig.add_subplot()
 
 fig_setup(ax, x, y, xmin, xmax, ymin, ymax, title)
@@ -193,7 +193,10 @@ fig_setup(ax, x, y, xmin, xmax, ymin, ymax, title)
 im = ax.imshow(heatmap, extent=extent, origin='lower', interpolation=interpolation, cmap=cmap)
 ax.set_aspect('auto')
 
-plt.colorbar(im, ax=ax, label='Hustota pravděpodobnosti výskytu')
+cbar = plt.colorbar(im, ax=ax)
+
+cbar.ax.tick_params(labelsize=15)
+cbar.set_label('Pravděpodobnost výskytu', size=20)
 
 if not noshow:
 	plt.show()

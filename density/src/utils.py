@@ -83,8 +83,10 @@ def get_range(x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int
 
 def fig_setup(ax, x: NDArray, y: NDArray, xmin: int, xmax: int, ymin: int, ymax: int, title: str):
 	#labels
-	ax.set_xlabel(r"Hodnota vstupu X", fontsize=11)
-	ax.set_ylabel(r"Hodnota vstupu Y", fontsize=11)
+	ax.set_xlabel(r"Hodnota vstupu X", fontsize=20)
+	ax.set_ylabel(r"Hodnota vstupu Y", fontsize=20)
+
+	ax.tick_params(axis='both', which='major', labelsize=15)
 
 	#axis setup
 	ax.set_xlim(xmin, xmax)
