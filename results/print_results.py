@@ -38,10 +38,20 @@ def main():
 		required=False
 	)
 
+	parser.add_argument(
+		'--distribution', '-d',
+		help="Distribution filter",
+		default=None,
+		required=False
+	)
+
 	args = parser.parse_args()
 	input_file = determine_inpath(args.file)
 
 	df = pd.read_pickle(input_file)
+
+	if args.distribution is not None:
+		df = df[df['distribution'] == args.distribution]
 
 	print(df.to_string(float_format="{:.2f}".format))
 
