@@ -794,7 +794,7 @@ void f(int i){
     if(res_count &gt; 0) { delay_avg = delay_sum / res_count; }
 
     //Both inputs same number - triangular dist. (eg. isqrt algo)
-    input_a = fint(random_tri(-10,10,imax));
+    input_a = fint(random_tri(-10,10,140));
 
     input_b = input_a;
 

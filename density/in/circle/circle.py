@@ -1,6 +1,7 @@
 from random import randrange
 from math import sqrt
 import sys
+
 sys.path.append("..")
 from pairs import Pairs
 
@@ -33,10 +34,10 @@ def circle(cx: int, cy: int, r: int):
 		pairs.insert(x, x)
 		y = int(round(sqrt(r*r - x*x)))
 
-for i in range(5, 100):
-	x = randrange(0, 50)
-	y = randrange(0, 50)
-	r = i + randrange(0,150)
+for i in range(10000):
+	x = randrange(0, 256)
+	y = randrange(0, 256)
+	r = randrange(51, 256)
 	circle(x, y, r)
 
 pairs.pkl_dump()

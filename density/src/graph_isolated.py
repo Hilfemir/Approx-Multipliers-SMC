@@ -133,13 +133,17 @@ xmin, xmax = axis_setup(data, xmin, xmax)
 
 df = data.singular_dataframe(step=step)
 
-df.rename(columns={'x' : 'X', 'y' : 'Y'}, inplace=True)
+df.drop(columns=['y'], inplace=True)
+df.rename(columns={'x' : 'X a Y'}, inplace=True)
+
+print(df)
 
 df.plot(
 	ax=ax,
 	kind='density',
 	xlim=(xmin, xmax),
-	title=title
+	title=title,
+	color='C0'
 	)
 
 ax.set_xlabel("Hodnota vstupu", fontsize=20)

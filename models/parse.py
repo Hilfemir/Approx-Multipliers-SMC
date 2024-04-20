@@ -562,7 +562,7 @@ class Parser(object):
 
 		elif distribution == "same_triang":
 			comment = "    //Both inputs same number - triangular dist. (eg. isqrt algo)\n"
-			replacement =  "    input_a = fint(random_tri(-10,10,imax));\n\n"
+			replacement =  "    input_a = fint(random_tri(-10,10,140));\n\n"
 
 			replacement += "    input_b = input_a;\n"
 

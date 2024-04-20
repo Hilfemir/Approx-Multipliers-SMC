@@ -796,8 +796,8 @@ void f(int i){
     //Constant 2 and normal distribution (eg. Bresenham line algorithm)
     input_a = 2;
 
-    input_b = fint(random_normal(50, 30));
-    if(input_b &lt; 0) { input_b = fint(random(155)) + 100; }
+    input_b = fint(random_normal(140, 100));
+    if(input_b &lt; 0 or input_b &gt; 255) { input_b = fint(random(imax)); }
 
     input_a = check_limits(input_a, 0, imax-1);
     input_b = check_limits(input_b, 0, imax-1);
