@@ -13,6 +13,41 @@ from pathlib import Path
 import pandas as pd
 import argparse
 
+area = {
+	"mul8u_12KA" : 683.3,
+	"mul8u_17MJ" : 18.8,
+	"mul8u_17MN" : 13.1,
+	"mul8u_17R6" : 228.5,
+	"mul8u_197B" : 395.6,
+	"mul8u_1A0M" : 75.6,
+	"mul8u_2NDH" : 347.8,
+	"mul8u_BG1" : 561.8,
+	"mul8u_GTR" : 550.5,
+	"mul8u_NLX" : 511.5,
+	"mul8u_R36" : 60.5,
+	"mul8u_R92" : 604.5,
+	"mul8u_Z9D" : 220.6,
+	"mul8u_ZB3" : 682.8,
+	"mul8u_ZDF" : 651.9
+}
+
+metrics_cs = {
+	"avg_flips_per_res" : "Průměr překl. bitů",
+	"coverage_percentage" : "Procento pokrytí",
+	"delay_avg" : "Průměrné zpoždění",
+	"error_prob" : "Pravděpodobnost chyby",
+	"max_bit_flips" : "Max. překl. bitů",
+	"max_hamming_distance" : "Max. Hammingova vzdálenost",
+	"mean_abs_error" : "Průměrná absolutní chyba",
+	"mean_relative_error" : "Průměrná relativní chyba",
+	"mean_squared_error" : "Průměrná kvadratická chyba",
+	"worst_case_error" : "Nejhorší absolutní chyba",
+	"worst_case_relative_error" : "Nejhorší relativní chyba",
+	"worst_delay" : "Nejhorší zpoždění",
+	"area" : "Plocha"
+}
+
+
 def determine_inpath(args_file: str) -> PathLike[str]:
 	"""Take path to the input file, edit if necessary.
 	Returns Path object of the input file.
@@ -24,6 +59,7 @@ def determine_inpath(args_file: str) -> PathLike[str]:
 		args_file = f"./pickles/{args_file}"
 
 	return Path(args_file)
+
 
 def main():
 	parser = argparse.ArgumentParser(
@@ -45,6 +81,13 @@ def main():
 		required=False
 	)
 
+	parser.add_argument(
+		'--multiplier', '-m',
+		help='Multiplier filter',
+		default=None,
+		required=False
+	)
+
 	args = parser.parse_args()
 	input_file = determine_inpath(args.file)
 
@@ -53,7 +96,38 @@ def main():
 	if args.distribution is not None:
 		df = df[df['distribution'] == args.distribution]
 
+	if args.multiplier is not None:
+		df = df[df['multiplier'] == args.multiplier]
+
+	#pivot for one concrete distribution (shows all different mults)
+	df = pd.pivot(df, columns="metric", index="multiplier", values="value")
+ 
+	#pivot for one concrete multiplier (shows all different distributions)
+	#df = pd.pivot(df, columns="metric", index="distribution", values="value")
+
+	#add the area column
+	df['area'] = df.index.map(area)
+
+	#drop unknown values
+	df.dropna(inplace=True)
+
+	#drop irrelevant columns
+	df.drop(columns=["coverage_percentage"])
+
+	#move 'area' column to the front
+	column_to_move = df.pop("area")
+	df.insert(0, "area", column_to_move)
+
+	#sort by area
+	df.sort_values(by=['area'], inplace=True)
+
+	#rename to czech labels
+	df.rename(columns=metrics_cs, inplace=True)
+
 	print(df.to_string(float_format="{:.2f}".format))
+
+	#export csv
+	df.to_csv('out.csv', index=True)
 
 if __name__ == "__main__":
 	main()
