@@ -99,8 +99,6 @@ def transform_barplot(df: pd.DataFrame, multiplier: str, metric: str, distributi
 	idx = [7] + [i for i in range(len(df)) if i != 7]
 	df = df.reindex(idx)
 
-	print(df)
-
 	return df
 
 
@@ -192,7 +190,7 @@ def main():
 	output_file = determine_outpath(args.outname, args.metric, str(args.color))
 
 	df = pd.read_pickle(input_file)
-	fig = plt.figure(figsize=(12,8))
+	fig = plt.figure(figsize=(12,10))
 	ax = fig.add_subplot(1,1,1)
 
 	if args.type == "scatter":
@@ -218,19 +216,21 @@ def main():
 				colors[args.color]]
 			)
 
-		ax.set_ylabel(metrics_cs[args.metric], fontsize=22)
-		ax.set_xlabel("Rozdělení", fontsize=22)
-		ax.set_title(args.multiplier, fontsize=22)
-		ax.tick_params(axis='both', which='major', labelsize=12)
+		ax.set_ylabel(metrics_cs[args.metric], fontsize=28)
+		ax.set_xlabel("Rozdělení", fontsize=28)
+		ax.set_title(args.multiplier, fontsize=28)
+		ax.tick_params(axis='both', which='major', labelsize=22)
 
 		ax.grid(visible=True, axis='y', linestyle=":")
+
+		fig.autofmt_xdate()
 
 
 	if args.print:
 		print(df.to_string())
 
 	if not args.noout:
-		plt.savefig(output_file, bbox_inches='tight')
+		plt.savefig(output_file)
 
 	if not args.noshow:
 		plt.show()
