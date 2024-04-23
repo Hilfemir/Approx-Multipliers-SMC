@@ -33,7 +33,7 @@ area = {
 
 metrics_cs = {
 	"avg_flips_per_res" : "Průměr překl. bitů",
-	"coverage_percentage" : "Procento pokrytí",
+	"coverage_percentage" : "% pokrytí",
 	"delay_avg" : "Průměrné zpoždění",
 	"error_prob" : "Pravděpodobnost chyby",
 	"max_bit_flips" : "Max. překl. bitů",
@@ -88,6 +88,21 @@ def main():
 		required=False
 	)
 
+	parser.add_argument(
+		'--outname',
+		help="Name of the output file",
+		default='out.csv',
+		required=False
+		)
+	
+	parser.add_argument(
+		'--noout',
+		help="Don't save the output csv file.",
+		action='store_true',
+		default=False,
+		required=False
+		)
+
 	args = parser.parse_args()
 	input_file = determine_inpath(args.file)
 
@@ -121,13 +136,34 @@ def main():
 	#sort by area
 	df.sort_values(by=['area'], inplace=True)
 
-	#rename to czech labels
-	df.rename(columns=metrics_cs, inplace=True)
+	#out_table = df[['area', 'error_prob', 'mean_abs_error', 'worst_case_error']].copy()
+ 
+	#change column order
+	out_table = df[
+		[
+			'area',
+			'coverage_percentage',
+			'error_prob', 
+			'mean_abs_error',
+			'mean_relative_error',
+			'mean_squared_error',
+			'worst_case_error',
+			'worst_case_relative_error',
+			'max_hamming_distance',
+			'delay_avg',
+			'worst_delay',
+			'avg_flips_per_res',
+			'max_bit_flips'
+			]
+		].copy()
 
-	print(df.to_string(float_format="{:.2f}".format))
+	#rename to czech labels
+	out_table.rename(columns=metrics_cs, inplace=True)
+
+	print(out_table.to_string(float_format="{:.2f}".format))
 
 	#export csv
-	df.to_csv('out.csv', index=True)
+	out_table.to_csv(f'./out_csv/{args.outname}', index=True)
 
 if __name__ == "__main__":
 	main()

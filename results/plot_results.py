@@ -8,11 +8,35 @@ date: 2024
 Part of bachelor's thesis called Statistical model checking of approximate computing systems.
 """
 
+from random import choice
 import pandas as pd
 import argparse
 from os import PathLike
 from pathlib import Path
 import matplotlib.pyplot as plt
+
+metrics_cs = {
+	"avg_flips_per_res" : "Průměr překl. bitů",
+	"coverage_percentage" : "% pokrytí",
+	"delay_avg" : "Průměrné zpoždění",
+	"error_prob" : "Pravděpodobnost chyby",
+	"max_bit_flips" : "Max. překl. bitů",
+	"max_hamming_distance" : "Max. Hammingova vzdálenost",
+	"mean_abs_error" : "Průměrná absolutní chyba",
+	"mean_relative_error" : "Průměrná relativní chyba",
+	"mean_squared_error" : "Průměrná kvadratická chyba",
+	"worst_case_error" : "Nejhorší absolutní chyba",
+	"worst_case_relative_error" : "Nejhorší relativní chyba",
+	"worst_delay" : "Nejhorší zpoždění",
+	"area" : "Plocha"
+}
+
+colors = {
+	1 : "#7F58AF",
+	2 : "#64C5EB",
+	3 : "#E84D8A",
+	4 : "#FEB326"
+	}
 
 
 def determine_inpath(args_file: str) -> PathLike[str]:
@@ -28,15 +52,21 @@ def determine_inpath(args_file: str) -> PathLike[str]:
 	return Path(args_file)
 
 
-def determine_outpath(args_outname: str) -> PathLike[str]:
+def determine_outpath(args_outname: str, metric: str | None, multiplier: str | None) -> PathLike[str]:
 	"""Take path to the output file, edit if necessary.
 	Returns Path object of the output file.
 	"""
+	if multiplier is not None:
+		args_outname = f"{multiplier}.png"
+
 	if not args_outname.endswith(".png"):
 		args_outname += ".png"
 
 	if not args_outname.startswith("./plots/"):
-		args_outname = f"./plots/{args_outname}"
+		if metric is not None:
+			args_outname = f"./plots/metric_examples/{metric}/{args_outname}"
+		else:
+			args_outname = f"./plots/{args_outname}"
 
 	return Path(args_outname)
 		
@@ -63,6 +93,13 @@ def transform_barplot(df: pd.DataFrame, multiplier: str, metric: str, distributi
 	df = df[['distribution', 'value']]
 
 	df.rename(columns={'value' : metric}, inplace=True)
+ 
+	#move uni_uni row to start
+	df.reset_index(inplace=True, drop=True)
+	idx = [7] + [i for i in range(len(df)) if i != 7]
+	df = df.reindex(idx)
+
+	print(df)
 
 	return df
 
@@ -142,9 +179,17 @@ def main():
 		default=False
 	)
 
+	parser.add_argument(
+		'--color', '-c',
+		help="Color of the plot",
+		choices=[1,2,3,4],
+		default=1,
+		type=int
+	)
+
 	args = parser.parse_args()
 	input_file = determine_inpath(args.file)
-	output_file = determine_outpath(args.outname)
+	output_file = determine_outpath(args.outname, args.metric, str(args.color))
 
 	df = pd.read_pickle(input_file)
 	fig = plt.figure(figsize=(12,8))
@@ -156,13 +201,36 @@ def main():
 
 	elif args.type == "bar":
 		df = transform_barplot(df, args.multiplier, args.metric, args.distribution)
-		df.plot.bar(x='distribution', y=args.metric, rot=0, ax=ax)
+		df.plot.bar(
+			x='distribution', 
+			y=args.metric, 
+			rot=0, 
+			ax=ax, 
+			legend=False,
+			color=[
+				'gray', 
+				colors[args.color],
+				colors[args.color],
+				colors[args.color],
+				colors[args.color],
+				colors[args.color],
+				colors[args.color],
+				colors[args.color]]
+			)
+
+		ax.set_ylabel(metrics_cs[args.metric], fontsize=22)
+		ax.set_xlabel("Rozdělení", fontsize=22)
+		ax.set_title(args.multiplier, fontsize=22)
+		ax.tick_params(axis='both', which='major', labelsize=12)
+
+		ax.grid(visible=True, axis='y', linestyle=":")
+
 
 	if args.print:
 		print(df.to_string())
 
 	if not args.noout:
-		plt.savefig(output_file)
+		plt.savefig(output_file, bbox_inches='tight')
 
 	if not args.noshow:
 		plt.show()
