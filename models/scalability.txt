@@ -1,3 +1,6 @@
+2x2_unsigned
+mul2x2 - 317 MB, 1 sec, 5 gates
+
 7x7_unsigned
 mul7u_09Y - 3.7 GB, 75 sec, 73 gates
 mul7u_073 - 4.3 GB, 760 sec, 154 gates
