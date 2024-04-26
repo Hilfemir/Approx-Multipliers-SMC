@@ -4,8 +4,8 @@
 		<declaration>clock x;
 clock tcover;
 int input=0;
-int[0, MAX_INT] nsame=0;
-int[0, MAX_INT] inSame=0;
+int[0, 16777216] nsame=0;
+int[0, 16777216] inSame=0;
 double rCover;
 int idx=0;
 

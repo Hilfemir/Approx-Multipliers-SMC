@@ -4,7 +4,7 @@
 	<declaration>/* Feel free to cite and/or read details to the model using:
   STRNADEL Josef. Statistical Model Checking of Approximate Circuits: Challenges and Opportunities. In: Proceedings of the 2020 Design, Automation &amp; Test in Europe Conference &amp; Exhibition (DATE). Grenoble: IEEE Computer Society, 2020, pp. 1574-1577. ISBN 978-3-9819263-4-7. Available from: https://ieeexplore.ieee.org/document/9116207 and https://www.fit.vut.cz/research/publication/12055/
  */
-const int MAX_INT = 65536;
+const int MAX_INT = 16384;
 
 double dif_count = 0;
 double res_count = 0;
@@ -60,8 +60,8 @@ const tOp OP_XOR = 6;
 const tOp OP_XNOR = 7;
 const tOp OP_SET = 8;
 
-const int NCOM = 90;
-tOp tbl_op[NCOM] = {2, 2, 2, 6, 2, 2, 6, 4, 2, 2, 2, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 2, 2, 2, 2, 6, 2, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 2, 2, 2, 2, 2, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 2, 2, 2, 2, 2, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 2, 2, 1};
+const int NCOM = 41;
+tOp tbl_op[NCOM] = {6, 2, 2, 2, 2, 2, 2, 2, 6, 2, 2, 6, 6, 6, 2, 2, 6, 4, 2, 2, 2, 2, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 6, 2, 2, 6, 4, 2, 2, 6, 1};
 
 int duration(tOp op){  
     int duration=0;
@@ -100,10 +100,10 @@ double inCoverage;
 
 bool allCovered=false;
 
-const int NIB_MUL2 = 16;
-const int NOB_MUL2 = 16;
+const int NIB_MUL2 = 14;
+const int NOB_MUL2 = 14;
 const int NTV_MUL2 = TBL_PWR2[NIB_MUL2]; 
-const int DLY_MUL2 = 500;                 
+const int DLY_MUL2 = 100;                 
 
 /* ===------------------------  ------------------------==== */
 int getMasked(int w, int offset, int[0,MAX_INT] data){ 
@@ -112,8 +112,8 @@ int getMasked(int w, int offset, int[0,MAX_INT] data){
 }    
 bool getBit(int pos, int[0,MAX_INT] data){ return getMasked(1, pos, data); }
 
-const int NIB_ANY = 16;
-const int NOB_ANY = 16;
+const int NIB_ANY = 14;
+const int NOB_ANY = 14;
 const int NTV_ANY = TBL_PWR2[NIB_ANY]; 
 const int DLY_ANY = 20;                 
 bool tbl_acc_any[TBL_PWR2[NIB_ANY]][NIB_ANY+NOB_ANY];
@@ -150,10 +150,10 @@ const int NPO = NOB_MUL2;
 const int NTV = NTV_MUL2; 
 const int DLY = DLY_MUL2;
 //
-const int PIxy[NPI] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-const int POx[NPO] = {16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+const int PIxy[NPI] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+const int POx[NPO] = {14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27};
 //
-const int POy[NPO] = {-1, 33, 34, 35, -1, 37, -1, -1, 40, 41, 42, 43, 44, 45, 46, 47};
+const int POy[NPO] = {28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41};
 
 int[0, 1073741824] PWR2_NPI = TBL_PWR2[NPI];
 /* ===------------------------  ------------------------==== */
@@ -343,22 +343,20 @@ int getOut(){
 }
 
 void f(){
-    if(POx[15]&gt;=0) bits[POx[15]]=ttbl[bin2dec()][16];
-    if(POx[14]&gt;=0) bits[POx[14]]=ttbl[bin2dec()][17];
-    if(POx[13]&gt;=0) bits[POx[13]]=ttbl[bin2dec()][18];
-    if(POx[12]&gt;=0) bits[POx[12]]=ttbl[bin2dec()][19];
-    if(POx[11]&gt;=0) bits[POx[11]]=ttbl[bin2dec()][20];
-    if(POx[10]&gt;=0) bits[POx[10]]=ttbl[bin2dec()][21];
-    if(POx[9]&gt;=0) bits[POx[9]]=ttbl[bin2dec()][22];
-    if(POx[8]&gt;=0) bits[POx[8]]=ttbl[bin2dec()][23];
-    if(POx[7]&gt;=0) bits[POx[7]]=ttbl[bin2dec()][24];
-    if(POx[6]&gt;=0) bits[POx[6]]=ttbl[bin2dec()][25];
-    if(POx[5]&gt;=0) bits[POx[5]]=ttbl[bin2dec()][26];
-    if(POx[4]&gt;=0) bits[POx[4]]=ttbl[bin2dec()][27];
-    if(POx[3]&gt;=0) bits[POx[3]]=ttbl[bin2dec()][28];
-    if(POx[2]&gt;=0) bits[POx[2]]=ttbl[bin2dec()][29];
-    if(POx[1]&gt;=0) bits[POx[1]]=ttbl[bin2dec()][30];
-    if(POx[0]&gt;=0) bits[POx[0]]=ttbl[bin2dec()][31];
+    if(POx[13]&gt;=0) bits[POx[13]]=ttbl[bin2dec()][14];
+    if(POx[12]&gt;=0) bits[POx[12]]=ttbl[bin2dec()][15];
+    if(POx[11]&gt;=0) bits[POx[11]]=ttbl[bin2dec()][16];
+    if(POx[10]&gt;=0) bits[POx[10]]=ttbl[bin2dec()][17];
+    if(POx[9]&gt;=0) bits[POx[9]]=ttbl[bin2dec()][18];
+    if(POx[8]&gt;=0) bits[POx[8]]=ttbl[bin2dec()][19];
+    if(POx[7]&gt;=0) bits[POx[7]]=ttbl[bin2dec()][20];
+    if(POx[6]&gt;=0) bits[POx[6]]=ttbl[bin2dec()][21];
+    if(POx[5]&gt;=0) bits[POx[5]]=ttbl[bin2dec()][22];
+    if(POx[4]&gt;=0) bits[POx[4]]=ttbl[bin2dec()][23];
+    if(POx[3]&gt;=0) bits[POx[3]]=ttbl[bin2dec()][24];
+    if(POx[2]&gt;=0) bits[POx[2]]=ttbl[bin2dec()][25];
+    if(POx[1]&gt;=0) bits[POx[1]]=ttbl[bin2dec()][26];
+    if(POx[0]&gt;=0) bits[POx[0]]=ttbl[bin2dec()][27];
 
     diffctrl++;
 }
@@ -451,7 +449,6 @@ void f(){
     bits[PIxy[4]] = getBit(4, input);
     bits[PIxy[5]] = getBit(5, input);
     bits[PIxy[6]] = getBit(6, input);
-    bits[PIxy[7]] = getBit(7, input);
 
     if(inCoverSet[input]) { inSame = -1*input; nsame++; }
     else inSame = input;
@@ -683,8 +680,8 @@ void inits(){
 		<declaration>clock x;
 clock tcover;
 int input=0;
-int[0, 16777216] nsame=0;
-int[0, 16777216] inSame=0;
+int[0, MAX_INT] nsame=0;
+int[0, MAX_INT] inSame=0;
 double rCover;
 int idx=0;
 
@@ -1102,101 +1099,52 @@ synPri = syncPrimary();
 mul2A = tmul2any(PIxy, POx, tbl_acc_any, DLY_MUL2);
 
 //mul2Atb = tmul2_tb_exhaust(PIxy, DLY_MUL2, COVERAGE_RATIO);
-//mul2Atb = tmul2_tb_nondet(PIxy[0], PIxy[7], DLY_MUL2, COVERAGE_RATIO);
+//mul2Atb = tmul2_tb_nondet(PIxy[0], PIxy[6], DLY_MUL2, COVERAGE_RATIO);
 mul2Atb = tmul2_tb_random(DLY_MUL2, COVERAGE_RATIO);
 
 ediff = eval_diff(5);
 
 //gates
-g172 = gate2(0, PIxy[15], PIxy[2], 172, change[15], change[2], change[172]);
-g218 = gate2(1, PIxy[15], PIxy[3], 218, change[15], change[3], change[218]);
-g247 = gate2(2, PIxy[14], PIxy[3], 247, change[14], change[3], change[247]);
-g251 = gate2(3, 172, 218, 251, change[172], change[218], change[251]);
-g252 = gate2(4, 172, PIxy[3], 252, change[172], change[3], change[252]);
-g253 = gate2(5, PIxy[15], 247, 253, change[15], change[247], change[253]);
-g254 = gate2(6, 251, 247, 254, change[251], change[247], change[254]);
-g255 = gate2(7, 252, 253, 255, change[252], change[253], change[255]);
-g261 = gate2(8, PIxy[13], PIxy[4], 261, change[13], change[4], change[261]);
-g262 = gate2(9, PIxy[14], PIxy[4], 262, change[14], change[4], change[262]);
-g263 = gate2(10, PIxy[15], PIxy[4], POy[2], change[15], change[4], change[263]);
-g291 = gate2(11, 254, 262, 291, change[254], change[262], change[291]);
-g292 = gate2(12, 254, 262, 292, change[254], change[262], change[292]);
-g293 = gate2(13, 291, 261, 293, change[291], change[261], change[293]);
-g294 = gate2(14, 291, 261, POy[3], change[291], change[261], change[294]);
-g295 = gate2(15, 292, 293, 295, change[292], change[293], change[295]);
-g296 = gate2(16, 255, POy[2], 296, change[255], change[263], change[296]);
-g297 = gate2(17, 255, POy[2], 297, change[255], change[263], change[297]);
-g298 = gate2(18, PIxy[15], 295, 298, change[15], change[295], change[298]);
-g299 = gate2(19, 296, 295, 299, change[296], change[295], change[299]);
-g300 = gate2(20, 297, 298, 300, change[297], change[298], change[300]);
-g305 = gate2(21, PIxy[12], PIxy[5], POy[9], change[12], change[5], change[305]);
-g306 = gate2(22, PIxy[13], PIxy[5], 306, change[13], change[5], change[306]);
-g307 = gate2(23, PIxy[14], PIxy[5], 307, change[14], change[5], change[307]);
-g308 = gate2(24, PIxy[15], PIxy[5], 308, change[15], change[5], change[308]);
-g331 = gate2(25, POy[3], 306, 331, change[294], change[306], change[331]);
-g332 = gate2(26, POy[3], 306, 332, change[294], change[306], change[332]);
-g336 = gate2(27, 299, 307, 336, change[299], change[307], change[336]);
-g337 = gate2(28, 299, 307, 337, change[299], change[307], change[337]);
-g338 = gate2(29, 336, 332, 338, change[336], change[332], change[338]);
-g339 = gate2(30, 336, 332, 339, change[336], change[332], change[339]);
-g340 = gate2(31, 337, 338, 340, change[337], change[338], change[340]);
-g341 = gate2(32, 300, 308, 341, change[300], change[308], change[341]);
-g342 = gate2(33, 300, 308, 342, change[300], change[308], change[342]);
-g343 = gate2(34, PIxy[15], 340, 343, change[15], change[340], change[343]);
-g344 = gate2(35, 341, 340, 344, change[341], change[340], change[344]);
-g345 = gate2(36, 342, 343, 345, change[342], change[343], change[345]);
-g349 = gate2(37, PIxy[10], PIxy[6], 349, change[10], change[6], change[349]);
-g350 = gate2(38, PIxy[12], PIxy[6], POy[5], change[12], change[6], change[350]);
-g351 = gate2(39, PIxy[13], PIxy[6], 351, change[13], change[6], change[351]);
-g352 = gate2(40, PIxy[14], PIxy[6], 352, change[14], change[6], change[352]);
-g353 = gate2(41, PIxy[15], PIxy[6], 353, change[15], change[6], change[353]);
-g371 = gate2(42, 331, POy[5], 371, change[331], change[350], change[371]);
-g372 = gate2(43, 331, POy[5], 372, change[331], change[350], change[372]);
-g373 = gate2(44, 371, 349, 373, change[371], change[349], change[373]);
-g374 = gate2(45, 371, 349, POy[10], change[371], change[349], change[374]);
-g375 = gate2(46, 372, 373, 375, change[372], change[373], change[375]);
-g376 = gate2(47, 339, 351, 376, change[339], change[351], change[376]);
-g377 = gate2(48, 339, 351, 377, change[339], change[351], change[377]);
-g378 = gate2(49, 376, 375, 378, change[376], change[375], change[378]);
-g379 = gate2(50, 376, 375, 379, change[376], change[375], change[379]);
-g380 = gate2(51, 377, 378, 380, change[377], change[378], change[380]);
-g381 = gate2(52, 344, 352, 381, change[344], change[352], change[381]);
-g382 = gate2(53, 344, 352, 382, change[344], change[352], change[382]);
-g383 = gate2(54, 381, 380, 383, change[381], change[380], change[383]);
-g384 = gate2(55, 381, 380, 384, change[381], change[380], change[384]);
-g385 = gate2(56, 382, 383, 385, change[382], change[383], change[385]);
-g386 = gate2(57, 345, 353, 386, change[345], change[353], change[386]);
-g387 = gate2(58, 345, 353, 387, change[345], change[353], change[387]);
-g388 = gate2(59, 353, 385, 388, change[353], change[385], change[388]);
-g389 = gate2(60, 386, 385, 389, change[386], change[385], change[389]);
-g390 = gate2(61, 387, 388, 390, change[387], change[388], change[390]);
-g395 = gate2(62, PIxy[12], PIxy[7], 395, change[12], change[7], change[395]);
-g396 = gate2(63, PIxy[13], PIxy[7], 396, change[13], change[7], change[396]);
-g397 = gate2(64, PIxy[14], PIxy[7], 397, change[14], change[7], change[397]);
-g398 = gate2(65, PIxy[15], PIxy[7], 398, change[15], change[7], change[398]);
-g407 = gate2(66, PIxy[7], PIxy[11], 407, change[7], change[11], change[407]);
-g416 = gate2(67, 379, 395, 416, change[379], change[395], change[416]);
-g417 = gate2(68, 379, 395, 417, change[379], change[395], change[417]);
-g418 = gate2(69, 416, 407, 418, change[416], change[407], change[418]);
-g419 = gate2(70, 416, 407, POy[11], change[416], change[407], change[419]);
-g420 = gate2(71, 417, 418, 420, change[417], change[418], change[420]);
-g421 = gate2(72, 384, 396, 421, change[384], change[396], change[421]);
-g422 = gate2(73, 384, 396, 422, change[384], change[396], change[422]);
-g423 = gate2(74, 421, 420, 423, change[421], change[420], change[423]);
-g424 = gate2(75, 421, 420, POy[12], change[421], change[420], change[424]);
-g425 = gate2(76, 422, 423, 425, change[422], change[423], change[425]);
-g426 = gate2(77, 389, 397, 426, change[389], change[397], change[426]);
-g427 = gate2(78, 389, 397, 427, change[389], change[397], change[427]);
-g428 = gate2(79, 426, 425, 428, change[426], change[425], change[428]);
-g429 = gate2(80, 426, 425, POy[13], change[426], change[425], change[429]);
-g430 = gate2(81, 427, 428, 430, change[427], change[428], change[430]);
-g431 = gate2(82, 390, 398, 431, change[390], change[398], change[431]);
-g432 = gate2(83, 390, PIxy[7], 432, change[390], change[7], change[432]);
-g433 = gate2(84, 398, 430, 433, change[398], change[430], change[433]);
-g434 = gate2(85, 431, 430, POy[14], change[431], change[430], change[434]);
-g435 = gate2(86, 432, 433, POy[15], change[432], change[433], change[435]);
-g436 = gate2(87, PIxy[12], PIxy[5], POy[8], change[12], change[5], change[436]);
-g437 = gate2(88, PIxy[12], PIxy[5], POy[1], change[12], change[5], change[437]);
+g269 = gate2(0, PIxy[5], PIxy[6], 269, change[5], change[6], change[269]);
+g270 = gate2(1, PIxy[6], PIxy[11], POy[5], change[6], change[11], change[270]);
+g272 = gate2(2, 269, PIxy[11], 272, change[269], change[11], change[272]);
+g273 = gate2(3, POy[5], PIxy[5], 273, change[270], change[5], change[273]);
+g279 = gate2(4, PIxy[5], PIxy[12], 279, change[5], change[12], change[279]);
+g280 = gate2(5, PIxy[6], PIxy[12], 280, change[6], change[12], change[280]);
+g281 = gate2(6, PIxy[6], PIxy[10], POy[9], change[6], change[10], change[281]);
+g302 = gate2(7, PIxy[4], PIxy[12], 302, change[4], change[12], change[302]);
+g303 = gate2(8, 272, 279, 303, change[272], change[279], change[303]);
+g304 = gate2(9, 272, 279, 304, change[272], change[279], change[304]);
+g305 = gate2(10, 303, 302, 305, change[303], change[302], change[305]);
+g306 = gate2(11, 303, 302, 306, change[303], change[302], change[306]);
+g307 = gate2(12, 304, 305, 307, change[304], change[305], change[307]);
+g308 = gate2(13, 273, 280, POy[4], change[273], change[280], change[308]);
+g309 = gate2(14, 273, PIxy[12], 309, change[273], change[12], change[309]);
+g310 = gate2(15, PIxy[6], 307, POy[0], change[6], change[307], change[310]);
+g311 = gate2(16, POy[4], 307, 311, change[308], change[307], change[311]);
+g312 = gate2(17, 309, POy[0], 312, change[309], change[310], change[312]);
+g317 = gate2(18, PIxy[4], PIxy[13], 317, change[4], change[13], change[317]);
+g318 = gate2(19, PIxy[5], PIxy[13], POy[7], change[5], change[13], change[318]);
+g319 = gate2(20, PIxy[6], PIxy[13], 319, change[6], change[13], change[319]);
+g336 = gate2(21, PIxy[13], PIxy[3], 336, change[13], change[3], change[336]);
+g337 = gate2(22, 306, 317, 337, change[306], change[317], change[337]);
+g338 = gate2(23, 306, 317, 338, change[306], change[317], change[338]);
+g339 = gate2(24, 337, 336, 339, change[337], change[336], change[339]);
+g340 = gate2(25, 337, 336, POy[10], change[337], change[336], change[340]);
+g341 = gate2(26, 338, 339, POy[1], change[338], change[339], change[341]);
+g342 = gate2(27, 311, POy[7], 342, change[311], change[318], change[342]);
+g343 = gate2(28, 311, POy[7], 343, change[311], change[318], change[343]);
+g344 = gate2(29, 342, POy[1], 344, change[342], change[341], change[344]);
+g345 = gate2(30, 342, POy[1], POy[11], change[342], change[341], change[345]);
+g346 = gate2(31, 343, 344, 346, change[343], change[344], change[346]);
+g347 = gate2(32, 312, 319, 347, change[312], change[319], change[347]);
+g348 = gate2(33, 312, PIxy[13], POy[2], change[312], change[13], change[348]);
+g349 = gate2(34, PIxy[6], 346, 349, change[6], change[346], change[349]);
+g350 = gate2(35, 347, 346, POy[6], change[347], change[346], change[350]);
+g351 = gate2(36, POy[2], 349, POy[13], change[348], change[349], change[351]);
+g352 = gate2(37, PIxy[6], 307, POy[3], change[6], change[307], change[352]);
+g353 = gate2(38, PIxy[6], 307, POy[8], change[6], change[307], change[353]);
+g354 = gate2(39, 347, 346, POy[12], change[347], change[346], change[354]);
 
 // List one or more processes to be composed into a system.
 system
@@ -1204,33 +1152,27 @@ synPri,
 mul2A, 
 mul2Atb,
 ediff,
-g172,
-g218,
-g247,
-g251,
-g252,
-g253,
-g254,
-g255,
-g261,
-g262,
-g263,
-g291,
-g292,
-g293,
-g294,
-g295,
-g296,
-g297,
-g298,
-g299,
-g300,
+g269,
+g270,
+g272,
+g273,
+g279,
+g280,
+g281,
+g302,
+g303,
+g304,
 g305,
 g306,
 g307,
 g308,
-g331,
-g332,
+g309,
+g310,
+g311,
+g312,
+g317,
+g318,
+g319,
 g336,
 g337,
 g338,
@@ -1241,58 +1183,15 @@ g342,
 g343,
 g344,
 g345,
+g346,
+g347,
+g348,
 g349,
 g350,
 g351,
 g352,
 g353,
-g371,
-g372,
-g373,
-g374,
-g375,
-g376,
-g377,
-g378,
-g379,
-g380,
-g381,
-g382,
-g383,
-g384,
-g385,
-g386,
-g387,
-g388,
-g389,
-g390,
-g395,
-g396,
-g397,
-g398,
-g407,
-g416,
-g417,
-g418,
-g419,
-g420,
-g421,
-g422,
-g423,
-g424,
-g425,
-g426,
-g427,
-g428,
-g429,
-g430,
-g431,
-g432,
-g433,
-g434,
-g435,
-g436,
-g437;
+g354;
 </system>
 	<queries>
 		<query>

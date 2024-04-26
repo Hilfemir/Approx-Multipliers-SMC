@@ -683,8 +683,8 @@ void inits(){
 		<declaration>clock x;
 clock tcover;
 int input=0;
-int[0, MAX_INT] nsame=0;
-int[0, MAX_INT] inSame=0;
+int[0, 16777216] nsame=0;
+int[0, 16777216] inSame=0;
 double rCover;
 int idx=0;
 
@@ -798,8 +798,8 @@ void f(int i){
 
     input_b = fint(random(imax));
 
-    input_a = check_limits(input_a, 0, imax);
-    input_b = check_limits(input_b, 0, imax);
+    input_a = check_limits(input_a, 0, imax-1);
+    input_b = check_limits(input_b, 0, imax-1);
 
     dec_to_bin(input_a, a_binary);
     dec_to_bin(input_b, b_binary);
@@ -1138,6 +1138,10 @@ g449;
 </system>
 	<queries>
 		<query>
+			<formula>simulate[&lt;=20000;1] {input_a, input_b}</formula>
+			<comment>Input numbers</comment>
+		</query>
+		<query>
 			<formula>simulate[&lt;=20000;1] {res_acc, res_approx}</formula>
 			<comment>Accurate results vs approximate results</comment>
 		</query>
@@ -1146,7 +1150,7 @@ g449;
 			<comment>Jitter of delay for each result</comment>
 		</query>
 		<query>
-			<formula>simulate[&lt;=5000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
+			<formula>simulate[&lt;=10000000;1] {coverage_percentage, delay_avg, error_prob, mean_abs_error,
 mean_relative_error, mean_squared_error, avg_flips_per_res, worst_case_error, 
 worst_case_relative_error, max_hamming_distance, max_bit_flips, worst_delay
 }</formula>

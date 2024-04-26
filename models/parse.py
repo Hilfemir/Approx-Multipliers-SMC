@@ -216,7 +216,7 @@ class Parser(object):
 		line = line.strip()
 
 		#eg. assign sig_118 = !(sig_115 & B[3]);
-		negated_gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(?:!|~)\((.*?)\s(.*?)\s(.*?)\);'
+		negated_gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(?:!|~)\((.*?)\s+(.*?)\s+(.*?)\);'
 
 		#eg. assign sig_118 = sig_115 & B[3];
 		gate_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(.*?)\s(.*?)\s(.*?);'
@@ -237,10 +237,12 @@ class Parser(object):
 		out_pat5 = r'assign\s+(O\[[0-9]+\])\s*=\s*sig_([0-9]+)\s*;'
 
 		#eg. assign sig_182 = ~sig_203;
-		neg_pat = r'assign\s+(sig_[0-9]+)\s*=\s*~\s*(.*?)\s*;'
+		neg_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(?:~|!)\s*(.*?)\s*;'
 
 		#eg. assign sig_182 = sig_179;
 		same_sig_pat = r'assign\s+(sig_[0-9]+)\s*=\s*(sig_[0-9]+)\s*;'
+
+		in_pat = r'assign\s+(sig_[0-9]+)\s*=\s*([A-Z]\[[0-9]+\]);'
 
 		if match := re.match(negated_gate_pat, line):
 			op = match.group(3)
@@ -307,8 +309,12 @@ class Parser(object):
 			groups = [match.group(1), match.group(2), "SET", match.group(2)]
 			op = "SET"
 
+		elif match := re.match(in_pat, line):
+			groups = [match.group(1), match.group(2), "SET", match.group(2)]
+			op = "SET"
+
 		elif line.startswith("assign sig"):
-			raise Exception(f"Error: Unknown Signal assign Expression.\n{line}")
+			raise Exception(f"Unknown Signal assign Expression.\n{line}")
 		
 		else:
 			return
