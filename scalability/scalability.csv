@@ -1,0 +1,11 @@
+Násobička,Vstupní bity,Paměť [GB],Čas [s],Počet hradel
+mul2u,2x2,0.3,1,5
+mul7u_09Y,7x7,3.7,75,73
+mul7u_073,7x7,4.3,760,154
+mul7u_01Q,7x7,4.3,670,209
+mul8u_17MN,8x8,8.9,85,10
+mul8u_R36,8x8,8.9,50,30
+mul8u_17R6,8x8,8.9,255,88
+mul8u_197B,8x8,8.9,550,175
+mul8u_GTR,8x8,8.9,1005,241
+mul8u_12KA,8x8,8.9,1540,319
