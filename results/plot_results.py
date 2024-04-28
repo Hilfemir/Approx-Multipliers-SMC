@@ -306,7 +306,6 @@ def main():
 		print(df.to_string())
 
 	if not args.noout:
-		print(output_file)
 		plt.savefig(output_file)
 
 	if not args.noshow:

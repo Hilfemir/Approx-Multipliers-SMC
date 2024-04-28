@@ -26,14 +26,15 @@ def main():
 	new_df = df[df['Vstupní bity'] == '8x8']
 	new_df.plot(ax=ax, x="Počet hradel", y="Čas [s]", label="mult_8x8", color="#E84D8A")
 
-	x = np.arange(1, 351)
-	y = 4.3 * x
-	ax.plot(x, y, color="gray", label="y=4.3x", linestyle=":")
+	#x = np.arange(1, 351)
+	#y = 4.3 * x
+	#ax.plot(x, y, color="gray", label="y=4.3x", linestyle=":")
 
 	ax.set_ylabel("Čas [s]", fontsize=20)
 	ax.set_xlabel("Počet hradel", fontsize=20)
 	ax.tick_params(axis='both', which='major', labelsize=16)
 
+	plt.savefig("scalability_time.png")
 	plt.show()
 
 if __name__ == "__main__":
