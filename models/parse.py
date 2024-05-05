@@ -14,6 +14,29 @@ organization: BUT FIT
 date: 2024
 
 Part of bachelor's thesis called Statistical model checking of approximate computing systems.
+
+Copyright (c) 2024 Michal Blazek
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import re
@@ -286,14 +309,23 @@ class Parser(object):
 				prev_signal = next(x for x in self.signals if x.id == id)
 			except:
 				print(id)
-				#for sig in self.signals:
-				#	print(sig)
-				#exit(1)
 
 			#multiple signals mapped to the same output
 			if prev_signal.out.startswith("PO"):
-				in1 = f"sig_{prev_signal.in1}" if not prev_signal.in1.startswith("PI") else prev_signal.in1
-				in2 = f"sig_{prev_signal.in2}" if not prev_signal.in2.startswith("PI") else prev_signal.in2
+				reverse_PIxy = {value : key for key, value in self.PIxy.items()}
+				prev_in1 = prev_signal.in1
+				prev_in2 = prev_signal.in2
+
+				if prev_in1.startswith("PI"):
+					in1 = reverse_PIxy[prev_in1]
+				else:
+					in1 = f"sig_{prev_signal.in1}"
+
+				if prev_in2.startswith("PI"):
+					in2 = reverse_PIxy[prev_in2]
+				else:
+					in2 = f"sig_{prev_signal.in2}"
+
 				groups = [match.group(1), in1, prev_signal.op, in2]
 				op = prev_signal.op
 
