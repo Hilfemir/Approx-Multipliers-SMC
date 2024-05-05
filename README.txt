@@ -6,11 +6,15 @@ Skola: FIT VUT Brno
 Rok: 2024
 
 Struktura repozitare:
-/density - vse co se tyka pravdepodobnostnich rozdeleni
-         -> zdrojove kody jednotlivych zkoumanych algoritmu
-         -> skript pro sbirani dvojic nasobenych cisel z algoritmu
-         -> skripty pro vizualizaci ziskanych rozdeleni (heatmapy, PDF, ...)
-         -> grafy
+/aux - /density - vse co se tyka pravdepodobnostnich rozdeleni
+                -> zdrojove kody jednotlivych zkoumanych algoritmu
+                -> skript pro sbirani dvojic nasobenych cisel z algoritmu
+                -> skripty pro vizualizaci ziskanych rozdeleni (heatmapy, PDF, ...)
+                -> grafy
+     - /scalability - zkoumani skalovatelnosti
+                    -> csv soubory s namerenymi daty
+	            -> skripty pro vizualizaci
+	            -> grafy
 
 /models - preklad modelu z Verilogu do UPPAAL
         -> vstupni soubory ve Verilogu
@@ -22,10 +26,5 @@ Struktura repozitare:
 	 -> skript pro zpracovani vysledku z csv do Pandas df
 	 -> skripty pro vizualizaci vysledku
 	 -> grafy
-
-/scalability - zkoumani skalovatelnosti
-             -> csv soubory s namerenymi daty
-	     -> skripty pro vizualizaci
-	     -> grafy
 
 /thesis - soubory textu technicke zpravy
