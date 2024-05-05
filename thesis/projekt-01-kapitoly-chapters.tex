@@ -4,7 +4,19 @@
 %\begin{document}
 
 \chapter{Úvod}
-TODO
+Tato bakalářská práce se zabývá statistickým ověřováním modelů přibližných násobiček. Přibližné (neboli aproximační) výpočetní systémy jsou technologií, která reaguje na sílící poptávku po energeticky úsporných zařízeních a která se v posledních letech těší významnému rozvoji. Aproximační násobičky nabízejí -- za cenu zavedení určité chyby do výpočtů -- zmenšení plochy obvodů oproti přesným násobičkám, čímž lze dosáhnout jak energetické, tak časové úspory. Tyto násobičky jsou vhodné pro použití v aplikacích, které jsou odolné vůči chybám. Může se jednat například o neuronové sítě nebo o aplikace zaměřené na zpracování multimédií.
+
+Při verifikaci hodnotících metrik aproximačních obvodů jsou obvykle uvažovány všechny kombinace jejich vstupních hodnot. Cílem této práce je prozkoumat, jakým způsobem se mění vlastnosti vybraných aproximačních násobiček při jejich použití v kontextu různých aplikací. V rámci práce je zvoleno několik algoritmů, u nichž dochází k násobení celých kladných čísel. U těchto algoritmů je poté analyzována četnost výskytů jednotlivých dvojic násobených čísel, z čehož jsou následně odvozena pravděpodobnostní rozdělení, která jsou použita při generování vstupů zkoumaných aproximačních násobiček.
+
+Druhá kapitola se věnuje přibližným výpočetním systémům. Po uvedení jejich základního principu se zaměřuje na jednotlivé oblasti, v nichž aproximace nachází uplatnění, a krátce také na oblasti, kde naopak využití aproximačních systémů vhodné není. Následuje představení některých používaných aproximačních technik. Dále jsou uvedeny hodnotící metriky pro posuzování vlastností aproximačních systémů. Závěrečná část kapitoly se zaměřuje na různé přístupy k tvorbě aproximačních násobiček.
+
+Třetí kapitola se zabývá statistickým ověřováním modelů. Nejprve jsou vysvětleny základní pojmy z oblasti verifikace systémů. Následuje srovnání klasického a statistického ověřování modelů. Poté jsou v kapitole uvedeny klasické a stochastické časové automaty. Na závěř je představen modelovací nástroj UPPAAL.
+
+Ve čtvrté kapitole je uveden návrh a postup řešení praktické části bakalářské práce. Nejprve jsou popsány jednotlivé používané modely. Dalé je popsána implementace převodu modelů násobiček z Verilogu do modelů v prostředí UPPAAL. Následuje výpis zvolených aplikací a od nich odvozených pravděpodobnostních rozdělení. Poté jsou uvedeny použité simulační dotazy.
+
+Pátá kapitola prezentuje získané výsledky simulací, včetně porovnání některých výsledků s referenčními hodnotami z knihovny EvoApproxLib.
+
+Šestá kapitola se zabývá škálovatelností zvoleného systému s ohledem na časovou a paměťovou náročnost.
 
 \chapter{Přibližné výpočetní systémy} 
 \label{acs}
@@ -105,8 +117,6 @@ Voltage Scaling (škálování napětí) je aproximační technika na úrovni ob
 
 Při snižování napětí v obvodech mohou vznikat chyby. Například snižování napětí u paměti SRAM může vést vedle ušetření energie k častějším neúspěšným čtením a zápisům do paměti (\textit{read upset} a \textit{write failure}) \cite{ac_techniques}.
 
-\pagebreak
-
 \section{Hodnotící metriky} \label{error_metrics}
 Jednou z klíčových otázek při implementaci aproximačních systémů je vyhodnocení míry chybovosti těchto systémů. \textbf{Chybové metriky} porovnávají výsledky přesných systémů s výsledky jejich aproximačních variant z hlediska dané metriky. Seznam některých často používaných metrik je vypsán níže \cite{circuit_library} a \cite{error_metrics}. Symbol $n_i$ v rovnicích značí počet primárních vstupů, $O_{approx}$ a $O_{orig}$ značí výstupy přibližných, respektive přesných systémů.
 
@@ -206,13 +216,6 @@ Jedním z možných přístupů je využití malých bloků nepřesných násobi
 
 Příkladem stavebního bloku může být násobička na obrázku \ref{fig:approx_acc_mult}. Jak lze pozorovat v Karnaughově mapě v tabulce \ref{tab:kmap2x2}, tato násobička je přesná pro 15 ze 16 možných vstupních kombinací (nepřesný výsledek je v tabulce vyznačen červeně). Změna oproti přesné násobičce je v tom, že výsledek vstupu $3\cdot3$ je reprezentován bity $111$ oproti přesnému výsledku $1001$, díky čemuž se snížila plocha obvodu téměř na polovinu (5 logických hradel oproti 9 u přesné násobičky, méně drátů) s pravděpodobností chyby pouze $\frac{1}{16}$ \cite{underdesigned_mult}.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/approx_acc_mult.png}
-    \caption{(a) Přibližná násobička 2x2 bity (b) Přesná násobička 2x2 bity}
-    \label{fig:approx_acc_mult}
-\end{figure}
-
 \begin{table}[H]
 \centering
 \begin{tabular}{|
@@ -231,6 +234,13 @@ Příkladem stavebního bloku může být násobička na obrázku \ref{fig:appro
 \caption{Karnaughova mapa pro nepřesnou násobičku z obrázku \ref{fig:approx_acc_mult}}
 \label{tab:kmap2x2}
 \end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{obrazky-figures/approx_acc_mult.png}
+    \caption{(a) Přibližná násobička 2x2 bity (b) Přesná násobička 2x2 bity}
+    \label{fig:approx_acc_mult}
+\end{figure}
 
 Na obrázku \ref{fig:larger_mults} je znázorněn příklad násobičky 4x4 bitů složené ze 4 bloků násobiček 2x2
 bity. A a X jsou vstupní hodnoty, dolní indexy H, respektive L značí 2 vyšší, respektive 2 nižší bity vstupu. V jednotlivých blocích postupně dochází k roznásobení všech kombinací dvojic vstupních bitů. Tyto dílčí výsledky jsou následně bitově posunuty a sečteny, čímž vzniká celkový výsledek násobení.
@@ -321,7 +331,9 @@ Metody formální verifikace se původně zaměřovaly na diskrétní chování 
 
 Časové automaty ovšem nejsou dostatečně expresivní na to, aby dokázaly popsat chování komplexnějších systémů s reálným časem. Chování těchto systémů často závisí na stochastických jevech, ověřování modelů takových systémů je nerozhodnutelné. S alternativním řešením tohoto problému přichází rozšíření UPPAAL SMC, které tyto systémy reprezentuje pomocí sítí stochastických časových automatů, jejichž chování může záviset na stochastických a nelineárních dynamických jevech. K efektivní analýze vlastností modelů využívá \textbf{statistického ověřování modelů}.
 
-Zdrojem následujících 3 odstavců je primárně článek \cite{automata_zoo}. Stochastické časové automaty jsou součástí hierarchie výpočetních modelů založených na automatech, která je znázorněna ve stromě na obrázku \ref{fig:automata_zoo}. Modely, které jsou umístěné ve stromě výše, dědí vlastnosti od svých níže postavených předchůdců a obvykle přidávají některé funkcionality navíc.
+Zdrojem následujících 3 odstavců je primárně článek \cite{automata_zoo}. 
+
+Stochastické časové automaty jsou součástí hierarchie výpočetních modelů založených na automatech, která je znázorněna ve stromě na obrázku \ref{fig:automata_zoo}. Modely, které jsou umístěné ve stromě výše, dědí vlastnosti od svých níže postavených předchůdců a obvykle přidávají některé funkcionality navíc.
 
 Jak z obrázku plyne, většina těchto výpočetních modelů vychází z označených přechodových systémů, které zavádí nedeterministický výběr přechodu a také je možné pomocí nich modelovat paralelní systémy umožňující komunikaci mezi jednotlivými modely \cite{mc_principles}. Diskrétní pravděpodobnostní rozhodování má zase původ v Markovových řetězcích s diskrétním časem. Kombinací těchto dvou vlastností vznikají Markovovy rozhodovací procesy. 
 
@@ -564,7 +576,7 @@ Určuje, jakým způsobem má být stavový prostor reprezentován. U některýc
 \begin{itemize}
     \item Rozdílové matice (Difference Bound Matrices, DBM) -- rychlé, u modelů s mnoha časovými proměnnými spotřebují velké množství paměti,
     \item Kompaktní datová struktura (Compact Data Structure) -- kompaktnější (menší spotřeba paměti) a pomalejší než DBM,
-    \item Nedostatečná aproximace (Under Approximation) -- využívá hashovací tabulky, míra aproximace lze nastavit určením velikosti dané tabulky (možnost \textit{Hash Table Size} v nastavení),
+    \item Nedostatečná aproximace (Under Approximation) -- využívá hashovací tabulky, míru aproximace lze nastavit určením velikosti dané tabulky (možnost \textit{Hash Table Size} v nastavení),
     \item Nadměrná aproximace (Over Approximation) -- využívá komplexní obaly k aproximaci zón, nemá žádný efekt u modelů bez časových proměnných.
 \end{itemize}
 
@@ -580,7 +592,9 @@ Určuje, jakým způsobem má být stavový prostor reprezentován. U některýc
 \end{itemize}
 
 \subsection{Dotazovací jazyk} \label{uppaal_query_lang}
-Tato podsekce čerpá z článků \cite{uppaal_intro} a \cite{uppaal_smc}. Hlavním úkolem nástroje na ověřování modelů je verifikace modelu s ohledem na určité požadavky. Takové požadavky musejí být vyjádřeny v nějakém formálně definovaném a strojově čitelném jazyce. Existuje několik logik, které toto splňují, UPPAAL používá zjednodušenou verzi logiky TCTL (\textit{Timed Computation Tree Logic}). Dotazovací jazyk se tedy, podobně jako v TCTL, skládá ze stavových formulí (\textbf{state formulae}) a běhových formulí (\textbf{path formulae}). Stavové formule popisují jednotlivé stavy systému, běhové formule kvantifikují přes jednotlivé běhy nebo stopy systému.
+Tato podsekce čerpá z článků \cite{uppaal_intro} a \cite{uppaal_smc}. 
+
+Hlavním úkolem nástroje na ověřování modelů je verifikace modelu s ohledem na určité požadavky. Takové požadavky musejí být vyjádřeny v nějakém formálně definovaném a strojově čitelném jazyce. Existuje několik logik, které toto splňují, UPPAAL používá zjednodušenou verzi logiky TCTL (\textit{Timed Computation Tree Logic}). Dotazovací jazyk se tedy, podobně jako v TCTL, skládá ze stavových formulí (\textbf{state formulae}) a běhových formulí (\textbf{path formulae}). Stavové formule popisují jednotlivé stavy systému, běhové formule kvantifikují přes jednotlivé běhy nebo stopy systému.
 
 Příklady běhových formulí lze pozorovat na obrázku \ref{fig:uppaal_path_form}. Stavy, které splňují danou stavovou formuli $\varphi$, jsou vybarveny žlutě. Hrany, které jsou procházeny při vyhodnocování, jsou ztučněny. Významy jednotlivých běhových formulí jsou vysvětleny níže ve zbytku podsekce.
 
@@ -624,7 +638,7 @@ Výslednou vizualizaci je možno vidět na obrázku \ref{fig:simulate_example}. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/simulate_example.png}
+    \includegraphics[width=0.6\textwidth]{obrazky-figures/simulate_example.png}
     \caption{Vizualizace hodnot při simulaci, nástroj UPPAAL}
     \label{fig:simulate_example}
 \end{figure}
@@ -667,13 +681,13 @@ Příklad využití z praktické části práce odhaduje maximální zpoždění
 
 Výsledkem dotazu je konfidenční interval s předem danou hladinou spolehlivosti. Výsledkem tohoto konkrétního dotazu při simulaci jedné konkrétní náhodně vybrané přibližné násobičky byla hodnota \texttt{1138 +- 18.4169 (95\% CI)}. 
 
-Jak lze vidět na obrázku \ref{fig:prob_plots}, nástroj UPPAAL dále umožňuje některé detailnější pohledy na odhad dané hodnoty. Konkrétně se jedná o grafy rozdělení hustoty pravděpodobnosti (\textit{Probability Density Distribution}), rozdělení pravděpodobnosti (\textit{Probability Distribution}), rozdělení distribuční funkce pravděpodobnosti (\textit{Cumulative Probability Distribution}), zobrazení konfidenčních intervalů distribuční funkce (\textit{Cumulative Probability Confidence Intervals}) a také histogram frekvencí výskytu jednotlivých hodnot při simulačních bězích (\textit{Frequency Histogram}).
+Nástroj UPPAAL dále umožňuje některé detailnější pohledy na odhad dané hodnoty. Konkrétně se jedná o graf rozdělení hustoty pravděpodobnosti (\textit{Probability Density Distribution}), příklad takového grafu je vidět na obrázku \ref{fig:plot_prob_dens_dist}. Dále grafy rozdělení pravděpodobnosti (\textit{Probability Distribution}), rozdělení distribuční funkce pravděpodobnosti (\textit{Cumulative Probability Distribution}), zobrazení konfidenčních intervalů distribuční funkce (\textit{Cumulative Probability Confidence Intervals}) a také histogram frekvencí výskytu jednotlivých hodnot při simulačních bězích (\textit{Frequency Histogram}). Příklady těchto grafů lze pozorovat v příloze \ref{append:prob_plots}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{obrazky-figures/prob_plots.png}
+    \includegraphics[width=0.8\textwidth]{obrazky-figures/plot_prob_dens_dist.png}
     \caption{Grafy pravděpodobnostního rozdělení při odhadu maximální hodnoty proměnné v nástroji UPPAAL}
-    \label{fig:prob_plots}
+    \label{fig:plot_prob_dens_dist}
 \end{figure}
 
 \chapter{Návrh a implementace řešení}
@@ -842,13 +856,6 @@ Jak již bylo zmíněno, zdrojem modelů přibližných bezznaménkových násob
 
 Skript je schopen přeložit modely z jazyka Verilog ve formátu zobrazeném ve výpise \ref{lst:verilog}. Zvládne tedy přeložit všechny modely násobiček 7x7, 8x8 (kromě násobičky \texttt{mul8u\_1JJQ}) a 11x11 bitů. Modely násobiček 12x12 a 16x16 bitů mají odlišnou (složitější) strukturu. Jsou modelovány pomocí skládání menších přibližných násobiček do sebe a skript \texttt{parse.py} toto neimplementuje.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{obrazky-figures/parser_diagram.png}
-    \caption{Schéma fungování skriptu \texttt{parse.py}}
-    \label{fig:parser_diagram}
-\end{figure}
-
 \begin{lstlisting}[language={Verilog}, caption={Příklad platného formátu modelu násobičky v jazyce Verilog}, label={lst:verilog}]
 module mult_name (
     A,
@@ -873,24 +880,13 @@ assign O[0] = 1'b0;
 \end{lstlisting}
 
 \subsubsection{Základní princip fungování skriptu}
-Pseudokód struktury funkce \texttt{main} skriptu \texttt{parse.py} je k vidění ve výpise \ref{lst:main}.
-\begin{lstlisting}[language={Python}, caption={Pseudokód hlavní části skriptu parse.py}, label={lst:main}]
-read(input_file)
-
-for line in input_file:
-    parse_input_output(line)
-
-create_PIxy_mapping()
-create_POy_mapping()
-
-for line in input_file:
-    parse_gates(line)
-
-generate_parts()
-output_file = join_parts()
-
-write(output_file)
-\end{lstlisting}
+Základní princip fungování skriptu \texttt{parse.py} je ilustrován na obrázku \ref{fig:parser_diagram}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{obrazky-figures/parser_diagram.png}
+    \caption{Schéma fungování skriptu \texttt{parse.py}}
+    \label{fig:parser_diagram}
+\end{figure}
 
 Prvním krokem je otevření a načtení vstupního souboru napsaného ve Verilogu. Při první iteraci přes jednotlivé řádky souboru je získána informace o počtu vstupních a výstupních bitů násobičky. Ta je využita k nastavení některých vnitřních parametrů skriptu a také k pozdějšímu vygenerování globálních proměnných \texttt{NPI}, \texttt{NPO} a polí \texttt{PIxy}, \texttt{POx} a \texttt{POy}.
 
@@ -918,174 +914,40 @@ V závěru skriptu poté dochází k vygenerování jednotlivých částí výst
 
 Skript lze spouštět s přepínačem \texttt{----distribution [DISTRIBUTION]}, který nastavuje vybrané pravděpodobnostní rozdělení pro generování náhodných vstupů. Při vytváření modelu generátoru náhodných vstupů je poté vybrané rozdělení zohledněno. Rozdělení jsou ve skriptu připravena pro násobičky 8x8 bitů (tedy generují čísla 0 až 255). Pro jiné typy násobiček by bylo třeba tyto hodnoty změnit, případně je lze změnit po vygenerování ve finálním souboru v lokálních deklaracích modelu \texttt{tmul2\_tb\_random}.
 
-\section{Zvolená pravděpodobnostní rozdělení při generování náhodných vstupů} \label{rozdeleni_pst}
+Pseudokód struktury funkce \texttt{main} skriptu \texttt{parse.py} je k vidění ve výpise \ref{lst:main}.
+
+\begin{lstlisting}[language={Python}, caption={Pseudokód hlavní části skriptu parse.py}, label={lst:main}]
+read(input_file)
+
+for line in input_file:
+    parse_input_output(line)
+
+create_PIxy_mapping()
+create_POy_mapping()
+
+for line in input_file:
+    parse_gates(line)
+
+generate_parts()
+output_file = join_parts()
+
+write(output_file)
+\end{lstlisting}
+
+\section{Zvolené aplikace} \label{zvolene_aplikace}
 Klíčovou myšlenkou práce bylo ověření vlastností přibližných násobiček v závislosti na různých pravděpodobnostních rozděleních jejich vstupů. V rámci této práce bylo zvoleno několik algoritmů, u nichž dochází k násobení celých kladných čísel. Každý algoritmus byl s vhodnými vstupy simulován s tím, že se postupně sbírala data o dvojicích násobených čísel. Tato data byla poté vizualizována a následně byl proveden odhad pravděpodobnostního rozdělení (nebo kombinace více rozdělení), které by přibližně odpovídalo danému naměřenému rozdělení.
 
-Výchozím a referenčním rozdělením bylo zvoleno rozdělení nazvané \textbf{uni\_uni}. Oba vstupy jsou v tomto případě generovány s rovnoměrným rozdělením v intervalu 0 až 255 (minimální a maximální hodnoty, kterých může nabývat 8bitový bezznaménkový integer). Jinými slovy všechny vstupní kombinace mají stejnou pravděpodobnost výskytu.
+Výstupy vizualizací, z nich odvozené odhady pravděpodobnostních rozdělení a pseudokódy ilustrující generování těchto rozdělení jsou uvedeny v příloze \ref{append:rozdeleni_pst}. Zde následuje pouze stručný výpis vybraných aplikací a od nich odvozených rozdělení:
 
-V této sekci jsou postupně představeny jednotlivé algoritmy a získaná rozdělení. U každého algoritmu se nachází obrázek s grafy naměřených rozdělení. Struktura těchto obrázků je následující:
-
-V grafech \textbf{(a)} a \textbf{(b)} je vidět hustota rozdělení pravděpodobnosti (zkr. PDF z angl. \textit{probability density function}) získaná z reálných naměřených dat z algoritmů. V grafu (a) je zobrazena pravděpodobnost výskytu pro oba vstupy zvlášť, v grafu (b) je to stejné v podobě teplotní mapy. V grafech \textbf{(c)} a \textbf{(d)} jsou zobrazena výsledná odhadnutá pravděpodobnostní rozdělení pro oba vstupy.
-
-Dále je u každého algoritmu vypsán pseudokód generování čísel dle zvolených rozdělení. Součástí kódu ve výsledném souboru pro nástroj UPPAAL je mj. i ošetření překročení hranic (čísla menší než 0 se nastaví na 0, čísla větší než 255 se nastaví na 255), které v pseudokódech není zahrnuto.
-
-\subsubsection{Algoritmus Ellipse Mid-Point}
-Ellipse Mid-Point je algoritmus používaný v grafice pro rasterizaci elipsy. Na obrázku \ref{fig:beta_uni} jsou znázorněna pravděpodobnostní rozdělení vstupů násobičky. Pseudokód zvolených rozdělení je následující:
-
-\begin{lstlisting}[language={C}, label={lst:ellipse}]
-input_x = int(random_beta(0.5, 5.0) * 40)
-
-input_y = int(random_uniform(0, 266))
-if input_y > 255:
-    input_y = int(random_uniform(0, 15))
-
-if input_y < 2:
-    input_y += 2
-\end{lstlisting}
-
-Pro generování vstupu X bylo zvoleno rozdělení beta s parametry $\alpha = 0,5$ a $\beta = 5$ následně vynásobené hodnotou 40. Vstup Y je generován mírně deformovaným rovnoměrným rozdělením od 0 do 255. V rámci experimentů byla tato dvojice rozdělení označena jako \textbf{beta\_uni}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{obrazky-figures/beta_uni_all.png}
-    \caption{(a) a (b) PDF násobených dvojic rasterizačního algoritmu Ellipse Mid-Point, (c) a (d) Pravděpodobnostní rozdělení použitá při generování náhodných vstupů}
-    \label{fig:beta_uni}
-\end{figure}
-
-\pagebreak
-
-\subsubsection{Bresenhamův algoritmus}
-Bresenhamův algoritmus je algoritmus používaný v grafice pro rasterizaci úsečky. Na obrázku \ref{fig:const_norm} jsou znázorněna pravděpodobnostní rozdělení vstupů násobičky. Pseudokód zvolených rozdělení je následující:
-
-\begin{lstlisting}[language={C}, label={lst:bresenham}]
-input_x = 2
-
-input_y = int(random_normal(150, 30))
-if input_y < 0:
-    input_y = int(random(100, 255))
-\end{lstlisting}
-
-V algoritmu dochází pouze k násobení různých hodnot číslem 2. Vstupem X je tedy konstanta 2, vstup Y přibližně odpovídá normálnímu rozdělení se střední hodnotou 150 a rozptylem 30. V rámci experimentů byl tento způsob generování čísel označen jako \textbf{const\_norm}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/const_norm_all.png}
-    \caption{(a) a (b) PDF násobených dvojic Bresenhamova rasterizačního algoritmu, (c) Pravděpodobnostní rozdělení použité při generování náhodných vstupů}
-    \label{fig:const_norm}
-\end{figure}
-
-\pagebreak
-
-\subsubsection{Pritchardovo síto}
-Pritchardovo síto (angl. \textit{Sieve of Pritchard}) je algoritmus z oblasti teorie čísel používaný pro nalezení všech prvočísel menších než je daná hranice. Na obrázku \ref{fig:gamma_2norm} jsou znázorněna pravděpodobnostní rozdělení vstupů násobičky. Pseudokód zvolených rozdělení je následující:
-
-\begin{lstlisting}[language={C}, label={lst:pritchard}]
-input_x = int(random_gamma(1.0, 0.8) * 7)
-
-input_y = int(random_uniform(0, 256))
-if 100 < input_y < 175:
-    input_y = int(random_uniform(0, 75))
-
-if 175 <= input_y < 200:
-    input_y = int(random_uniform(200, 255))
-\end{lstlisting}
-
-Pro generování vstupu X bylo zvoleno rozdělení gamma s parametry $k = 1.0$ a $\theta = 0.8$ následně vynásobené hodnotou 7. Vstup Y byl generován kombinací několika rovnoměrných rozdělení, což dalo vzniknout dvěma přibližným normálním rozdělením okolo středů 50 a 220. V rámci experimentů byl tento způsob generování čísel označen jako \textbf{gamma\_2norm}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/gamma_2norm_all.png}
-    \caption{(a) a (b) PDF násobených dvojic v algoritmu Pritchardovo síto, (c) a (d) Pravděpodobnostní rozdělení použitá při generování náhodných vstupů}
-    \label{fig:gamma_2norm}
-\end{figure}
-
-\pagebreak
-
-\subsubsection{Algoritmus Integer Square Root}
-Algoritmus používaný k určení celočíselné odmocniny nějakého čísla, tedy největšího přirozeného čísla, které je menší nebo rovno odmocnině daného čísla. Na obrázku \ref{fig:same_triang} jsou znázorněna pravděpodobnostní rozdělení vstupů násobičky. Pseudokód zvolených rozdělení je následující:
-
-\begin{lstlisting}[language={C}, label={lst:isqrt}]
-input_x = int(random_triangular(-10, 255, 10))
-
-input_y = input_x
-\end{lstlisting}
-
-V algoritmu dochází k umocňování na druhou, oba vstupy jsou tedy stejná čísla. Frekventovanější jsou menší hodnoty, proto bylo pro generování zvoleno triangulární rozdělení s minimem v -10, maximem v 255 a modem v hodnotě 10. V rámci experimentů byl tento způsob generování čísel označen jako \textbf{same\_triang}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/same_triang_all.png}
-    \caption{(a) a (b) PDF násobených dvojic v algoritmu výpočtu celočíselné odmocniny, (c) Pravděpodobnostní rozdělení použité při generování náhodných vstupů}
-    \label{fig:same_triang}
-\end{figure}
-
-\pagebreak
-
-\subsubsection{Algoritmus Circle Point to Point}
-Algoritmus používaný v grafice k rasterizaci kružnice. Na obrázku \ref{fig:same_uni} jsou znázorněna pravděpodobnostní rozdělení vstupů násobičky. Pseudokód zvolených rozdělení je následující:
-
-\begin{lstlisting}[language={C}, label={lst:circle}]
-input_x = int(random_uniform(0, 255))
-
-input_y = input_x
-\end{lstlisting}
-
-V algoritmu Point to Point dochází, podobně jako u předchozího algoritmu, k umocňování čísel na druhou. V tomto případě ovšem vstupy následují přibližně rovnoměrné rozdělení od 0 do 255. V rámci experimentů byl tento způsob generování čísel označen jako \textbf{same\_uni}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/same_uni.png}
-    \caption{(a) a (b) PDF násobených dvojic v algoritmu Circle Point to Point, (c) Pravděpodobnostní rozdělení použité při generování náhodných vstupů}
-    \label{fig:same_uni}
-\end{figure}
-
-\pagebreak
-
-\subsubsection{Algoritmus AKS}
-AKS je algoritmus z oblasti teorie čísel sloužící k ověření toho, zda je nějaké dané číslo prvočíslem. Na obrázku \ref{fig:triang_beta} jsou znázorněna pravděpodobnostní rozdělení vstupů násobičky. Pseudokód zvolených rozdělení je následující:
-
-\begin{lstlisting}[language={C}, label={lst:aks}]
-input_x = int(random_triangular(-50, 450, 70))
-if input_x > 255:
-    input_x = int(random_uniform(0, 150))
-
-input_y = fint(random_beta(2.0, 2.0) * 255);
-\end{lstlisting}
-
-Rozdělení vstupu X přibližně odpovídá triangulárnímu rozdělení s minimem -50, maximem 450 a modem v hodnotě 70. Vstup Y byl generován podle rozdělení beta s parametry $\alpha = 2$ a $\beta = 2$. Vygenerovaná hodnota byla následně vynásobena 255 (beta rozdělení figuruje na intervalu 0 až 1). V rámci experimentů byl tento způsob generování čísel označen jako \textbf{triang\_beta}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/triang_beta_all.png}
-    \caption{(a) a (b) PDF násobených dvojic v algoritmu AKS, (c) a (d) Pravděpodobnostní rozdělení použitá při generování náhodných vstupů}
-    \label{fig:triang_beta}
-\end{figure}
-
-\pagebreak
-
-\subsubsection{Algoritmus ElGamal}
-Algoritmus ElGamal slouží k asymetrickému šifrování klíčů. Na obrázku \ref{fig:triang_weibull} jsou znázorněna pravděpodobnostní rozdělení vstupů násobičky. Pseudokód zvolených rozdělení je následující:
-
-\begin{lstlisting}[language={C}, label={lst:elgamal}]
-input_x = int(random_triangular(0, 350, 0))
-if input_x > 255:
-    input_x = int(random_uniform(0, 50))
-
-input_y = int(random_weibull(1.7, 1.7) * 60)
-if input_y > 255:
-    input_y = int(random_uniform(0, 25))
-\end{lstlisting}
-
-Vstup X je generován dle lehce deformovaného triangulárního rozdělení s minimem a modem 0 a maximem 350. Hodnoty větší než 350 jsou ovšem zahozeny a je místo nich vygenerováno číslo z intervalu 0 až 50, čímž dochází ke zmíněné deformaci.
-
-Vstup Y je generován pomocí Weibullova rozdělení s parametry $k = 1,7$ a $\lambda = 1,7$ deformovaného podobným způsobem jako vstup X. V rámci experimentů byl tento způsob generování čísel označen jako \textbf{triang\_weibull}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{obrazky-figures/triang_weibull_all.png}
-    \caption{(a) a (b) PDF násobených dvojic v algoritmu ElGamal, (c) a (d) Pravděpodobnostní rozdělení použitá při generování náhodných vstupů}
-    \label{fig:triang_weibull}
-\end{figure}
+\begin{itemize}
+    \item \textbf{Algoritmus Ellipse Mid-Point} -- vstup X je generován pomocí rozdělení beta s parametry $\alpha = 0,5$ a $\beta = 5$. Vstup Y je generován dle mírně deformovaného rovnoměrného rozdělení od 0 do 255. Zvolené rozdělení bylo pojmenováno \textbf{beta\_uni}.
+    \item \textbf{Bresenhamův rasterizační algoritmus} -- jako vstup X byla zvolena konstanta 2. Vstup Y je generován s normálním rozdělením se střední hodnotou 150 a rozptylem 30. Zvolené rozdělení bylo pojmenováno jako \textbf{const\_norm}.
+    \item \textbf{Pritchardovo síto} -- vstup X je generován dle rozdělení gamma s parametry $k=1,0$ a $\theta=0,8$ a poté vynásoben hodnotou 7. Vstup Y je generován pomocí dvou normálních rozdělení okolo středů 50 a 220. Rozdělení bylo pojmenováno jako \textbf{gamma\_2norm}.
+    \item \textbf{Algoritmus Integer Square Root} -- vstupy X a Y mají vždy stejnou hodnotu. Jsou generovány pomocí triangulárního rozdělení s minimem v -10, maximem v 255 a modem 10. Zvolené rozdělení bylo pojmenováno jako \textbf{same\_triang}.
+    \item \textbf{Algoritmus Circle Point to Point} -- vstupy X a Y mají opět vždy stejnou hodnotu. Jsou generovány s rovnoměrným rozdělením v intervalu $\langle 0, 255 \rangle$. Zvolené rozdělení bylo pojmenováno jako \textbf{same\_uni}.
+    \item \textbf{Algoritmus AKS} -- vstup X je generován s triangulárním rozdělením s minimem v -50, maximem ve 450 a modem 70. Vstup Y je generován dle rozdělení beta s parametry $\alpha = 2$ a $\beta = 2$, následně je vynásoben hodnotou 255. Zvolené rozdělení bylo pojmenováno jako \textbf{triang\_beta}.
+    \item \textbf{Algoritmus ElGamal} -- vstup X je generován dle deformovaného triangulárního rozdělení s minimem a modem 0 a maximem 350. Vstup Y je generován s Weibullovým rozdělením s parametry $k = 1,7$ a $\lambda = 1,7$. Zvolené rozdělení bylo pojmenováno jako \textbf{triang\_weibull}.
+\end{itemize}
 
 \section{Simulační dotazy} \label{sim_dotazy}
 Pro simulaci chování násobiček bylo v systému UPPAAL vytvořeno několik dotazů.
@@ -1100,7 +962,7 @@ Jeden příklad výstupu lze pozorovat na obrázku \ref{fig:input_sim_example}, 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{obrazky-figures/inputs_uni_uni.png}
+    \includegraphics[width=0.75\textwidth]{obrazky-figures/inputs_uni_uni.png}
     \caption{Příklad výstupu dotazu ověřujícího hodnoty vygenerovaných vstupů}
     \label{fig:input_sim_example}
 \end{figure}
@@ -1117,8 +979,6 @@ Třetí dotaz zobrazuje zpoždění, které zkoumaná násobička nabírá při 
     \texttt{simulate[<=1000;1] {current\_delay}}
 \end{equation*}
 
-\pagebreak
-
 Čtvrtý dotaz tvoří hlavní část experimentů. V rámci tohoto dotazu jsou sledovány všechny vybrané hodnotící metriky. Dotaz má následující podobu:
 
 \begin{equation*}
@@ -1130,22 +990,28 @@ Třetí dotaz zobrazuje zpoždění, které zkoumaná násobička nabírá při 
     \end{array}
 \end{equation*}
 
-Jednotlivé sledované proměnné mají následující význam:
+Význam jednotlivých sledovaných proměnných je popsán v tabulce \ref{tab:var_expl}.
 
-\begin{itemize}
-    \item \texttt{coverage\_percentage} -- procento pokrytí všech kombinací vstupů,
-    \item \texttt{delay\_avg} -- průměrné zpoždění jednoho výpočtu přibližné násobičky,
-    \item \texttt{error\_prob} -- pravděpodobnost chyby,
-    \item \texttt{mean\_abs\_error} -- průměrná absolutní chyba,
-    \item \texttt{mean\_relative\_error} -- průměrná relativní chyba,
-    \item \texttt{mean\_squared\_error} -- průměrná kvadratická chyba,
-    \item \texttt{avg\_flips\_per\_res} -- průměrný počet překlopených bitů v logických hradlech v rámci jednoho výpočtu,
-    \item \texttt{worst\_case\_error} -- nejhorší absolutní chyba,
-    \item \texttt{worst\_case\_relative\_error} -- nejhorší relativní chyba,
-    \item \texttt{max\_hamming\_distance} -- maximální Hammingova vzdálenost mezi výsledky přesné a přibližné násobičky,
-    \item \texttt{max\_bit\_flips} -- maximální počet překlopených bitů v logických hradlech v rámci jednoho výpočtu,
-    \item \texttt{worst\_delay} -- nejhorší zpoždění jednoho výpočtu přibližné násobičky.
-\end{itemize}
+\begin{table}[!ht]
+    \centering
+    \begin{tabularx}{\textwidth}{l|X}
+        \textbf{Název} & \textbf{Význam} \\ \hline
+        coverage\_percentage & procento pokrytí všech kombinací vstupů \\ \hline
+        delay\_avg & průměrné zpoždění jednoho výpočtu přibližné násobičky \\ \hline
+        error\_prob & pravděpodobnost chyby \\ \hline
+        mean\_abs\_error & průměrná absolutní chyba \\ \hline
+        mean\_relative\_error & průměrná relativní chyba \\ \hline
+        mean\_squared\_error & průměrná kvadratická chyba \\ \hline
+        avg\_flips\_per\_res & průměrný počet překlopených bitů v logických hradlech v rámci jednoho výpočtu \\ \hline
+        worst\_case\_error & nejhorší absolutní chyba \\ \hline
+        worst\_case\_relative\_error & nejhorší relativní chyba \\ \hline
+        max\_hamming\_distance & maximální Hammingova vzdálenost mezi výsledky přesné a přibližné násobičky \\ \hline
+        max\_bit\_flips & maximální počet překlopených bitů v logických hradlech v rámci jednoho výpočtu \\ \hline
+        worst\_delay & nejhorší zpoždění jednoho výpočtu přibližné násobičky \\ 
+    \end{tabularx}
+    \caption{Význam sledovaných proměnných}
+    \label{tab:var_expl}
+\end{table}
 
 Většina těchto metrik byla již popsána v sekci \ref{error_metrics}. Překlopení bitu logického hradla je situace, v níž se výstupní bit daného hradla po výpočtu nastaví na opačnou hodnotu, než jakou měl před výpočtem. Jedná se o metriku, kterou lze dále využít k výpočtu energetické spotřeby obvodu.
 
@@ -1159,38 +1025,48 @@ Alternativním způsobem řešení by mohly být dotazy typu
 \end{equation*}
 které by byly volány pro každou metriku zvlášť. Tím by se ovšem značně zvýšila časová náročnost simulací (pro každou násobičku v řádech desítek minut až jednotek hodin, v závislosti na výkonu počítače a také na počtu hradel dané násobičky).
 
+\subsection{Možná rozšíření o další dotazy}
+Práci by šlo dále rozšířit o dotazy na odhad pravděpodobnosti. Například odhad, s jakou pravděpodobností se za určitou dobu eventuelně dostane procento pokrytí všech vstupních kombinací alespoň na danou hodnotu (v příkladu 50 \%):
+\begin{equation*}
+    \texttt{Pr[<=10000000] (<> coverage\_percentage > 50)}.
+\end{equation*}
+
+Dalším příkladem by mohl být odhad toho, s jakou pravděpodobností bude celkový počet překlopení bitů v jednotlivých logických hradlech za určitou dobu menší než daná hodnota:
+\begin{equation*}
+    \texttt{Pr[<=10000000] ([] bit\_flips\_sum < 10000)}.
+\end{equation*}
+
 \chapter{Výsledky experimentů}
 \label{experimenty}
 Z knihovny EvoApproxLib bylo vybráno celkem 14 přibližných násobiček 8x8 bitů, na kterých byly prováděny výše popsané simulační dotazy. Při volbě jednotlivých násobiček byla zohledněna jejich plocha a z toho plynoucí úroveň aproximace. Ve vybrané sadě se tak objevují jak násobičky, které jsou sestaveny z méně než 10 logických hradel, tak naopak téměř přesné aproximační násobičky složené z několika stovek logických hradel.
 
-V referenční tabulce \ref{tab:ref_tab} jsou vypsány všechny zvolené násobičky spolu s některými sledovanými metrikami. Údaje o velikosti plochy obvodů byly převzaty z knihovny EvoApproxLib \cite{circuit_library}. Ostatní data pocházejí z výsledků simulací s referenčním rozdělením generovaných vstupů \textbf{uni\_uni}.
+V referenční tabulce \ref{tab:ref_tab} jsou vypsány všechny zvolené násobičky spolu s některými sledovanými metrikami. Údaje o velikosti plochy obvodů byly převzaty z knihovny EvoApproxLib \cite{circuit_library}. Ostatní data pocházejí z výsledků simulací s referenčním rozdělením generovaných vstupů \textbf{uni\_uni}. V tabulce jsou pro porovnání zahrnuty také přesné hodnoty metrik z knihovny EvoApproxLib. Odchylky naměřených hodnot oproti hodnotám z knihovny jsou způsobeny tím, že v rámci simulací nedocházelo z časových důvodů k pokrytí celé množiny vstupních kombinací.
 
-\begin{table}[!ht]
-    \centering
-    \resizebox{0.9\textwidth}{!}{\begin{tabular}{|l|l|l|l|l|}
-        \textbf{Násobička} & \textbf{Plocha [$\mu m^2$]} & \Centerstack{\textbf{Pravděpodobnost} \\\textbf{chyby}} & \Centerstack{\textbf{Průměrná} \\\textbf{absolutní chyba}} & \Centerstack{\textbf{Nejhorší} \\\textbf{absolutní chyba}} \\ \hline
-        mul8u\_17MN & 13.1 & 0.97 & 2342.61 & 17726 \\ 
-        mul8u\_17MJ & 18.8 & 0.89 & 1406.84 & 17030 \\ 
-        mul8u\_R36 & 60.5 & 0.98 & 3764.64 & 32289 \\ 
-        mul8u\_1A0M & 75.6 & 0.98 & 1796.1 & 7171 \\ 
-        mul8u\_Z9D & 220.6 & 0.89 & 3141.56 & 31752 \\ 
-        mul8u\_17R6 & 228.5 & 0.98 & 185.57 & 1905 \\ 
-        mul8u\_2NDH & 347.8 & 0.99 & 93.52 & 2709 \\ 
-        mul8u\_197B & 395.6 & 0.98 & 69.92 & 424 \\ 
-        mul8u\_NLX & 511.5 & 0.95 & 6.06 & 161 \\ 
-        mul8u\_GTR & 550.5 & 0.84 & 20.1 & 125 \\ 
-        mul8u\_BG1 & 561.8 & 0.49 & 289.01 & 2932 \\ 
-        mul8u\_R92 & 604.5 & 0.83 & 2.84 & 39 \\ 
-        mul8u\_ZB3 & 682.8 & 0.07 & 0.14 & 2 \\ 
-        mul8u\_12KA & 683.3 & 0.09 & 11.91 & 192 \\ 
-    \end{tabular}}
-    \caption{Zkoumané násobičky a vybrané metriky naměřené s rozdělením \texttt{uni\_uni}}
-    \label{tab:ref_tab}
+\begin{table}[H]
+\resizebox{\textwidth}{!}{\begin{tabular}{|l|l|ll|ll|ll|}
+\textbf{Násobička} & \textbf{Plocha} & \multicolumn{2}{c|}{\textbf{\begin{tabular}[c]{@{}c@{}}Pravděpodobnost \\ chyby\end{tabular}}} & \multicolumn{2}{c|}{\textbf{\begin{tabular}[c]{@{}c@{}}Průměrná \\ absolutní chyba\end{tabular}}} & \multicolumn{2}{c|}{\textbf{\begin{tabular}[c]{@{}c@{}}Nejhorší\\  absolutní chyba\end{tabular}}} \\
+             &           & měření                                               & EvoApproxLib                            & měření                                                  & EvoApproxLib                            & měření                                                 & EvoApproxLib                             \\ \hline
+mul8u\_17MN        & 13.1            & \multicolumn{1}{l|}{0.97}                            & 0.99                                    & \multicolumn{1}{l|}{2342.61}                            & 5249                                    & \multicolumn{1}{l|}{17726}                             & 17853                                    \\
+mul8u\_17MJ        & 18.8            & \multicolumn{1}{l|}{0.89}                            & 0.99                                    & \multicolumn{1}{l|}{1406.84}                            & 4276                                    & \multicolumn{1}{l|}{17030}                             & 17793                                    \\
+mul8u\_R36         & 60.5            & \multicolumn{1}{l|}{0.98}                            & 0.98                                    & \multicolumn{1}{l|}{3764.64}                            & 3828                                    & \multicolumn{1}{l|}{32289}                             & 32289                                    \\
+mul8u\_Z9D         & 220.6           & \multicolumn{1}{l|}{0.89}                            & 0.89                                    & \multicolumn{1}{l|}{3141.56}                            & 3169                                    & \multicolumn{1}{l|}{31752}                             & 32258                                    \\
+mul8u\_17R6        & 228.5           & \multicolumn{1}{l|}{0.98}                            & 0.99                                    & \multicolumn{1}{l|}{185.57}                             & 442                                     & \multicolumn{1}{l|}{1905}                              & 1925                                     \\
+mul8u\_2NDH        & 347.8           & \multicolumn{1}{l|}{0.99}                            & 0.99                                    & \multicolumn{1}{l|}{93.52}                              & 285                                     & \multicolumn{1}{l|}{2709}                              & 2709                                     \\
+mul8u\_197B        & 395.6           & \multicolumn{1}{l|}{0.98}                            & 0.98                                    & \multicolumn{1}{l|}{69.92}                              & 119                                     & \multicolumn{1}{l|}{424}                               & 431                                      \\
+mul8u\_NLX         & 511.5           & \multicolumn{1}{l|}{0.95}                            & 0.96                                    & \multicolumn{1}{l|}{6.06}                               & 42                                      & \multicolumn{1}{l|}{161}                               & 161                                      \\
+mul8u\_GTR         & 550.5           & \multicolumn{1}{l|}{0.84}                            & 0.85                                    & \multicolumn{1}{l|}{20.1}                               & 29                                      & \multicolumn{1}{l|}{125}                               & 125                                      \\
+mul8u\_BG1         & 561.8           & \multicolumn{1}{l|}{0.49}                            & 0.5                                     & \multicolumn{1}{l|}{289.01}                             & 284                                     & \multicolumn{1}{l|}{2932}                              & 2938                                     \\
+mul8u\_R92         & 604.5           & \multicolumn{1}{l|}{0.83}                            & 0.88                                    & \multicolumn{1}{l|}{2.84}                               & 11                                      & \multicolumn{1}{l|}{39}                                & 40                                       \\
+mul8u\_ZB3         & 682.8           & \multicolumn{1}{l|}{0.07}                            & 0.06                                    & \multicolumn{1}{l|}{0.14}                               & 0.12                                    & \multicolumn{1}{l|}{2}                                 & 2                                        \\
+mul8u\_12KA        & 683.3           & \multicolumn{1}{l|}{0.09}                            & 0.09                                    & \multicolumn{1}{l|}{11.91}                              & 12                                      & \multicolumn{1}{l|}{192.0}                             & 192                                     
+\end{tabular}}
+\caption{Zkoumané násobičky a vybrané metriky naměřené s rozdělením \texttt{uni\_uni} vs přesné hodnoty z EvoApproxLib}
+\label{tab:ref_tab}
 \end{table}
 
-V rámci této kapitoly je prezentován výběr z výsledků v podobě sloupcových grafů vždy ve skupinách po čtyřech. Každá skupina se váže k jedné hodnotící metrice, každý graf potom prezentuje výsledky jedné konkrétní násobičky. Jednotlivé sloupce představují různá pravděpodobnostní rozdělení použitá při generování vstupů (viz sekce \ref{rozdeleni_pst}), referenční rozdělení \texttt{uni\_uni} má ve všech grafech šedou barvu. Kompletní výsledky simulací všech násobiček v rámci všech rozdělení jsou k dispozici v příloze \ref{append:exp_results}, každá tabulka se vztahuje k jednomu danému rozdělení.
+V rámci této kapitoly je prezentován výběr z výsledků v podobě sloupcových grafů vždy ve skupinách po čtyřech. Každá skupina se váže k jedné hodnotící metrice, každý graf potom prezentuje výsledky jedné konkrétní násobičky. Jednotlivé sloupce představují různá pravděpodobnostní rozdělení použitá při generování vstupů (viz sekce \ref{zvolene_aplikace} a příloha \ref{append:rozdeleni_pst}), referenční rozdělení \texttt{uni\_uni} má ve všech grafech šedou barvu. Kompletní výsledky simulací všech násobiček v rámci všech rozdělení jsou k dispozici v příloze \ref{append:exp_results}, každá tabulka se vztahuje k jednomu danému rozdělení.
 
-\pagebreak
+\bigskip
 
 \textbf{Pravděpodobnost chyby} u většiny zkoumaných násobiček buď zůstávala podobná, jako u referenčního rozdělení, nebo o něco klesla. K výraznějšímu poklesu pravděpodobnosti chyby docházelo zpravidla u rozdělení, kde alespoň jedno z generovaných čísel nabývá nízkých hodnot (rozdělení \texttt{beta\_uni}, \texttt{const\_norm} a \texttt{gamma\_2norm}). U rozdělení \texttt{const\_norm}, kde je jeden ze vstupů vždy konstanta 2, dokonce některé násobičky generovaly 100 \% přesné výsledky, tedy pravděpodobnost chyby byla nulová. 
 
@@ -1330,7 +1206,7 @@ Výsledky lze pozorovat v tabulce \ref{tab:scalability_memory} a na obrázku \re
   \end{minipage}\hfill
 \end{figure}
 \pagebreak
-Časová náročnost simulací je lineárně závislá na počtu logických hradel v násobičce. Dále se časová náročnost odvíjí od výkonu procesoru počítače, na kterém jsou simulace prováděny. Na obrázku \ref{fig:scalability_time} je vidět časová náročnost v závislosti na počtu hradel u násobiček 7x7 a 8x8 bitů. Z grafu také plyne, že počet vstupních bitů násobičky nemá na časovou složitost simulace výrazný vliv. TODO možná víc dat, když bude čas.
+Časová náročnost simulací je lineárně závislá na počtu logických hradel v násobičce. Dále se časová náročnost odvíjí od výkonu procesoru počítače, na kterém jsou simulace prováděny. Na obrázku \ref{fig:scalability_time} je vidět časová náročnost v závislosti na počtu hradel u násobiček 7x7 a 8x8 bitů. Z grafu také plyne, že počet vstupních bitů násobičky nemá na časovou složitost simulace výrazný vliv.
 
 \begin{figure}[H]
     \centering
@@ -1341,10 +1217,17 @@ Výsledky lze pozorovat v tabulce \ref{tab:scalability_memory} a na obrázku \re
 
 \chapter{Závěr}
 \label{zaver}
-TODO
+Cílem této bakalářské práce bylo porovnání vlastností vybraných přibližných násobiček v rámci kontextu různých aplikací. Modely jednotlivých násobiček byly převzaty z knihovny EvoApproxLib \cite{circuit_library} a následně převedeny do modelů v simulačním nástroji UPPAAL. V rámci tohoto prostředí byly poté prováděny simulace jednotlivých modelů násobiček s různými pravděpodobnostními rozděleními při generování jejich vstupů. Při simulování byly sledovány především chybové metriky jako pravděpodobnost chyby, průměrná absolutní chyba aj.
+
+Z výsledků lze usuzovat, že různá rozdělení vstupů mají na chybovost výsledků výpočtů značný vliv. To bylo obvzláště patrné u méně přesných násobiček, u kterých často chybové metriky kolísaly oběma směry v závislosti na daném rozdělení. Z toho plyne, že pokud by se násobička, která je v případě testování všech kombinací vstupů velmi nepřesná, použila v určitém vhodném kontextu, mohlo by být dosaženo výrazného snížení energetické spotřeby a časové náročnosti výpočtů se zachováním dostatečné přesnosti. Na druhou stranu při použití stejné násobičky v nevhodném kontextu by mohla chybovost výpočtů být výrazně horší.
+
+Je nutno podotknout, že výsledky simulací nejsou 100\% přesné, neboť v rámci simulací z časových důvodů nedocházelo k vyzkoušení všech kombinací možných vstupních hodnot. Zde proto vidím první možnost pro vylepšení práce.
+
+Další rozšíření by bylo možné učinit přizpůsobením skriptu \texttt{parse.py}, který převádí modely z EvoApproxLib do UPPAAL, dalším modelům z této knihovny. Momentálně je uzpůsoben pro bezznaménkové násobičky 7x7, 8x8 a 11x11 bitů. Poměrně jednoduše by bylo možné skript rozšířit i pro aproximační sčítačky nebo pro násobičky s rozdílně velkými vstupy.
+
+Také by bylo možné sledovat některé složitější hodnotící metriky. Sledovanou metriku o počtu překlopení bitů by bylo možné například využít k výpočtu energetické spotřeby obvodu.
 
 %===============================================================================
 
 % Pro kompilaci po částech (viz projekt.tex) nutno odkomentovat
 %\end{document}
-
