@@ -1,12 +1,52 @@
 \chapter{Obsah paměťového média}
 \dirtree{%
 .1 /\DTcomment{Médium}.
-.2 latex/\DTcomment{Zdrojové soubory textu ve formátu \LaTeX}.
-.2 src/\DTcomment{Zdrojové kódy}.
+.2 aux/\DTcomment{Pomocné soubory}.
+.3 density/\DTcomment{Odhad a generování pst. rozdělení}.
+.4 in/\DTcomment{Převzaté zdrojové soubory algoritmů}.
+.4 out/\DTcomment{Grafy pravděpodobnostních rozdělení}.
+.4 src/\DTcomment{Skripty pro odhad a generování pst. rozdělení}.
+.3 scalability/\DTcomment{Zkoumání škálovatelnosti}.
+.2 models/\DTcomment{Převod modelů z Verilogu do UPPAAL}.
+.3 out/\DTcomment{Výstupní XML soubory -- systémy modelů programu UPPAAL}.
+.3 templates/\DTcomment{Šablony jednotlivých modelů}.
+.3 verilog/\DTcomment{Vstupní soubory -- modely násobiček ve Verilogu}.
+.3 parse.py\DTcomment{Skript pro překlad modelů z Verilogu do UPPAAL}.
+.2 results/\DTcomment{Zpracování výsledků simulací}.
+.3 out\_csv/\DTcomment{Zpracované výsledky ve formátu csv}.
+.3 pickles/\DTcomment{Pandas DF uložené v souboru pkl obsahující výsledky simulací}.
+.3 plots/\DTcomment{Grafy výsledků simulací}.
+.3 sim\_results/\DTcomment{Výsledky simulací ve formátu csv}.
+.3 plot\_results.py\DTcomment{Skript pro vytvoření grafů}.
+.3 print\_results.py\DTcomment{Skript pro vytvoření výstupních csv souborů}.
+.3 process\_results.py\DTcomment{Skript pro vytvoření Pandas DF z csv výsledků simulací}.
+.2 thesis/\DTcomment{Zdrojové soubory textu}.
 }
 
 \chapter{Návod na zprovoznění}
-TODO
+V této příloze je popsáno, jak zprovoznit program UPPAAL, jak pracovat se skriptem pro překlad modelů a jak spouštět simulace v prostředí UPPAAL.
+
+\section*{Nástroj UPPAAL}
+Pro provádění simulací je zapotřebí nainstalovat simulační nástroj UPPAAL. V době vzniku této bakalářské práce byla aktuální verze 5.0.
+Program lze stáhnout na adrese \url{https://uppaal.org/downloads/} v závislosti na operačním systému. Dále je nutné se zaregistrovat na adrese \url{https://uppaal.veriaal.dk/academic.html} pro obdržení licence k používání programu. Pro akademické pracovníky a studenty je zdarma.
+
+\section*{Skript parse.py}
+Pro spouštění skriptu je potřeba prostředí \texttt{python3}. Ve skriptu jsou použity pouze standardní moduly \texttt{re} a \texttt{argparse}.
+
+Skript lze spouštět v příkazové řádce ve tvaru
+\begin{equation*}
+    \texttt{python3 parse.py input\_file [-d DISTRIBUTION] [----noout]}.
+\end{equation*}
+Argumenty skriptu mají následující význam:
+\begin{itemize}
+    \item \texttt{input\_file} je cesta ke vstupnímu souboru s modelem násobičky napsaným ve Verilogu,
+    \item \texttt{-d DISTRIBUTION} je nepovinný argument sloužící pro specifikaci vybraného pravděpodobnostního rozdělení pro generování vstupů. \texttt{DISTRIBUTION} může být jeden z názvů rozdělení popsaných v části \ref{zvolene_aplikace},
+    \item \texttt{----noout} je nepovinný přepínač sloužící k případnému zakázání vytváření výstupního XML souboru. Vhodné pouze k ladění skriptu.
+\end{itemize}
+Výstupní soubory se v aktuální podobě skriptu ukládají do složky \texttt{./out}, která má uvnitř téměř stejnou strukturu, jako složka \texttt{./verilog} obsahující vstupní soubory.
+
+\section*{Simulace}
+Soubor vygenerovaný skriptem \texttt{parse.py} je možné otevřít v programu UPPAAL. V části programu nazvané \texttt{Verifier} jsou připraveny simulační dotazy. Jednotlivé dotazy lze spouštět tlačítkem \texttt{Check}. Po dokončení simulace lze na dotaz kliknout pravým tlačítkem myši a poté kliknout na položku \texttt{Simulations (1)} pro otevření vizualizace výsledků dané simulace. Odtud lze exportovat data ve formátu csv. Simulace posledního dotazu může trvat až několik desítek minut či jednotek hodin v závislosti na výkonu procesoru, velikosti operační paměti a také na počtu logických hradel zkoumané násobičky.
 
 \chapter{Pravděpodobnostní grafy při odhadu max. nebo min. hodnoty} \label{append:prob_plots}
 V této příloze jsou uvedeny příklady grafů popsaných v části \ref{uppaal_smc_queries}.
@@ -251,7 +291,7 @@ Výstupy kontrolních dotazů popsaných v sekci \ref{sim_dotazy}.
   \centering
   \includegraphics[width=0.95\linewidth]{obrazky-figures/inputs_same_triang.png}
   \caption{Rozdělení \textbf{same\_triang}}
-  \label{fig:inputs_const_norm}
+  \label{fig:inputs_same_triang}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
   \centering
