@@ -5,16 +5,19 @@ Autor: Michal Blazek
 Skola: FIT VUT Brno
 Rok: 2024
 
-Struktura repozitare:
-/aux - /density - vse co se tyka pravdepodobnostnich rozdeleni
+------------------------------------------------------------------------------------
+
+Struktura adresare:
+
+/auxiliary - /density - vse co se tyka pravdepodobnostnich rozdeleni
                 -> zdrojove kody jednotlivych zkoumanych algoritmu
                 -> skript pro sbirani dvojic nasobenych cisel z algoritmu
                 -> skripty pro vizualizaci ziskanych rozdeleni (heatmapy, PDF, ...)
                 -> grafy
-     - /scalability - zkoumani skalovatelnosti
-                    -> csv soubory s namerenymi daty
-	            -> skripty pro vizualizaci
-	            -> grafy
+           - /scalability - zkoumani skalovatelnosti
+                          -> csv soubory s namerenymi daty
+	                  -> skripty pro vizualizaci
+	                  -> grafy
 
 /models - preklad modelu z Verilogu do UPPAAL
         -> vstupni soubory ve Verilogu
@@ -27,4 +30,22 @@ Struktura repozitare:
 	 -> skripty pro vizualizaci vysledku
 	 -> grafy
 
-/thesis - soubory textu technicke zpravy
+/thesis - zdrojove soubory textu
+
+------------------------------------------------------------------------------------
+
+Navod na pouziti:
+
+Podrobnejsi navod se nachazi v textu prace v priloze B.
+
+Skript /models/parse.py lze spoustet nasledujicim prikazem:
+   $ python3 parse.py input_file [-h] [-d DISTRIBUTION] [--noout]
+
+Vyznam argumentu je nasledujici:
+   - input_file - cesta ke vstupnimu souboru s modelem nasobicky ve Verilogu,
+   - -h - zobrazi navod na spusteni skriptu (+ moznosti vyberu rozdeleni),
+   - -d DISTRIBUTION - vyber pravdepodobnostniho rozdeleni,
+   - --noout - zakaz vygenerovani vysledneho souboru. Vhodne k ladeni.
+
+Vysledne soubory se ukladaji do adresare /models/out/<DISTRIBUTION>/...
+Tyto soubory lze pote otevrit v nastroji UPPAAL a provadet simulace.

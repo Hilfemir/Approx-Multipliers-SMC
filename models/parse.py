@@ -786,7 +786,7 @@ def main():
 		with open(out_path, "w") as f:
 			f.write(output)
 
-	print('Done!')
+	print(f'Success!\nFile generated in:\n  {out_path}')
 
 if __name__ == "__main__":
     main()
