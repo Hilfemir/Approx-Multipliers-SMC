@@ -1,3 +1,30 @@
+EN:
+
+Bachelor's thesis
+
+Title: Statistical Model Checking of Approximate Computing Systems
+Author: Michal Blazek
+Institution: Faculty of Information Technology, BUT
+Year: 2024
+
+Abstract:
+This bachelor's thesis focuses on the simulation of models of approximate multipliers. 
+The main aim of the thesis is comparing selected properties of approx. multipliers in
+an application-specific scope of input values. The thesis includes the conversion of
+multiplier models from the EvoApproxLib library into models used in the UPPAAL environ-
+ment. These models are then simulated while monitoring their selected evaluation metrics
+such as error probability, mean absolute error, etc.
+  
+  From the obtained results, one can conclude that using a suitable approximate multi-
+plier in a specific context can have a positive effect on the error in calculations. 
+The results could therefore have further applications in the field of approximate com-
+puting systems.
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+
+CZ:
+
 Bakalarska prace
 
 Nazev: Statisticke overovani modelu pribliznych vypocetnich systemu
